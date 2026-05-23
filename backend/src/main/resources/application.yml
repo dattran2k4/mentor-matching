@@ -1,0 +1,51 @@
+spring:
+  application:
+    name: ${APP_NAME:mentor-matching}
+  profiles:
+    active: ${SPRING_PROFILES_ACTIVE:dev}
+  jpa:
+    open-in-view: false
+
+server:
+  port: ${SERVER_PORT:8080}
+  servlet:
+    context-path: ${SERVER_CONTEXT_PATH:/}
+
+springdoc:
+  api-docs:
+    enabled: ${SPRINGDOC_API_DOCS_ENABLED:true}
+    path: ${SPRINGDOC_API_DOCS_PATH:/v3/api-docs}
+  swagger-ui:
+    enabled: ${SPRINGDOC_SWAGGER_UI_ENABLED:true}
+    path: ${SPRINGDOC_SWAGGER_UI_PATH:/swagger-ui.html}
+    operations-sorter: ${SPRINGDOC_SWAGGER_UI_SORTER:alpha}
+
+app:
+  swagger:
+    title: ${APP_SWAGGER_TITLE:Mentor Matching API}
+    version: ${APP_SWAGGER_VERSION:v1}
+    description: ${APP_SWAGGER_DESCRIPTION:API backend for Mentor Matching}
+    contact-name: ${APP_SWAGGER_CONTACT_NAME:Backend Team}
+    contact-email: ${APP_SWAGGER_CONTACT_EMAIL:backend@example.com}
+  cors:
+    allowed-origins: ${FRONTEND_BASE_URL:http://localhost:5173}
+    allowed-methods: ${APP_CORS_ALLOWED_METHODS:GET,POST,PUT,PATCH,DELETE,OPTIONS}
+    allowed-headers: ${APP_CORS_ALLOWED_HEADERS:*}
+    exposed-headers: ${APP_CORS_EXPOSED_HEADERS:Authorization,Content-Disposition}
+    allow-credentials: ${APP_CORS_ALLOW_CREDENTIALS:true}
+    max-age: ${APP_CORS_MAX_AGE:3600}
+  jwt:
+    access-token-secret: ${APP_JWT_ACCESS_TOKEN_SECRET:VGhpc0lzQVRlbXBsYXRlSldUU2VjcmV0S2V5U2hvdWxkQmVBdExlYXN0MzJCeXRlcw==}
+    access-token-expiration-ms: ${APP_JWT_ACCESS_TOKEN_EXPIRATION_MS:86400000}
+  refresh-token:
+    expiration-ms: ${APP_REFRESH_TOKEN_EXPIRATION_MS:604800000}
+    byte-length: ${APP_REFRESH_TOKEN_BYTE_LENGTH:64}
+    cookie:
+      path: ${APP_REFRESH_TOKEN_COOKIE_PATH:/api/v1/auth}
+      secure: ${APP_REFRESH_TOKEN_COOKIE_SECURE:false}
+      same-site: ${APP_REFRESH_TOKEN_COOKIE_SAME_SITE:Strict}
+
+logging:
+  level:
+    root: ${LOGGING_LEVEL_ROOT:INFO}
+    com.mentormatching: ${LOGGING_LEVEL_APP:DEBUG}

@@ -1,0 +1,36 @@
+spring:
+  config:
+    activate:
+      on-profile: dev
+  devtools:
+    add-properties: true
+  datasource:
+    url: jdbc:mysql://${DATABASE_HOST:localhost}:${DATABASE_PORT:3306}/mentor-matching
+    username: ${DATABASE_USERNAME:root}
+    password: ${DATABASE_PASSWORD:123456}
+    hikari: # Connection poll
+      max-lifetime: 300000 # 5 phút
+      idle-timeout: 60000 # 1 phút
+      validation-timeout: 5000 # 5 giây
+      minimum-idle: 5
+      maximum-pool-size: 20
+  jpa:
+    show-sql: true
+    hibernate:
+      ddl-auto: update
+  servlet:
+    multipart:
+      max-file-size: 50MB
+      max-request-size: 50MB
+springdoc:
+  api-docs:
+    enabled: ${SPRINGDOC_API_DOCS_ENABLED_DEV:true}
+
+app:
+  swagger:
+    description: ${APP_SWAGGER_DESCRIPTION_DEV:API docs for development environment}
+
+logging:
+  level:
+    root: ${LOGGING_LEVEL_ROOT_DEV:INFO}
+    com.mentormatching: ${LOGGING_LEVEL_APP_DEV:DEBUG}
