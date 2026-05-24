@@ -1,7 +1,9 @@
 package com.mentormatching.modules.booking.presentation.dto.response;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.List;
 
 import com.mentormatching.modules.booking.domain.Booking;
@@ -9,15 +11,21 @@ import com.mentormatching.modules.booking.domain.BookingMeetingType;
 import com.mentormatching.modules.booking.domain.BookingStatus;
 import com.mentormatching.shared.response.PageResponse;
 
-public record BookingResponse(Long id, Long studentUserId, Long mentorId, Long mentorSubjectId,
-                              Long mentorAvailabilityId, LocalDate bookingDate,
+public record BookingResponse(Long id, Long studentUserId, String studentName, Long mentorId, String mentorName,
+                              Long mentorSubjectId, String subjectName, String gradeName,
+                              Long mentorAvailabilityId, Long timeSlotId, LocalDate bookingDate,
+                              LocalTime startTime, LocalTime endTime, String timeSlotLabel,
+                              BigDecimal pricePerHour, BigDecimal totalAmount,
                               BookingMeetingType meetingType, String meetingLink, String meetingAddress,
                               BookingStatus status, String note, Long cancelledBy, String cancelReason,
                               LocalDateTime createdAt, LocalDateTime updatedAt) {
 
     public static BookingResponse from(Booking booking) {
-        return new BookingResponse(booking.getId(), booking.getStudentUserId(), booking.getMentorId(),
-                booking.getMentorSubjectId(), booking.getMentorAvailabilityId(), booking.getBookingDate(),
+        return new BookingResponse(booking.getId(), booking.getStudentUserId(), booking.getStudentName(),
+                booking.getMentorId(), booking.getMentorName(), booking.getMentorSubjectId(),
+                booking.getSubjectName(), booking.getGradeName(), booking.getMentorAvailabilityId(),
+                booking.getTimeSlotId(), booking.getBookingDate(), booking.getStartTime(), booking.getEndTime(),
+                booking.getTimeSlotLabel(), booking.getPricePerHour(), booking.getTotalAmount(),
                 booking.getMeetingType(), booking.getMeetingLink(), booking.getMeetingAddress(), booking.getStatus(),
                 booking.getNote(), booking.getCancelledBy(), booking.getCancelReason(), booking.getCreatedAt(),
                 booking.getUpdatedAt());

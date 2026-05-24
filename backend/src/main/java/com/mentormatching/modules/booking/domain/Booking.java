@@ -1,7 +1,11 @@
 package com.mentormatching.modules.booking.domain;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 
 import com.mentormatching.shared.exception.InvalidDataException;
 
@@ -11,10 +15,20 @@ public class Booking {
 
     private final Long id;
     private final Long studentUserId;
+    private final String studentName;
     private final Long mentorId;
+    private final String mentorName;
     private final Long mentorSubjectId;
+    private final String subjectName;
+    private final String gradeName;
     private final Long mentorAvailabilityId;
+    private final Long timeSlotId;
     private final LocalDate bookingDate;
+    private final LocalTime startTime;
+    private final LocalTime endTime;
+    private final String timeSlotLabel;
+    private final BigDecimal pricePerHour;
+    private final BigDecimal totalAmount;
     private BookingMeetingType meetingType;
     private String meetingLink;
     private String meetingAddress;
@@ -28,10 +42,20 @@ public class Booking {
     private Booking(BookingRestoreData data) {
         this.id = data.id();
         this.studentUserId = data.studentUserId();
+        this.studentName = data.studentName();
         this.mentorId = data.mentorId();
+        this.mentorName = data.mentorName();
         this.mentorSubjectId = data.mentorSubjectId();
+        this.subjectName = data.subjectName();
+        this.gradeName = data.gradeName();
         this.mentorAvailabilityId = data.mentorAvailabilityId();
+        this.timeSlotId = data.timeSlotId();
         this.bookingDate = data.bookingDate();
+        this.startTime = data.startTime();
+        this.endTime = data.endTime();
+        this.timeSlotLabel = data.timeSlotLabel();
+        this.pricePerHour = data.pricePerHour();
+        this.totalAmount = data.totalAmount();
         this.meetingType = data.meetingType();
         this.meetingLink = data.meetingLink();
         this.meetingAddress = data.meetingAddress();
@@ -50,10 +74,13 @@ public class Booking {
     public static Booking create(BookingCreateData data) {
         validateCreateData(data);
         LocalDateTime now = LocalDateTime.now();
+        BigDecimal totalAmount = calculateTotalAmount(data.pricePerHour(), data.startTime(), data.endTime());
 
-        return new Booking(new BookingRestoreData(null, data.studentUserId(), data.mentorId(),
-                data.mentorSubjectId(), data.mentorAvailabilityId(), data.bookingDate(), data.meetingType(),
-                null, null, BookingStatus.PENDING, data.note(), null, null, now, now));
+        return new Booking(new BookingRestoreData(null, data.studentUserId(), data.studentName(), data.mentorId(),
+                data.mentorName(), data.mentorSubjectId(), data.subjectName(), data.gradeName(),
+                data.mentorAvailabilityId(), data.timeSlotId(), data.bookingDate(), data.startTime(), data.endTime(),
+                data.timeSlotLabel(), data.pricePerHour(), totalAmount, data.meetingType(), null, null,
+                BookingStatus.PENDING, data.note(), null, null, now, now));
     }
 
     public Long getId() {
@@ -64,20 +91,60 @@ public class Booking {
         return studentUserId;
     }
 
+    public String getStudentName() {
+        return studentName;
+    }
+
     public Long getMentorId() {
         return mentorId;
+    }
+
+    public String getMentorName() {
+        return mentorName;
     }
 
     public Long getMentorSubjectId() {
         return mentorSubjectId;
     }
 
+    public String getSubjectName() {
+        return subjectName;
+    }
+
+    public String getGradeName() {
+        return gradeName;
+    }
+
     public Long getMentorAvailabilityId() {
         return mentorAvailabilityId;
     }
 
+    public Long getTimeSlotId() {
+        return timeSlotId;
+    }
+
     public LocalDate getBookingDate() {
         return bookingDate;
+    }
+
+    public LocalTime getStartTime() {
+        return startTime;
+    }
+
+    public LocalTime getEndTime() {
+        return endTime;
+    }
+
+    public String getTimeSlotLabel() {
+        return timeSlotLabel;
+    }
+
+    public BigDecimal getPricePerHour() {
+        return pricePerHour;
+    }
+
+    public BigDecimal getTotalAmount() {
+        return totalAmount;
     }
 
     public BookingMeetingType getMeetingType() {
@@ -122,16 +189,38 @@ public class Booking {
         requireNotNull(data.mentorId(), "Mentor id is required");
         requireNotNull(data.mentorSubjectId(), "Mentor subject id is required");
         requireNotNull(data.mentorAvailabilityId(), "Mentor availability id is required");
+        requireNotNull(data.timeSlotId(), "Time slot id is required");
         requireNotNull(data.bookingDate(), "Booking date is required");
+        requireNotNull(data.startTime(), "Booking start time is required");
+        requireNotNull(data.endTime(), "Booking end time is required");
+        requireNotNull(data.pricePerHour(), "Price per hour is required");
         requireNotNull(data.meetingType(), "Meeting type is required");
-        validateBookingDate(data.bookingDate());
+        validateBookingTime(data.bookingDate(), data.startTime(), data.endTime());
+        validateAmount(data.pricePerHour());
         validateNote(data.note());
     }
 
-    private static void validateBookingDate(LocalDate bookingDate) {
-        if (bookingDate.isBefore(LocalDate.now())) {
-            throw new InvalidDataException("Booking date must not be in the past");
+    private static void validateBookingTime(LocalDate bookingDate, LocalTime startTime, LocalTime endTime) {
+        if (!endTime.isAfter(startTime)) {
+            throw new InvalidDataException("Booking end time must be after start time");
         }
+
+        LocalDateTime bookingStartAt = LocalDateTime.of(bookingDate, startTime);
+        if (!bookingStartAt.isAfter(LocalDateTime.now())) {
+            throw new InvalidDataException("Booking time must be in the future");
+        }
+    }
+
+    private static void validateAmount(BigDecimal amount) {
+        if (amount.compareTo(BigDecimal.ZERO) <= 0) {
+            throw new InvalidDataException("Price per hour must be positive");
+        }
+    }
+
+    private static BigDecimal calculateTotalAmount(BigDecimal pricePerHour, LocalTime startTime, LocalTime endTime) {
+        long durationMinutes = Duration.between(startTime, endTime).toMinutes();
+        return pricePerHour.multiply(BigDecimal.valueOf(durationMinutes))
+                .divide(BigDecimal.valueOf(60), 2, RoundingMode.HALF_UP);
     }
 
     private static void validateNote(String note) {

@@ -48,7 +48,7 @@ public class BookingController {
     @PreAuthorize("isAuthenticated()")
     public ApiResponse<CreateBookingResponse> createBooking(@AuthenticationPrincipal AuthenticatedPrincipal principal,
                                                             @Valid @RequestBody CreateBookingRequest request) {
-        Long bookingId = createBookingUseCase.createBooking(request.toCommand(principal.getId()));
+        Long bookingId = createBookingUseCase.createBooking(request.toCommand(principal));
         return apiResponseFactory.created(CreateBookingResponse.from(bookingId), "Create booking successfully");
     }
 

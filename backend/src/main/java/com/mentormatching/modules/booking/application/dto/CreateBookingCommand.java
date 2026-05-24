@@ -1,10 +1,14 @@
 package com.mentormatching.modules.booking.application.dto;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalTime;
 
 import com.mentormatching.modules.booking.domain.BookingMeetingType;
 
-public record CreateBookingCommand(Long studentUserId, Long mentorId, Long mentorSubjectId,
-                                   Long mentorAvailabilityId, LocalDate bookingDate,
-                                   BookingMeetingType meetingType, String note) {
+public record CreateBookingCommand(Long studentUserId, String studentName, Long mentorId, String mentorName,
+                                   Long mentorSubjectId, String subjectName, String gradeName,
+                                   Long mentorAvailabilityId, Long timeSlotId, LocalDate bookingDate,
+                                   LocalTime startTime, LocalTime endTime, String timeSlotLabel,
+                                   BigDecimal pricePerHour, BookingMeetingType meetingType, String note) {
 }

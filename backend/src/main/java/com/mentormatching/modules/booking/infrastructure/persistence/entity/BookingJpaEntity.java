@@ -1,7 +1,9 @@
 package com.mentormatching.modules.booking.infrastructure.persistence.entity;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
@@ -39,17 +41,47 @@ public class BookingJpaEntity {
     @Column(name = "student_user_id", nullable = false)
     private Long studentUserId;
 
+    @Column(name = "student_name")
+    private String studentName;
+
     @Column(name = "mentor_id", nullable = false)
     private Long mentorId;
+
+    @Column(name = "mentor_name")
+    private String mentorName;
 
     @Column(name = "mentor_subject_id", nullable = false)
     private Long mentorSubjectId;
 
+    @Column(name = "subject_name")
+    private String subjectName;
+
+    @Column(name = "grade_name")
+    private String gradeName;
+
     @Column(name = "mentor_availability_id", nullable = false)
     private Long mentorAvailabilityId;
 
+    @Column(name = "time_slot_id", nullable = false)
+    private Long timeSlotId;
+
     @Column(name = "booking_date", nullable = false)
     private LocalDate bookingDate;
+
+    @Column(name = "start_time", nullable = false)
+    private LocalTime startTime;
+
+    @Column(name = "end_time", nullable = false)
+    private LocalTime endTime;
+
+    @Column(name = "time_slot_label")
+    private String timeSlotLabel;
+
+    @Column(name = "price_per_hour", nullable = false, precision = 12, scale = 2)
+    private BigDecimal pricePerHour;
+
+    @Column(name = "total_amount", nullable = false, precision = 12, scale = 2)
+    private BigDecimal totalAmount;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "meeting_type")
