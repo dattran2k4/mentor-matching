@@ -59,12 +59,6 @@ public class BookingJpaEntity {
     @Column(name = "grade_name")
     private String gradeName;
 
-    @Column(name = "mentor_availability_id", nullable = false)
-    private Long mentorAvailabilityId;
-
-    @Column(name = "time_slot_id", nullable = false)
-    private Long timeSlotId;
-
     @Column(name = "booking_date", nullable = false)
     private LocalDate bookingDate;
 
@@ -73,9 +67,6 @@ public class BookingJpaEntity {
 
     @Column(name = "end_time", nullable = false)
     private LocalTime endTime;
-
-    @Column(name = "time_slot_label")
-    private String timeSlotLabel;
 
     @Column(name = "price_per_hour", nullable = false, precision = 12, scale = 2)
     private BigDecimal pricePerHour;

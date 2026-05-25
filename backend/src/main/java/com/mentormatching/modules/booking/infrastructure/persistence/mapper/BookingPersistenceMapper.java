@@ -12,12 +12,10 @@ public class BookingPersistenceMapper {
     public Booking toDomain(BookingJpaEntity entity) {
         return Booking.restore(new BookingRestoreData(entity.getId(), entity.getStudentUserId(),
                 entity.getStudentName(), entity.getMentorId(), entity.getMentorName(), entity.getMentorSubjectId(),
-                entity.getSubjectName(), entity.getGradeName(), entity.getMentorAvailabilityId(),
-                entity.getTimeSlotId(), entity.getBookingDate(), entity.getStartTime(), entity.getEndTime(),
-                entity.getTimeSlotLabel(), entity.getPricePerHour(), entity.getTotalAmount(),
-                entity.getMeetingType(), entity.getMeetingLink(), entity.getMeetingAddress(), entity.getStatus(),
-                entity.getNote(), entity.getCancelledBy(), entity.getCancelReason(), entity.getCreatedAt(),
-                entity.getUpdatedAt()));
+                entity.getSubjectName(), entity.getGradeName(), entity.getBookingDate(), entity.getStartTime(),
+                entity.getEndTime(), entity.getPricePerHour(), entity.getTotalAmount(), entity.getMeetingType(),
+                entity.getMeetingLink(), entity.getMeetingAddress(), entity.getStatus(), entity.getNote(),
+                entity.getCancelledBy(), entity.getCancelReason(), entity.getCreatedAt(), entity.getUpdatedAt()));
     }
 
     public BookingJpaEntity toEntity(Booking booking) {
@@ -30,12 +28,9 @@ public class BookingPersistenceMapper {
                 .mentorSubjectId(booking.getMentorSubjectId())
                 .subjectName(booking.getSubjectName())
                 .gradeName(booking.getGradeName())
-                .mentorAvailabilityId(booking.getMentorAvailabilityId())
-                .timeSlotId(booking.getTimeSlotId())
                 .bookingDate(booking.getBookingDate())
                 .startTime(booking.getStartTime())
                 .endTime(booking.getEndTime())
-                .timeSlotLabel(booking.getTimeSlotLabel())
                 .pricePerHour(booking.getPricePerHour())
                 .totalAmount(booking.getTotalAmount())
                 .meetingType(booking.getMeetingType())

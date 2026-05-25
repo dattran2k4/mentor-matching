@@ -1,6 +1,5 @@
 package com.mentormatching.modules.booking.application.port.out;
 
-import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -22,6 +21,4 @@ public interface BookingRepositoryPort {
     List<Booking> findByMentorId(Long mentorId);
 
     List<Booking> findByStatus(BookingStatus status);
-
-    Optional<Booking> findByMentorAvailabilityIdAndBookingDate(Long mentorAvailabilityId, LocalDate bookingDate);
 }

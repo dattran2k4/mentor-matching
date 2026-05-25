@@ -6,6 +6,7 @@ import java.util.Optional;
 import org.springframework.stereotype.Component;
 
 import com.mentormatching.modules.scheduling.application.port.out.MentorAvailabilityRepositoryPort;
+import com.mentormatching.modules.scheduling.domain.AvailabilityType;
 import com.mentormatching.modules.scheduling.domain.MentorAvailability;
 import com.mentormatching.modules.scheduling.infrastructure.persistence.mapper.MentorAvailabilityPersistenceMapper;
 import com.mentormatching.modules.scheduling.infrastructure.persistence.repository.MentorAvailabilityJpaRepository;
@@ -41,8 +42,8 @@ public class MentorAvailabilityPersistenceAdapter implements MentorAvailabilityR
     }
 
     @Override
-    public List<MentorAvailability> findByTimeSlotId(Long timeSlotId) {
-        return mentorAvailabilityJpaRepository.findByTimeSlotId(timeSlotId).stream()
+    public List<MentorAvailability> findByAvailabilityType(AvailabilityType availabilityType) {
+        return mentorAvailabilityJpaRepository.findByAvailabilityType(availabilityType).stream()
                 .map(mentorAvailabilityPersistenceMapper::toDomain)
                 .toList();
     }

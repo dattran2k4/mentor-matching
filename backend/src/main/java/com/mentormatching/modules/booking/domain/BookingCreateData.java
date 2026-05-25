@@ -6,7 +6,6 @@ import java.time.LocalTime;
 
 public record BookingCreateData(Long studentUserId, String studentName, Long mentorId, String mentorName,
                                 Long mentorSubjectId, String subjectName, String gradeName,
-                                Long mentorAvailabilityId, Long timeSlotId, LocalDate bookingDate,
-                                LocalTime startTime, LocalTime endTime, String timeSlotLabel,
+                                LocalDate bookingDate, LocalTime startTime, LocalTime endTime,
                                 BigDecimal pricePerHour, BookingMeetingType meetingType, String note) {
 }

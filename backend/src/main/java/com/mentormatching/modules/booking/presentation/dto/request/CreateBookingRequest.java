@@ -19,13 +19,10 @@ public record CreateBookingRequest(String studentName,
                                    @NotNull(message = "Mentor subject id is required") Long mentorSubjectId,
                                    String subjectName,
                                    String gradeName,
-                                   @NotNull(message = "Mentor availability id is required") Long mentorAvailabilityId,
-                                   @NotNull(message = "Time slot id is required") Long timeSlotId,
                                    @NotNull(message = "Booking date is required")
                                    @FutureOrPresent(message = "Booking date must not be in the past") LocalDate bookingDate,
                                    @NotNull(message = "Start time is required") LocalTime startTime,
                                    @NotNull(message = "End time is required") LocalTime endTime,
-                                   String timeSlotLabel,
                                    @NotNull(message = "Price per hour is required")
                                    @DecimalMin(value = "0.01", message = "Price per hour must be positive") BigDecimal pricePerHour,
                                    @NotNull(message = "Meeting type is required") BookingMeetingType meetingType,
@@ -33,7 +30,6 @@ public record CreateBookingRequest(String studentName,
 
     public CreateBookingCommand toCommand(AuthenticatedPrincipal principal) {
         return new CreateBookingCommand(principal.getId(), studentName, mentorId, mentorName, mentorSubjectId,
-                subjectName, gradeName, mentorAvailabilityId, timeSlotId, bookingDate, startTime, endTime,
-                timeSlotLabel, pricePerHour, meetingType, note);
+                subjectName, gradeName, bookingDate, startTime, endTime, pricePerHour, meetingType, note);
     }
 }

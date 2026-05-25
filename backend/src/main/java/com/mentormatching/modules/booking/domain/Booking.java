@@ -21,12 +21,9 @@ public class Booking {
     private final Long mentorSubjectId;
     private final String subjectName;
     private final String gradeName;
-    private final Long mentorAvailabilityId;
-    private final Long timeSlotId;
     private final LocalDate bookingDate;
     private final LocalTime startTime;
     private final LocalTime endTime;
-    private final String timeSlotLabel;
     private final BigDecimal pricePerHour;
     private final BigDecimal totalAmount;
     private BookingMeetingType meetingType;
@@ -48,12 +45,9 @@ public class Booking {
         this.mentorSubjectId = data.mentorSubjectId();
         this.subjectName = data.subjectName();
         this.gradeName = data.gradeName();
-        this.mentorAvailabilityId = data.mentorAvailabilityId();
-        this.timeSlotId = data.timeSlotId();
         this.bookingDate = data.bookingDate();
         this.startTime = data.startTime();
         this.endTime = data.endTime();
-        this.timeSlotLabel = data.timeSlotLabel();
         this.pricePerHour = data.pricePerHour();
         this.totalAmount = data.totalAmount();
         this.meetingType = data.meetingType();
@@ -78,9 +72,8 @@ public class Booking {
 
         return new Booking(new BookingRestoreData(null, data.studentUserId(), data.studentName(), data.mentorId(),
                 data.mentorName(), data.mentorSubjectId(), data.subjectName(), data.gradeName(),
-                data.mentorAvailabilityId(), data.timeSlotId(), data.bookingDate(), data.startTime(), data.endTime(),
-                data.timeSlotLabel(), data.pricePerHour(), totalAmount, data.meetingType(), null, null,
-                BookingStatus.PENDING, data.note(), null, null, now, now));
+                data.bookingDate(), data.startTime(), data.endTime(), data.pricePerHour(), totalAmount,
+                data.meetingType(), null, null, BookingStatus.PENDING, data.note(), null, null, now, now));
     }
 
     public Long getId() {
@@ -115,14 +108,6 @@ public class Booking {
         return gradeName;
     }
 
-    public Long getMentorAvailabilityId() {
-        return mentorAvailabilityId;
-    }
-
-    public Long getTimeSlotId() {
-        return timeSlotId;
-    }
-
     public LocalDate getBookingDate() {
         return bookingDate;
     }
@@ -133,10 +118,6 @@ public class Booking {
 
     public LocalTime getEndTime() {
         return endTime;
-    }
-
-    public String getTimeSlotLabel() {
-        return timeSlotLabel;
     }
 
     public BigDecimal getPricePerHour() {
@@ -188,8 +169,6 @@ public class Booking {
         requireNotNull(data.studentUserId(), "Student user id is required");
         requireNotNull(data.mentorId(), "Mentor id is required");
         requireNotNull(data.mentorSubjectId(), "Mentor subject id is required");
-        requireNotNull(data.mentorAvailabilityId(), "Mentor availability id is required");
-        requireNotNull(data.timeSlotId(), "Time slot id is required");
         requireNotNull(data.bookingDate(), "Booking date is required");
         requireNotNull(data.startTime(), "Booking start time is required");
         requireNotNull(data.endTime(), "Booking end time is required");
