@@ -1,89 +1,80 @@
-# Mentor Matching
+# Mentor Matching Backend
 
-Mentor Matching backend built with feature-first Clean Architecture:
-- Feature-first Clean Architecture
+Mentor Matching backend built with feature-first Clean Architecture.
+
+## Highlights
+
+- Feature-first modular monolith
+- Clean Architecture boundaries per module
 - Standard API response format
 - Global exception handling
+- JWT authentication with refresh token cookie
 - Swagger / OpenAPI
 - CORS configuration by environment variables
-- Multi-profile config (`dev`, `test`, `prod`)
-- Docker + Docker Compose
+- Multi-profile config: `dev`, `test`, `prod`
+- MySQL for development/runtime, H2 for tests
+- Docker support
 
-## 1. Project Structure
+## Team Docs
+
+Backend working notes live in [`docs`](./docs/README.md).
+
+Recommended reading order for new members:
+
+1. [`docs/architecture-guide.md`](./docs/architecture-guide.md)
+2. [`docs/feature-workflow.md`](./docs/feature-workflow.md)
+3. [`docs/database-notes.md`](./docs/database-notes.md)
+4. [`docs/team-conventions.md`](./docs/team-conventions.md)
+
+## Project Structure
 
 ```text
 src/main/java/com/mentormatching
 ├── MentorMatchingApplication.java
 ├── modules
 │   ├── auth
-│   │   ├── application
-│   │   │   ├── dto
-│   │   │   ├── port
-│   │   │   │   ├── in
-│   │   │   │   └── out
-│   │   │   └── service
-│   │   ├── infrastructure
-│   │   └── presentation
-│   └── health
-│       └── presentation
+│   ├── booking
+│   ├── catalog
+│   ├── health
+│   ├── location
+│   ├── mentor
+│   ├── notification
+│   ├── payment
+│   ├── review
+│   ├── scheduling
+│   └── user
 └── shared
     ├── config
     ├── exception
     ├── response
-    └── security
+    ├── security
+    └── validation
 ```
 
-## 2. API Response Standards
+Typical module structure:
 
-### Success Response
-
-```json
-{
-  "status": 200,
-  "code": "SUCCESS",
-  "success": true,
-  "message": "Service is running",
-  "data": {
-    "status": "UP"
-  }
-}
+```text
+modules/{feature}
+├── domain
+├── application
+│   ├── dto
+│   ├── port
+│   │   ├── in
+│   │   └── out
+│   └── service
+├── infrastructure
+└── presentation
 ```
 
-### Error Response
+## Run Locally
 
-```json
-{
-  "code": "RESOURCE_NOT_FOUND",
-  "status": 404,
-  "message": "Resource not found",
-  "path": "/api/v1/example/1",
-  "timestamp": "2026-05-16T16:00:00"
-}
-```
-
-## 3. Environment Configuration
-
-Main config files:
-- `src/main/resources/application.yml`
-- `src/main/resources/application-dev.yml`
-- `src/main/resources/application-test.yml`
-- `src/main/resources/application-prod.yml`
-
-Environment variable template:
-- `.env.example`
-
-Recommended flow:
-1. Copy `.env.example` to `.env`
-2. Update values for your environment
-3. Run application
-
-## 4. Run Locally
+Run from the `backend` folder:
 
 ```bash
 ./mvnw spring-boot:run
 ```
 
-Or with profile:
+Or with a profile:
 
 ```bash
 SPRING_PROFILES_ACTIVE=dev ./mvnw spring-boot:run
@@ -91,20 +82,40 @@ SPRING_PROFILES_ACTIVE=test ./mvnw spring-boot:run
 SPRING_PROFILES_ACTIVE=prod ./mvnw spring-boot:run
 ```
 
-## 5. Swagger
+## Run Tests
+
+```bash
+./mvnw -q test
+```
+
+## Swagger
 
 Default URLs:
+
 - Swagger UI: `http://localhost:8080/swagger-ui.html`
 - OpenAPI JSON: `http://localhost:8080/v3/api-docs`
 
-## 6. Health Endpoint
+## Main Endpoints
+
+Health:
 
 - `GET /api/v1/health`
 
-## 7. Auth Endpoints
+Auth:
 
-- `POST /api/v1/auth/login`
 - `POST /api/v1/auth/register`
+- `POST /api/v1/auth/login`
+- `POST /api/v1/auth/refresh`
+- `POST /api/v1/auth/logout`
+
+User:
+
+- `GET /api/v1/users/me`
+
+Booking:
+
+- `POST /api/v1/bookings`
+- `GET /api/v1/bookings/me`
 
 ### Dev test accounts (profile `dev`)
 
@@ -119,12 +130,14 @@ Seeded on startup by `UserDataSeeder`. Password for all accounts: **`123456`**
 Restart the backend after pulling changes so passwords are reset for these emails.
 
 ## 8. Run with Docker Compose
+## Docker Compose
 
 ```bash
 docker compose up --build
 ```
 
-## 9. Notes
+## Notes
 
-- Database configuration is available through the active Spring profile and environment variables.
-- Add JPA + datasource per project requirements.
+- Database schema is still evolving with the team.
+- Flyway should be added after core DBML/business rules are stable enough.
+- Until Flyway is enabled, schema-changing PRs should clearly describe DB impact.
