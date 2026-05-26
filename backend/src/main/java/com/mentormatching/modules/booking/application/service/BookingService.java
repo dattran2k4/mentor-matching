@@ -24,9 +24,8 @@ public class BookingService implements CreateBookingUseCase, GetMyBookingsUseCas
     public Long createBooking(CreateBookingCommand command) {
         Booking booking = Booking.create(new BookingCreateData(command.studentUserId(), command.studentName(),
                 command.mentorId(), command.mentorName(), command.mentorSubjectId(), command.subjectName(),
-                command.gradeName(), command.mentorAvailabilityId(), command.timeSlotId(), command.bookingDate(),
-                command.startTime(), command.endTime(), command.timeSlotLabel(), command.pricePerHour(),
-                command.meetingType(), command.note()));
+                command.gradeName(), command.bookingDate(), command.startTime(), command.endTime(),
+                command.pricePerHour(), command.meetingType(), command.note()));
 
         Booking savedBooking = bookingRepositoryPort.save(booking);
         return savedBooking.getId();

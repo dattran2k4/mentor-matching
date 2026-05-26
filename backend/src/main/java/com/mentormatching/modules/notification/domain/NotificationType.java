@@ -1,0 +1,16 @@
+package com.mentormatching.modules.notification.domain;
+
+public enum NotificationType {
+    BOOKING_CREATED,
+    BOOKING_CONFIRMED,
+    BOOKING_CANCELLED,
+    BOOKING_REJECTED,
+    BOOKING_REMINDER,
+    PAYMENT_PENDING,
+    PAYMENT_SUCCESS,
+    PAYMENT_FAILED,
+    PAYMENT_REFUNDED,
+    MENTOR_APPROVED,
+    MENTOR_REJECTED,
+    SYSTEM
+}

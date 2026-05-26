@@ -1,13 +1,16 @@
-package com.mentormatching.modules.scheduling.infrastructure.persistence.entity;
+package com.mentormatching.modules.user.infrastructure.persistence.entity;
 
 import java.time.LocalDateTime;
-import java.time.LocalTime;
 
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
+import com.mentormatching.modules.user.domain.LearnerGender;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -24,24 +27,31 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "time_slots")
-public class TimeSlotJpaEntity {
+@Table(name = "learner_profiles")
+public class LearnerProfileJpaEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "day_of_week", nullable = false)
-    private Integer dayOfWeek;
+    @Column(name = "user_id", nullable = false, unique = true)
+    private Long userId;
 
-    @Column(name = "label")
-    private String label;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "gender")
+    private LearnerGender gender;
 
-    @Column(name = "start_time", nullable = false)
-    private LocalTime startTime;
+    @Column(name = "birth_year")
+    private Integer birthYear;
 
-    @Column(name = "end_time", nullable = false)
-    private LocalTime endTime;
+    @Column(name = "school_name")
+    private String schoolName;
+
+    @Column(name = "grade_id")
+    private Long gradeId;
+
+    @Column(name = "learning_goal", columnDefinition = "TEXT")
+    private String learningGoal;
 
     @CreationTimestamp
     @Column(name = "created_at")

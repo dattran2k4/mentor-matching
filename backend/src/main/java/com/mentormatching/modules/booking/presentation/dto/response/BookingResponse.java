@@ -13,8 +13,7 @@ import com.mentormatching.shared.response.PageResponse;
 
 public record BookingResponse(Long id, Long studentUserId, String studentName, Long mentorId, String mentorName,
                               Long mentorSubjectId, String subjectName, String gradeName,
-                              Long mentorAvailabilityId, Long timeSlotId, LocalDate bookingDate,
-                              LocalTime startTime, LocalTime endTime, String timeSlotLabel,
+                              LocalDate bookingDate, LocalTime startTime, LocalTime endTime,
                               BigDecimal pricePerHour, BigDecimal totalAmount,
                               BookingMeetingType meetingType, String meetingLink, String meetingAddress,
                               BookingStatus status, String note, Long cancelledBy, String cancelReason,
@@ -23,9 +22,8 @@ public record BookingResponse(Long id, Long studentUserId, String studentName, L
     public static BookingResponse from(Booking booking) {
         return new BookingResponse(booking.getId(), booking.getStudentUserId(), booking.getStudentName(),
                 booking.getMentorId(), booking.getMentorName(), booking.getMentorSubjectId(),
-                booking.getSubjectName(), booking.getGradeName(), booking.getMentorAvailabilityId(),
-                booking.getTimeSlotId(), booking.getBookingDate(), booking.getStartTime(), booking.getEndTime(),
-                booking.getTimeSlotLabel(), booking.getPricePerHour(), booking.getTotalAmount(),
+                booking.getSubjectName(), booking.getGradeName(), booking.getBookingDate(), booking.getStartTime(),
+                booking.getEndTime(), booking.getPricePerHour(), booking.getTotalAmount(),
                 booking.getMeetingType(), booking.getMeetingLink(), booking.getMeetingAddress(), booking.getStatus(),
                 booking.getNote(), booking.getCancelledBy(), booking.getCancelReason(), booking.getCreatedAt(),
                 booking.getUpdatedAt());
