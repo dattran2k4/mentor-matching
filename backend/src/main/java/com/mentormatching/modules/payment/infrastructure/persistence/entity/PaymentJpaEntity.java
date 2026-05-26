@@ -62,6 +62,21 @@ public class PaymentJpaEntity {
     @Column(name = "paid_at")
     private LocalDateTime paidAt;
 
+    @Column(name = "provider_reference_id")
+    private String providerReferenceId;
+
+    @Column(name = "provider_transaction_id")
+    private String providerTransactionId;
+
+    @Column(name = "checkout_url", columnDefinition = "TEXT")
+    private String checkoutUrl;
+
+    @Column(name = "expires_at")
+    private LocalDateTime expiresAt;
+
+    @Column(name = "failure_reason", columnDefinition = "TEXT")
+    private String failureReason;
+
     @CreationTimestamp
     @Column(name = "created_at")
     private LocalDateTime createdAt;

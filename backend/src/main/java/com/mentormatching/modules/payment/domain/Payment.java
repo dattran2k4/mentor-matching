@@ -13,6 +13,11 @@ public class Payment {
     private PaymentProvider paymentProvider;
     private PaymentStatus status;
     private LocalDateTime paidAt;
+    private String providerReferenceId;
+    private String providerTransactionId;
+    private String checkoutUrl;
+    private LocalDateTime expiresAt;
+    private String failureReason;
     private final LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
@@ -25,6 +30,11 @@ public class Payment {
         this.paymentProvider = data.paymentProvider();
         this.status = data.status();
         this.paidAt = data.paidAt();
+        this.providerReferenceId = data.providerReferenceId();
+        this.providerTransactionId = data.providerTransactionId();
+        this.checkoutUrl = data.checkoutUrl();
+        this.expiresAt = data.expiresAt();
+        this.failureReason = data.failureReason();
         this.createdAt = data.createdAt();
         this.updatedAt = data.updatedAt();
     }
@@ -63,6 +73,26 @@ public class Payment {
 
     public LocalDateTime getPaidAt() {
         return paidAt;
+    }
+
+    public String getProviderReferenceId() {
+        return providerReferenceId;
+    }
+
+    public String getProviderTransactionId() {
+        return providerTransactionId;
+    }
+
+    public String getCheckoutUrl() {
+        return checkoutUrl;
+    }
+
+    public LocalDateTime getExpiresAt() {
+        return expiresAt;
+    }
+
+    public String getFailureReason() {
+        return failureReason;
     }
 
     public LocalDateTime getCreatedAt() {

@@ -12,7 +12,9 @@ public class PaymentPersistenceMapper {
     public Payment toDomain(PaymentJpaEntity entity) {
         return Payment.restore(new PaymentRestoreData(entity.getId(), entity.getBookingId(), entity.getPayerUserId(),
                 entity.getAmount(), entity.getPaymentMethod(), entity.getPaymentProvider(), entity.getStatus(),
-                entity.getPaidAt(), entity.getCreatedAt(), entity.getUpdatedAt()));
+                entity.getPaidAt(), entity.getProviderReferenceId(), entity.getProviderTransactionId(),
+                entity.getCheckoutUrl(), entity.getExpiresAt(), entity.getFailureReason(), entity.getCreatedAt(),
+                entity.getUpdatedAt()));
     }
 
     public PaymentJpaEntity toEntity(Payment payment) {
@@ -25,6 +27,11 @@ public class PaymentPersistenceMapper {
                 .paymentProvider(payment.getPaymentProvider())
                 .status(payment.getStatus())
                 .paidAt(payment.getPaidAt())
+                .providerReferenceId(payment.getProviderReferenceId())
+                .providerTransactionId(payment.getProviderTransactionId())
+                .checkoutUrl(payment.getCheckoutUrl())
+                .expiresAt(payment.getExpiresAt())
+                .failureReason(payment.getFailureReason())
                 .createdAt(payment.getCreatedAt())
                 .updatedAt(payment.getUpdatedAt())
                 .build();
