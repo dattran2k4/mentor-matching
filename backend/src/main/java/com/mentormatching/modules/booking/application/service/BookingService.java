@@ -9,8 +9,10 @@ import com.mentormatching.modules.booking.application.dto.BookingMentorSubjectSn
 import com.mentormatching.modules.booking.application.dto.BookingMentorSnapshot;
 import com.mentormatching.modules.booking.application.dto.BookingUserSnapshot;
 import com.mentormatching.modules.booking.application.dto.CreateBookingCommand;
+import com.mentormatching.modules.booking.application.dto.GetBookingsQuery;
 import com.mentormatching.modules.booking.application.dto.GetMyBookingsQuery;
 import com.mentormatching.modules.booking.application.port.in.CreateBookingUseCase;
+import com.mentormatching.modules.booking.application.port.in.GetBookingsUseCase;
 import com.mentormatching.modules.booking.application.port.in.GetMyBookingsUseCase;
 import com.mentormatching.modules.booking.application.port.out.BookingAvailabilityLookupPort;
 import com.mentormatching.modules.booking.application.port.out.BookingMentorLookupPort;
@@ -26,7 +28,7 @@ import com.mentormatching.shared.exception.InvalidDataException;
 import com.mentormatching.shared.response.PageResponse;
 
 @Service
-public class BookingService implements CreateBookingUseCase, GetMyBookingsUseCase {
+public class BookingService implements CreateBookingUseCase, GetBookingsUseCase, GetMyBookingsUseCase {
 
     private static final List<BookingStatus> SCHEDULE_BLOCKING_STATUSES = List.of(BookingStatus.PENDING,
             BookingStatus.CONFIRMED);
@@ -70,8 +72,22 @@ public class BookingService implements CreateBookingUseCase, GetMyBookingsUseCas
     }
 
     @Override
+    @Transactional(readOnly = true)
+    public PageResponse<Booking> getBookings(GetBookingsQuery query) {
+        validateBookingDateRange(query);
+        return bookingRepositoryPort.findBookings(query);
+    }
+
+    @Override
     public PageResponse<Booking> getMyBookings(GetMyBookingsQuery query) {
         return bookingRepositoryPort.findMyBookings(query);
+    }
+
+    private void validateBookingDateRange(GetBookingsQuery query) {
+        if (query.bookingDateFrom() != null && query.bookingDateTo() != null
+                && query.bookingDateFrom().isAfter(query.bookingDateTo())) {
+            throw new InvalidDataException("Booking date from must not be after booking date to");
+        }
     }
 
     private void validateMentorSubject(CreateBookingCommand command, BookingMentorSubjectSnapshot mentorSubject) {
