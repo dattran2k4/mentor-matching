@@ -1,6 +1,9 @@
 package com.mentormatching.modules.booking.application.service;
 
+import java.util.List;
+
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.mentormatching.modules.booking.application.dto.BookingMentorSubjectSnapshot;
 import com.mentormatching.modules.booking.application.dto.BookingMentorSnapshot;
@@ -17,12 +20,16 @@ import com.mentormatching.modules.booking.application.port.out.BookingUserLookup
 import com.mentormatching.modules.booking.domain.Booking;
 import com.mentormatching.modules.booking.domain.BookingCreateData;
 import com.mentormatching.modules.booking.domain.BookingMeetingType;
+import com.mentormatching.modules.booking.domain.BookingStatus;
 import com.mentormatching.modules.mentor.domain.MeetingType;
 import com.mentormatching.shared.exception.InvalidDataException;
 import com.mentormatching.shared.response.PageResponse;
 
 @Service
 public class BookingService implements CreateBookingUseCase, GetMyBookingsUseCase {
+
+    private static final List<BookingStatus> SCHEDULE_BLOCKING_STATUSES = List.of(BookingStatus.PENDING,
+            BookingStatus.CONFIRMED);
 
     private final BookingRepositoryPort bookingRepositoryPort;
     private final BookingUserLookupPort bookingUserLookupPort;
@@ -42,6 +49,7 @@ public class BookingService implements CreateBookingUseCase, GetMyBookingsUseCas
     }
 
     @Override
+    @Transactional
     public Long createBooking(CreateBookingCommand command) {
         BookingUserSnapshot student = bookingUserLookupPort.getUserSnapshot(command.studentUserId());
         BookingMentorSnapshot mentor = bookingMentorLookupPort.getMentorSnapshot(command.mentorId());
@@ -50,6 +58,7 @@ public class BookingService implements CreateBookingUseCase, GetMyBookingsUseCas
         validateMentorSubject(command, mentorSubject);
         validateMeetingType(command.meetingType(), mentor.meetingType());
         validateMentorAvailability(command);
+        validateMentorScheduleAvailable(command);
 
         Booking booking = Booking.create(new BookingCreateData(command.studentUserId(), student.fullName(),
                 command.mentorId(), mentor.fullName(), command.mentorSubjectId(), mentorSubject.subjectName(),
@@ -90,4 +99,13 @@ public class BookingService implements CreateBookingUseCase, GetMyBookingsUseCas
             throw new InvalidDataException("Mentor is not available at this time");
         }
     }
+
+    private void validateMentorScheduleAvailable(CreateBookingCommand command) {
+        boolean overlapping = bookingRepositoryPort.existsOverlappingBooking(command.mentorId(), command.bookingDate(),
+                command.startTime(), command.endTime(), SCHEDULE_BLOCKING_STATUSES);
+        if (overlapping) {
+            throw new InvalidDataException("Mentor already has a booking at this time");
+        }
+    }
 }
+

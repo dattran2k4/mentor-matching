@@ -3,6 +3,8 @@ package com.mentormatching.modules.booking.infrastructure.persistence;
 import static com.mentormatching.shared.response.PageQueryDefaults.DEFAULT_SORT_BY;
 import static com.mentormatching.shared.response.PageQueryDefaults.DEFAULT_SORT_DIR;
 
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -78,6 +80,12 @@ public class BookingPersistenceAdapter implements BookingRepositoryPort {
     @Override
     public List<Booking> findByStatus(BookingStatus status) {
         return bookingJpaRepository.findByStatus(status).stream().map(bookingPersistenceMapper::toDomain).toList();
+    }
+
+    @Override
+    public boolean existsOverlappingBooking(Long mentorId, LocalDate bookingDate, LocalTime startTime,
+                                            LocalTime endTime, List<BookingStatus> statuses) {
+        return bookingJpaRepository.existsOverlappingBooking(mentorId, bookingDate, startTime, endTime, statuses);
     }
 
     private Sort buildSort(String sortBy, String sortDir) {
