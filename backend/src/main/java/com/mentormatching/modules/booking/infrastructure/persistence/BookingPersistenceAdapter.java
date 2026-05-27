@@ -4,6 +4,7 @@ import static com.mentormatching.shared.response.PageQueryDefaults.DEFAULT_SORT_
 import static com.mentormatching.shared.response.PageQueryDefaults.DEFAULT_SORT_DIR;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -15,6 +16,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Component;
 
+import com.mentormatching.modules.booking.application.dto.GetBookingsQuery;
 import com.mentormatching.modules.booking.application.dto.GetMyBookingsQuery;
 import com.mentormatching.modules.booking.application.port.out.BookingRepositoryPort;
 import com.mentormatching.modules.booking.domain.Booking;
@@ -28,7 +30,8 @@ import com.mentormatching.shared.response.PageResponse;
 @Component
 public class BookingPersistenceAdapter implements BookingRepositoryPort {
 
-    private static final Set<String> SORTABLE_FIELDS = Set.of("id", "bookingDate", "status", "createdAt", "updatedAt");
+    private static final Set<String> SORTABLE_FIELDS = Set.of("id", "studentName", "mentorName", "bookingDate",
+            "startTime", "endTime", "meetingType", "status", "totalAmount", "createdAt", "updatedAt");
 
     private final BookingJpaRepository bookingJpaRepository;
     private final BookingPersistenceMapper bookingPersistenceMapper;
@@ -50,20 +53,20 @@ public class BookingPersistenceAdapter implements BookingRepositoryPort {
     }
 
     @Override
+    public PageResponse<Booking> findBookings(GetBookingsQuery query) {
+        Pageable pageable = buildPageable(query.page(), query.size(), query.sortBy(), query.sortDir());
+        Specification<BookingJpaEntity> specification = BookingSpecification.filterBookings(query.status(),
+                query.meetingType(), query.mentorName(), query.studentName(), query.bookingDateFrom(),
+                query.bookingDateTo());
+        return toPageResponse(bookingJpaRepository.findAll(specification, pageable));
+    }
+
+    @Override
     public PageResponse<Booking> findMyBookings(GetMyBookingsQuery query) {
-        int pageNumber = query.page() > 0 ? query.page() - 1 : 0;
-        Pageable pageable = PageRequest.of(pageNumber, query.size(), buildSort(query.sortBy(), query.sortDir()));
+        Pageable pageable = buildPageable(query.page(), query.size(), query.sortBy(), query.sortDir());
         Specification<BookingJpaEntity> specification = BookingSpecification.filterMyBookings(query.studentUserId(),
                 query.status(), query.meetingType());
-        Page<BookingJpaEntity> bookingPage = bookingJpaRepository.findAll(specification, pageable);
-
-        return PageResponse.<Booking>builder()
-                .page(bookingPage.getNumber() + 1)
-                .pageSize(bookingPage.getSize())
-                .totalPages(bookingPage.getTotalPages())
-                .totalItems(bookingPage.getTotalElements())
-                .data(bookingPage.getContent().stream().map(bookingPersistenceMapper::toDomain).toList())
-                .build();
+        return toPageResponse(bookingJpaRepository.findAll(specification, pageable));
     }
 
     @Override
@@ -82,10 +85,24 @@ public class BookingPersistenceAdapter implements BookingRepositoryPort {
     }
 
     @Override
-    public Optional<Booking> findByMentorAvailabilityIdAndBookingDate(Long mentorAvailabilityId,
-                                                                      LocalDate bookingDate) {
-        return bookingJpaRepository.findByMentorAvailabilityIdAndBookingDate(mentorAvailabilityId, bookingDate)
-                .map(bookingPersistenceMapper::toDomain);
+    public boolean existsOverlappingBooking(Long mentorId, LocalDate bookingDate, LocalTime startTime,
+                                            LocalTime endTime, List<BookingStatus> statuses) {
+        return bookingJpaRepository.existsOverlappingBooking(mentorId, bookingDate, startTime, endTime, statuses);
+    }
+
+    private Pageable buildPageable(int page, int size, String sortBy, String sortDir) {
+        int pageNumber = page > 0 ? page - 1 : 0;
+        return PageRequest.of(pageNumber, size, buildSort(sortBy, sortDir));
+    }
+
+    private PageResponse<Booking> toPageResponse(Page<BookingJpaEntity> bookingPage) {
+        return PageResponse.<Booking>builder()
+                .page(bookingPage.getNumber() + 1)
+                .pageSize(bookingPage.getSize())
+                .totalPages(bookingPage.getTotalPages())
+                .totalItems(bookingPage.getTotalElements())
+                .data(bookingPage.getContent().stream().map(bookingPersistenceMapper::toDomain).toList())
+                .build();
     }
 
     private Sort buildSort(String sortBy, String sortDir) {

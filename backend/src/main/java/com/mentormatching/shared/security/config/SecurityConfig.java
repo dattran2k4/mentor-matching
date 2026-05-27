@@ -52,7 +52,7 @@ public class SecurityConfig {
                         .requestMatchers("/swagger-ui/**", "/swagger-ui.html", "/v3/api-docs/**",
                                 "/api/v1/health/**", "/api/v1/auth/login", "/api/v1/auth/register",
                                 "/api/v1/auth/refresh-token", "/api/v1/auth/logout",
-                                "/api/v1/users/public-check").permitAll()
+                                "/api/v1/payments/stripe/webhook", "/api/v1/users/public-check").permitAll()
                         .requestMatchers("/api/v1/users/admin-check").hasRole("ADMIN")
                         .requestMatchers("/api/v1/users/**").authenticated()
                         .anyRequest().permitAll())

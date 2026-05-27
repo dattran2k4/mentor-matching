@@ -2,6 +2,11 @@ spring:
   config:
     activate:
       on-profile: prod
+  flyway:
+    enabled: ${SPRING_FLYWAY_ENABLED_PROD:true}
+  jpa:
+    hibernate:
+      ddl-auto: validate
 
 springdoc:
   api-docs:

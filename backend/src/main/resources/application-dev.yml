@@ -18,6 +18,8 @@ spring:
     show-sql: true
     hibernate:
       ddl-auto: update
+  flyway:
+    enabled: ${SPRING_FLYWAY_ENABLED_DEV:true}
   servlet:
     multipart:
       max-file-size: 50MB

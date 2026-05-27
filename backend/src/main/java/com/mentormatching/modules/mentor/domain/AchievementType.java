@@ -1,9 +1,10 @@
 package com.mentormatching.modules.mentor.domain;
 
 public enum AchievementType {
-    CERTIFICATE,
     AWARD,
+    CERTIFICATE,
+    EXAM_SCORE,
+    COMPETITION,
     PROJECT,
-    PUBLICATION,
-    OTHER
+    WORK_EXPERIENCE
 }

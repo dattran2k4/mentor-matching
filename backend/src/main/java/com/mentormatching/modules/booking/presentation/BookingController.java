@@ -5,7 +5,10 @@ import static com.mentormatching.shared.response.PageQueryDefaults.DEFAULT_SIZE;
 import static com.mentormatching.shared.response.PageQueryDefaults.DEFAULT_SORT_BY;
 import static com.mentormatching.shared.response.PageQueryDefaults.DEFAULT_SORT_DIR;
 
+import java.time.LocalDate;
+
 import lombok.RequiredArgsConstructor;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
@@ -16,8 +19,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.mentormatching.modules.booking.application.dto.GetBookingsQuery;
 import com.mentormatching.modules.booking.application.dto.GetMyBookingsQuery;
 import com.mentormatching.modules.booking.application.port.in.CreateBookingUseCase;
+import com.mentormatching.modules.booking.application.port.in.GetBookingsUseCase;
 import com.mentormatching.modules.booking.application.port.in.GetMyBookingsUseCase;
 import com.mentormatching.modules.booking.domain.Booking;
 import com.mentormatching.modules.booking.domain.BookingMeetingType;
@@ -41,6 +46,7 @@ import jakarta.validation.constraints.Min;
 public class BookingController {
 
     private final CreateBookingUseCase createBookingUseCase;
+    private final GetBookingsUseCase getBookingsUseCase;
     private final GetMyBookingsUseCase getMyBookingsUseCase;
     private final ApiResponseFactory apiResponseFactory;
 
@@ -50,6 +56,23 @@ public class BookingController {
                                                             @Valid @RequestBody CreateBookingRequest request) {
         Long bookingId = createBookingUseCase.createBooking(request.toCommand(principal));
         return apiResponseFactory.created(CreateBookingResponse.from(bookingId), "Create booking successfully");
+    }
+
+    @GetMapping
+    @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")
+    public ApiResponse<PageResponse<BookingResponse>> getBookings(@RequestParam(defaultValue = DEFAULT_PAGE) @Min(1) int page,
+                                                                  @RequestParam(defaultValue = DEFAULT_SIZE) @Min(1) @Max(100) int size,
+                                                                  @RequestParam(defaultValue = DEFAULT_SORT_BY) String sortBy,
+                                                                  @RequestParam(defaultValue = DEFAULT_SORT_DIR) String sortDir,
+                                                                  @RequestParam(required = false) BookingStatus status,
+                                                                  @RequestParam(required = false) BookingMeetingType meetingType,
+                                                                  @RequestParam(required = false) String mentorName,
+                                                                  @RequestParam(required = false) String studentName,
+                                                                  @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate bookingDateFrom,
+                                                                  @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate bookingDateTo) {
+        PageResponse<Booking> bookings = getBookingsUseCase.getBookings(new GetBookingsQuery(page, size, sortBy,
+                sortDir, status, meetingType, mentorName, studentName, bookingDateFrom, bookingDateTo));
+        return apiResponseFactory.success(BookingResponse.from(bookings), "Get bookings successfully");
     }
 
     @GetMapping("/me")
