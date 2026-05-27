@@ -6,12 +6,14 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.mentormatching.modules.booking.application.dto.BookingMentorSubjectSnapshot;
+import com.mentormatching.modules.booking.application.dto.BookingPaymentSummary;
 import com.mentormatching.modules.booking.application.dto.BookingMentorSnapshot;
 import com.mentormatching.modules.booking.application.dto.BookingUserSnapshot;
 import com.mentormatching.modules.booking.application.dto.CreateBookingCommand;
 import com.mentormatching.modules.booking.application.dto.GetBookingsQuery;
 import com.mentormatching.modules.booking.application.dto.GetMyBookingsQuery;
 import com.mentormatching.modules.booking.application.port.in.CreateBookingUseCase;
+import com.mentormatching.modules.booking.application.port.in.GetBookingPaymentSummaryUseCase;
 import com.mentormatching.modules.booking.application.port.in.GetBookingsUseCase;
 import com.mentormatching.modules.booking.application.port.in.GetMyBookingsUseCase;
 import com.mentormatching.modules.booking.application.port.out.BookingAvailabilityLookupPort;
@@ -25,10 +27,11 @@ import com.mentormatching.modules.booking.domain.BookingMeetingType;
 import com.mentormatching.modules.booking.domain.BookingStatus;
 import com.mentormatching.modules.mentor.domain.MeetingType;
 import com.mentormatching.shared.exception.InvalidDataException;
+import com.mentormatching.shared.exception.ResourceNotFoundException;
 import com.mentormatching.shared.response.PageResponse;
 
 @Service
-public class BookingService implements CreateBookingUseCase, GetBookingsUseCase, GetMyBookingsUseCase {
+public class BookingService implements CreateBookingUseCase, GetBookingPaymentSummaryUseCase, GetBookingsUseCase, GetMyBookingsUseCase {
 
     private static final List<BookingStatus> SCHEDULE_BLOCKING_STATUSES = List.of(BookingStatus.PENDING,
             BookingStatus.CONFIRMED);
@@ -69,6 +72,15 @@ public class BookingService implements CreateBookingUseCase, GetBookingsUseCase,
 
         Booking savedBooking = bookingRepositoryPort.save(booking);
         return savedBooking.getId();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public BookingPaymentSummary getBookingPaymentSummary(Long bookingId) {
+        Booking booking = bookingRepositoryPort.findById(bookingId)
+                .orElseThrow(() -> new ResourceNotFoundException("Booking not found"));
+        return new BookingPaymentSummary(booking.getId(), booking.getStudentUserId(), booking.getTotalAmount(),
+                booking.getStatus());
     }
 
     @Override
