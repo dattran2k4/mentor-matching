@@ -237,7 +237,7 @@ export default function LoginPage() {
                             >
                               <div className='flex items-center gap-3'>
                                 <div className='flex h-10 w-10 items-center justify-center rounded-lg bg-primary/5 text-primary group-hover:bg-primary group-hover:text-white transition-colors'>
-                                  {account.label === 'Student' && <UserCheck className='h-5 w-5' />}
+                                  {account.label === 'Học viên' && <UserCheck className='h-5 w-5' />}
                                   {account.label === 'Mentor' && <ShieldCheck className='h-5 w-5' />}
                                   {account.label === 'Admin' && <Settings className='h-5 w-5' />}
                                 </div>
