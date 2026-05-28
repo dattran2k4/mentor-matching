@@ -1,7 +1,11 @@
 import { CalendarDays, Clock } from 'lucide-react'
 import { formatPrice } from '../utils/format'
 
-const BookingSidebar = ({ mentor }) => {
+interface BookingSidebarProps {
+  mentor: any
+}
+
+const BookingSidebar = ({ mentor }: BookingSidebarProps) => {
   return (
     <div className="sticky top-24 rounded-2xl border border-slate-200 bg-white p-5 shadow-soft">
       <div className="flex items-center justify-between">

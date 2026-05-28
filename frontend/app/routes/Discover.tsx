@@ -3,20 +3,22 @@ import { useState } from 'react'
 import FilterSidebar from '../components/FilterSidebar'
 import MentorCard from '../components/MentorCard'
 import SearchBar from '../components/SearchBar'
-import SectionTitle from '../components/SectionTitle'
 import { mentors } from '../constants/mentors'
 
 const Discover = () => {
   const [filtersOpen, setFiltersOpen] = useState(false)
 
   return (
-    <div className="flex flex-col gap-8">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <SectionTitle
-          eyebrow="Discover"
-          title="Mentor discovery"
-          subtitle="Browse verified mentors and filter by goals, price, and availability."
-        />
+    <div className="flex flex-col gap-10 py-6 relative">
+      <div className="absolute top-[-50px] right-[-100px] w-96 h-96 bg-primary/10 rounded-full blur-[100px] -z-10 pointer-events-none" />
+
+      <div className="flex flex-wrap items-center justify-between gap-4">
+        <div>
+          <h1 className="text-3xl md:text-4xl font-bold tracking-tight mb-2">
+            <span className="text-gradient">Mentor discovery</span>
+          </h1>
+          <p className="text-muted">Browse verified mentors and filter by goals, price, and availability.</p>
+        </div>
         <button
           className="flex items-center gap-2 rounded-full border border-slate-200 px-4 py-2 text-sm font-semibold text-ink md:hidden"
           onClick={() => setFiltersOpen(true)}
@@ -25,7 +27,9 @@ const Discover = () => {
         </button>
       </div>
 
-      <SearchBar />
+      <div className="glass-panel p-2 rounded-2xl">
+        <SearchBar />
+      </div>
 
       <div className="grid gap-8 lg:grid-cols-[280px_1fr]">
         <div className="hidden lg:block">

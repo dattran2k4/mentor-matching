@@ -4,16 +4,22 @@ import { Link } from 'react-router'
 import RatingStars from './RatingStars'
 import { formatPrice } from '../utils/format'
 
-const MentorCard = ({ mentor }) => {
+interface MentorCardProps {
+  mentor: any
+}
+
+const MentorCard = ({ mentor }: MentorCardProps) => {
   return (
     <motion.article
-      whileHover={{ y: -8 }}
-      className="flex h-full flex-col rounded-2xl border border-slate-200 bg-white p-5 shadow-soft"
+      whileHover={{ y: -8, scale: 1.02 }}
+      transition={{ duration: 0.3 }}
+      className="flex h-full flex-col rounded-3xl border border-slate-200/60 bg-white/80 backdrop-blur p-6 glass-panel card-hover relative overflow-hidden group"
     >
-      <div className="flex items-start justify-between">
-        <div className="flex items-center gap-3">
+      <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-bl-full pointer-events-none transition-transform group-hover:scale-110" />
+      <div className="flex items-start justify-between relative z-10">
+        <div className="flex items-center gap-4">
           <div
-            className={`flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br ${mentor.accent} text-sm font-semibold text-white`}
+            className={`flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br ${mentor.accent} text-lg font-bold text-white shadow-md`}
           >
             {mentor.initials}
           </div>
@@ -54,27 +60,27 @@ const MentorCard = ({ mentor }) => {
 
       <p className="mt-4 text-sm text-muted">{mentor.bio}</p>
 
-      <div className="mt-4 flex flex-wrap gap-2">
-        {mentor.tags.map((tag) => (
+      <div className="mt-5 flex flex-wrap gap-2">
+        {mentor.tags.map((tag: string) => (
           <span
             key={tag}
-            className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs text-muted"
+            className="rounded-full border border-slate-200/80 bg-slate-50/80 px-3 py-1.5 text-xs text-muted shadow-sm"
           >
             {tag}
           </span>
         ))}
       </div>
 
-      <div className="mt-5 flex items-center gap-3">
+      <div className="mt-6 flex items-center gap-3 relative z-10">
         <Link
           to={`/mentor/${mentor.id}`}
-          className="flex-1 rounded-full border border-primary px-4 py-2 text-center text-sm font-semibold text-primary transition hover:bg-primary hover:text-white"
+          className="flex-1 rounded-full border border-primary/30 px-4 py-2.5 text-center text-sm font-semibold text-primary transition-all hover:bg-primary/5 hover:border-primary shrink-0"
         >
           View Profile
         </Link>
         <Link
           to={`/mentor/${mentor.id}`}
-          className="flex-1 rounded-full bg-primary px-4 py-2 text-center text-sm font-semibold text-white shadow-lift transition hover:translate-y-[-2px]"
+          className="flex-1 rounded-full bg-gradient-to-r from-primary to-primary-light px-4 py-2.5 text-center text-sm font-semibold text-white shadow-soft transition-all hover:shadow-glow hover:-translate-y-0.5"
         >
           Book Now
         </Link>

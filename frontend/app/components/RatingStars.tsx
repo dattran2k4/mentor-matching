@@ -1,6 +1,11 @@
 import { Star } from 'lucide-react'
 
-const RatingStars = ({ rating, size = 16 }) => {
+interface RatingStarsProps {
+  rating: number
+  size?: number
+}
+
+const RatingStars = ({ rating, size = 16 }: RatingStarsProps) => {
   const filledCount = Math.round(rating)
 
   return (

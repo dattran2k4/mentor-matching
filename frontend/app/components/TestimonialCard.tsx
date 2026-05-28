@@ -1,6 +1,10 @@
 import RatingStars from './RatingStars'
 
-const TestimonialCard = ({ testimonial }) => {
+interface TestimonialCardProps {
+  testimonial: any
+}
+
+const TestimonialCard = ({ testimonial }: TestimonialCardProps) => {
   return (
     <div className="flex h-full flex-col justify-between rounded-2xl border border-slate-200 bg-white p-6 shadow-soft">
       <div>

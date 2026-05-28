@@ -1,4 +1,11 @@
-const SectionTitle = ({ eyebrow, title, subtitle, align = 'left' }) => {
+interface SectionTitleProps {
+  eyebrow?: string
+  title: string
+  subtitle?: string
+  align?: 'left' | 'center'
+}
+
+const SectionTitle = ({ eyebrow, title, subtitle, align = 'left' }: SectionTitleProps) => {
   const alignment = align === 'center' ? 'text-center items-center' : 'text-left'
 
   return (

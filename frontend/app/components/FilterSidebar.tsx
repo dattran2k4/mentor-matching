@@ -1,6 +1,10 @@
 import { Star, X } from 'lucide-react'
 
-const FilterSidebar = ({ onClose }) => {
+interface FilterSidebarProps {
+  onClose?: () => void
+}
+
+const FilterSidebar = ({ onClose }: FilterSidebarProps) => {
   return (
     <aside className="flex w-full flex-col gap-6 rounded-2xl border border-slate-200 bg-white p-5 shadow-soft">
       <div className="flex items-center justify-between md:hidden">

@@ -2,10 +2,10 @@ import { type RouteConfig, index, layout, route } from '@react-router/dev/routes
 
 export default [
   // Public marketing site
-  layout('layouts/MainLayout.jsx', [
-    index('routes/HomeFesba.jsx'),
-    route('discover', 'routes/Discover.jsx'),
-    route('mentor/:id', 'routes/MentorProfile.jsx')
+  layout('layouts/MainLayout.tsx', [
+    index('routes/HomeFesba.tsx'),
+    route('discover', 'routes/Discover.tsx'),
+    route('mentor/:id', 'routes/MentorProfile.tsx')
   ]),
 
   // User dashboard — /user/*

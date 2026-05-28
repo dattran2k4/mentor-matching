@@ -4,7 +4,12 @@ import { Link } from 'react-router'
 
 import { path } from '@/config/path'
 
-const SubjectCard = ({ subject }) => {
+interface SubjectCardProps {
+  subject: any
+}
+
+const SubjectCard = ({ subject }: SubjectCardProps) => {
+  // @ts-ignore
   const Icon = Icons[subject.icon] || Icons.BookOpen
 
   return (
