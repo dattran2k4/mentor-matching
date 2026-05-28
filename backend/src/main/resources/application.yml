@@ -48,6 +48,11 @@ app:
       path: ${APP_REFRESH_TOKEN_COOKIE_PATH:/api/v1/auth}
       secure: ${APP_REFRESH_TOKEN_COOKIE_SECURE:false}
       same-site: ${APP_REFRESH_TOKEN_COOKIE_SAME_SITE:Strict}
+  stripe:
+    secret-key: ${STRIPE_SECRET_KEY:}
+    webhook-secret: ${STRIPE_WEBHOOK_SECRET:}
+    success-url: ${STRIPE_SUCCESS_URL:http://localhost:5173/payment/success}
+    cancel-url: ${STRIPE_CANCEL_URL:http://localhost:5173/payment/cancel}
 
 logging:
   level:

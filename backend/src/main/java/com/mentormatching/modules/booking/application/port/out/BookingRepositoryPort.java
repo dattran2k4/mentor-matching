@@ -1,8 +1,11 @@
 package com.mentormatching.modules.booking.application.port.out;
 
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
 
+import com.mentormatching.modules.booking.application.dto.GetBookingsQuery;
 import com.mentormatching.modules.booking.application.dto.GetMyBookingsQuery;
 import com.mentormatching.modules.booking.domain.Booking;
 import com.mentormatching.modules.booking.domain.BookingStatus;
@@ -14,6 +17,8 @@ public interface BookingRepositoryPort {
 
     Optional<Booking> findById(Long id);
 
+    PageResponse<Booking> findBookings(GetBookingsQuery query);
+
     PageResponse<Booking> findMyBookings(GetMyBookingsQuery query);
 
     List<Booking> findByStudentUserId(Long studentUserId);
@@ -21,4 +26,8 @@ public interface BookingRepositoryPort {
     List<Booking> findByMentorId(Long mentorId);
 
     List<Booking> findByStatus(BookingStatus status);
+
+    boolean existsOverlappingBooking(Long mentorId, LocalDate bookingDate, LocalTime startTime, LocalTime endTime,
+                                     List<BookingStatus> statuses);
 }
+
