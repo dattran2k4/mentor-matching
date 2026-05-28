@@ -1,7 +1,8 @@
 import RatingStars from './RatingStars'
+import type { Testimonial } from '../types/testimonial'
 
 interface TestimonialCardProps {
-  testimonial: any
+  testimonial: Testimonial
 }
 
 const TestimonialCard = ({ testimonial }: TestimonialCardProps) => {

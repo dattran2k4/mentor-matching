@@ -7,10 +7,11 @@ import BookingSidebar from '../components/BookingSidebar'
 import RatingStars from '../components/RatingStars'
 import SectionTitle from '../components/SectionTitle'
 import { mentors } from '../constants/mentors'
+import type { Mentor, Experience, Education, Review } from '../types/mentor'
 
 const MentorProfile = () => {
   const { id } = useParams()
-  const mentor = mentors.find((item) => item.id === id) || mentors[0]
+  const mentor = (mentors as Mentor[]).find((item) => item.id === id) || (mentors as Mentor[])[0]
 
   return (
     <div className="grid gap-10 lg:grid-cols-[1.1fr_0.9fr] py-6 relative">
@@ -117,7 +118,7 @@ const MentorProfile = () => {
               <span className="text-lg">Experience</span>
             </div>
             <div className="mt-6 space-y-6 text-sm text-muted relative before:absolute before:inset-0 before:ml-2.5 before:-translate-x-px md:before:mx-auto md:before:translate-x-0 before:h-full before:w-0.5 before:bg-gradient-to-b before:from-transparent before:via-slate-200 before:to-transparent">
-              {mentor.experience.map((item: any) => (
+              {mentor.experience.map((item: Experience) => (
                 <div key={item.title} className="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group is-active">
                   <div className="flex items-center justify-center w-6 h-6 rounded-full border border-white bg-slate-200 text-slate-500 shadow shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2" />
                   <div className="w-[calc(100%-4rem)] md:w-[calc(50%-2.5rem)] p-4 rounded-2xl border border-slate-200 bg-white shadow-sm hover:shadow-md transition-shadow">
@@ -137,7 +138,7 @@ const MentorProfile = () => {
               <span className="text-lg">Education</span>
             </div>
             <div className="mt-6 space-y-6 text-sm text-muted">
-              {mentor.education.map((item: any) => (
+              {mentor.education.map((item: Education) => (
                 <div key={item.degree} className="p-4 rounded-2xl border border-slate-200 bg-white shadow-sm hover:shadow-md transition-shadow">
                   <p className="font-semibold text-ink text-base">{item.degree}</p>
                   <p className="mt-1">{item.school}</p>
@@ -155,7 +156,7 @@ const MentorProfile = () => {
         >
           <SectionTitle title="Reviews" subtitle={`${mentor.reviewsCount} total reviews`} />
           <div className="mt-8 space-y-4">
-            {mentor.reviews.map((review: any) => (
+            {mentor.reviews.map((review: Review) => (
               <div
                 key={review.name}
                 className="rounded-2xl border border-slate-200/50 bg-slate-50/50 p-6 transition-colors hover:bg-slate-100/50"

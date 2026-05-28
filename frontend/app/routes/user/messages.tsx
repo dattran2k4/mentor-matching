@@ -1,5 +1,5 @@
 import { DashboardPage } from '@/components/DashboardPage'
-import { motion } from 'framer-motion'
+
 import { Send, Search, MoreVertical, Paperclip, Smile, Video } from 'lucide-react'
 
 export function meta() {

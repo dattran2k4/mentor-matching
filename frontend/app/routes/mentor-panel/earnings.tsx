@@ -65,7 +65,7 @@ export default function MentorEarningsPage() {
             { id: 'TRX-001', type: 'Nhận từ dạy kèm', amount: '+ 800.000 ₫', status: 'Thành công', date: '28/05/2026', isPos: true },
             { id: 'TRX-002', type: 'Rút tiền', amount: '- 5.000.000 ₫', status: 'Đang xử lý', date: '25/05/2026', isPos: false },
             { id: 'TRX-003', type: 'Phí nền tảng (5%)', amount: '- 40.000 ₫', status: 'Thành công', date: '24/05/2026', isPos: false },
-          ].map((tx, i) => (
+          ].map((tx) => (
             <div key={tx.id} className="flex items-center justify-between p-4 border border-slate-100 rounded-2xl hover:border-primary/20 transition-colors">
               <div className="flex items-center gap-4">
                 <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${tx.isPos ? 'bg-emerald-100 text-emerald-600' : 'bg-red-100 text-red-600'}`}>

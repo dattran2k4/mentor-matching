@@ -1,8 +1,9 @@
 import { CalendarDays, Clock } from 'lucide-react'
 import { formatPrice } from '../utils/format'
+import type { Mentor } from '../types/mentor'
 
 interface BookingSidebarProps {
-  mentor: any
+  mentor: Mentor
 }
 
 const BookingSidebar = ({ mentor }: BookingSidebarProps) => {

@@ -1,6 +1,6 @@
 import { Link } from 'react-router'
 import { motion } from 'framer-motion'
-import { Users, Calendar, Star, ArrowUpRight, Plus } from 'lucide-react'
+import { Users, Calendar, Star, ArrowUpRight } from 'lucide-react'
 
 import { DashboardPage } from '@/components/DashboardPage'
 import { path } from '@/config/path'

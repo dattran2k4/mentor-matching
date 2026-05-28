@@ -3,9 +3,10 @@ import { motion } from 'framer-motion'
 import { Link } from 'react-router'
 import RatingStars from './RatingStars'
 import { formatPrice } from '../utils/format'
+import type { Mentor } from '../types/mentor'
 
 interface MentorCardProps {
-  mentor: any
+  mentor: Mentor
 }
 
 const MentorCard = ({ mentor }: MentorCardProps) => {

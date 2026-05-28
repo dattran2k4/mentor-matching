@@ -3,14 +3,15 @@ import { motion } from 'framer-motion'
 import { Link } from 'react-router'
 
 import { path } from '@/config/path'
+import type { Subject } from '../types/subject'
 
 interface SubjectCardProps {
-  subject: any
+  subject: Subject
 }
 
 const SubjectCard = ({ subject }: SubjectCardProps) => {
-  // @ts-ignore
-  const Icon = Icons[subject.icon] || Icons.BookOpen
+  const IconName = subject.icon as keyof typeof Icons
+  const Icon = (Icons[IconName] as React.ComponentType<{ size?: number }>) || Icons.BookOpen
 
   return (
     <motion.div
