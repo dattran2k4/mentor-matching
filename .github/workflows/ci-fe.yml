@@ -38,13 +38,13 @@ jobs:
           cache-dependency-path: frontend/package-lock.json
 
       - name: Install deps
-        run: npm ci
+        run: npm install
 
       - name: Lint (ESLint + Prettier check)
         run: npm run lint
 
       - name: Type check
-        run: npx tsc -b --noEmit
+        run: npm run typecheck
 
       - name: Build
         run: npm run build
