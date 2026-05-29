@@ -19,7 +19,7 @@ export default function GuestLayout() {
     if (isLoading) {
       return (
         <div className='flex min-h-[40vh] items-center justify-center'>
-          <p className='text-sm text-muted'>Đang chuyển hướng...</p>
+          <p className='text-muted text-sm'>Đang chuyển hướng...</p>
         </div>
       )
     }

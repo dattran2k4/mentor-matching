@@ -11,17 +11,17 @@ export default function ForbiddenPage() {
       <h1 className='mb-2 text-2xl font-semibold'>403 - Không có quyền truy cập</h1>
       <p className='mb-6 text-sm text-gray-600'>Bạn không có quyền truy cập trang này.</p>
       <div className='flex flex-wrap gap-3 text-sm'>
-        <Link className='font-medium text-primary hover:underline' to='/'>
+        <Link className='text-primary font-medium hover:underline' to='/'>
           Trang chủ
         </Link>
-        <Link className='font-medium text-primary hover:underline' to={path.discover}>
+        <Link className='text-primary font-medium hover:underline' to={path.discover}>
           Khám phá
         </Link>
-        <Link className='font-medium text-primary hover:underline' to={path.login}>
+        <Link className='text-primary font-medium hover:underline' to={path.login}>
           Đăng nhập
         </Link>
         {dashboardPath ? (
-          <Link className='font-medium text-primary hover:underline' to={dashboardPath}>
+          <Link className='text-primary font-medium hover:underline' to={dashboardPath}>
             Bảng điều khiển
           </Link>
         ) : null}

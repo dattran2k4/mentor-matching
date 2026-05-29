@@ -11,7 +11,7 @@ const Navbar = () => {
   const navigate = useNavigate()
   const [mobileOpen, setMobileOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
-  
+
   const accessToken = useAuthStore((state) => state.accessToken)
   const logout = useAuthStore((state) => state.logout)
   const dashboardPath = useDashboardPath()
@@ -42,7 +42,10 @@ const Navbar = () => {
           <>
             Trang chủ
             {isActive && (
-              <motion.div layoutId="underline" className="absolute left-0 right-0 bottom-0 h-0.5 bg-primary rounded-t-full" />
+              <motion.div
+                layoutId='underline'
+                className='bg-primary absolute right-0 bottom-0 left-0 h-0.5 rounded-t-full'
+              />
             )}
           </>
         )}
@@ -52,7 +55,10 @@ const Navbar = () => {
           <>
             Khám phá
             {isActive && (
-              <motion.div layoutId="underline" className="absolute left-0 right-0 bottom-0 h-0.5 bg-primary rounded-t-full" />
+              <motion.div
+                layoutId='underline'
+                className='bg-primary absolute right-0 bottom-0 left-0 h-0.5 rounded-t-full'
+              />
             )}
           </>
         )}
@@ -63,7 +69,10 @@ const Navbar = () => {
             <>
               Bảng điều khiển
               {isActive && (
-                <motion.div layoutId="underline" className="absolute left-0 right-0 bottom-0 h-0.5 bg-primary rounded-t-full" />
+                <motion.div
+                  layoutId='underline'
+                  className='bg-primary absolute right-0 bottom-0 left-0 h-0.5 rounded-t-full'
+                />
               )}
             </>
           )}
@@ -73,18 +82,23 @@ const Navbar = () => {
   )
 
   return (
-    <motion.header 
+    <motion.header
       initial={{ y: -100 }}
       animate={{ y: 0 }}
       className={`sticky top-0 z-50 transition-all duration-300 ${scrolled ? 'glass-panel border-b border-white/20' : 'bg-transparent'}`}
     >
-      <nav className={`mx-auto flex max-w-6xl items-center justify-between px-4 transition-all duration-300 ${scrolled ? 'py-3' : 'py-5'} md:px-6`}>
+      <nav
+        className={`mx-auto flex max-w-6xl items-center justify-between px-4 transition-all duration-300 ${scrolled ? 'py-3' : 'py-5'} md:px-6`}
+      >
         <div className='flex items-center gap-8'>
-          <Link className='flex items-center gap-2 group' to='/'>
-            <div className="bg-primary/10 p-2 rounded-xl text-primary group-hover:bg-primary group-hover:text-white transition-colors duration-300">
-              <Sparkles size={20} className="group-hover:rotate-12 transition-transform duration-300" />
+          <Link className='group flex items-center gap-2' to='/'>
+            <div className='bg-primary/10 text-primary group-hover:bg-primary rounded-xl p-2 transition-colors duration-300 group-hover:text-white'>
+              <Sparkles
+                size={20}
+                className='transition-transform duration-300 group-hover:rotate-12'
+              />
             </div>
-            <span className='text-xl font-semibold text-ink group-hover:text-primary transition-colors tracking-tight'>
+            <span className='text-ink group-hover:text-primary text-xl font-semibold tracking-tight transition-colors'>
               EduMarket
             </span>
           </Link>
@@ -93,7 +107,7 @@ const Navbar = () => {
 
         <div className='flex items-center gap-4'>
           <Link
-            className='hidden rounded-full border-2 border-primary/20 bg-white/50 backdrop-blur px-5 py-2 text-sm font-semibold text-primary transition-all duration-300 hover:border-primary hover:bg-primary/5 hover:shadow-soft md:inline-flex items-center gap-2'
+            className='border-primary/20 text-primary hover:border-primary hover:bg-primary/5 hover:shadow-soft hidden items-center gap-2 rounded-full border-2 bg-white/50 px-5 py-2 text-sm font-semibold backdrop-blur transition-all duration-300 md:inline-flex'
             to={path.mentorPanel.root}
           >
             Trở thành Mentor
@@ -102,22 +116,22 @@ const Navbar = () => {
           {accessToken ? (
             <>
               <button
-                className='relative hidden h-10 w-10 items-center justify-center rounded-full bg-white border border-slate-200 text-slate-600 transition-all hover:border-primary hover:text-primary md:flex shadow-sm hover:shadow-soft'
+                className='hover:border-primary hover:text-primary hover:shadow-soft relative hidden h-10 w-10 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-600 shadow-sm transition-all md:flex'
                 type='button'
               >
                 <Bell size={18} />
-                <span className='absolute right-2.5 top-2.5 h-2.5 w-2.5 rounded-full bg-red-500 border-2 border-white' />
+                <span className='absolute top-2.5 right-2.5 h-2.5 w-2.5 rounded-full border-2 border-white bg-red-500' />
               </button>
               {dashboardPath ? (
                 <Link
-                  className='hidden h-10 w-10 items-center justify-center rounded-full bg-gradient-to-tr from-primary to-secondary text-xs font-semibold text-white shadow-soft transition-transform hover:scale-105 md:flex'
+                  className='from-primary to-secondary shadow-soft hidden h-10 w-10 items-center justify-center rounded-full bg-gradient-to-tr text-xs font-semibold text-white transition-transform hover:scale-105 md:flex'
                   to={dashboardPath}
                 >
                   EM
                 </Link>
               ) : null}
               <button
-                className='hidden items-center gap-2 rounded-full border border-slate-200 bg-white pl-3 pr-4 py-2.5 text-sm font-medium text-slate-600 transition-all hover:bg-red-50 hover:text-red-600 hover:border-red-200 md:inline-flex shadow-sm'
+                className='hidden items-center gap-2 rounded-full border border-slate-200 bg-white py-2.5 pr-4 pl-3 text-sm font-medium text-slate-600 shadow-sm transition-all hover:border-red-200 hover:bg-red-50 hover:text-red-600 md:inline-flex'
                 type='button'
                 onClick={handleLogout}
               >
@@ -127,7 +141,7 @@ const Navbar = () => {
             </>
           ) : (
             <Link
-              className='hidden rounded-full bg-primary bg-gradient-to-r from-primary to-primary-light px-6 py-2.5 text-sm font-semibold text-white transition-all hover:shadow-glow hover:-translate-y-0.5 md:inline-flex'
+              className='bg-primary from-primary to-primary-light hover:shadow-glow hidden rounded-full bg-gradient-to-r px-6 py-2.5 text-sm font-semibold text-white transition-all hover:-translate-y-0.5 md:inline-flex'
               to={path.login}
             >
               Đăng nhập
@@ -135,7 +149,7 @@ const Navbar = () => {
           )}
 
           <button
-            className='flex h-10 w-10 items-center justify-center rounded-full bg-white border border-slate-200 text-slate-600 transition-colors hover:bg-slate-50 active:bg-slate-100 md:hidden'
+            className='flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-600 transition-colors hover:bg-slate-50 active:bg-slate-100 md:hidden'
             type='button'
             onClick={() => setMobileOpen((open) => !open)}
           >
@@ -146,16 +160,16 @@ const Navbar = () => {
 
       <AnimatePresence>
         {mobileOpen && (
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
-            className='border-t border-slate-200/50 bg-white/95 backdrop-blur-xl px-4 py-4 md:hidden'
+            className='border-t border-slate-200/50 bg-white/95 px-4 py-4 backdrop-blur-xl md:hidden'
           >
             <div className='flex flex-col gap-2'>{navLinks}</div>
             <div className='mt-5 flex flex-col gap-3 border-t border-slate-200/50 pt-5'>
               <Link
-                className='rounded-xl border-2 border-primary/20 bg-primary/5 px-4 py-3 text-center text-sm font-semibold text-primary transition-colors hover:bg-primary hover:text-white'
+                className='border-primary/20 bg-primary/5 text-primary hover:bg-primary rounded-xl border-2 px-4 py-3 text-center text-sm font-semibold transition-colors hover:text-white'
                 to={path.mentorPanel.root}
                 onClick={() => setMobileOpen(false)}
               >
@@ -163,7 +177,7 @@ const Navbar = () => {
               </Link>
               {accessToken ? (
                 <button
-                  className='rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-600 transition-colors hover:bg-red-50 hover:text-red-600 hover:border-red-200 flex justify-center items-center gap-2'
+                  className='flex items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-600 transition-colors hover:border-red-200 hover:bg-red-50 hover:text-red-600'
                   type='button'
                   onClick={handleLogout}
                 >
@@ -172,7 +186,7 @@ const Navbar = () => {
                 </button>
               ) : (
                 <Link
-                  className='rounded-xl bg-primary bg-gradient-to-r from-primary to-primary-light px-4 py-3 text-center text-sm font-semibold text-white shadow-soft hover:opacity-90'
+                  className='bg-primary from-primary to-primary-light shadow-soft rounded-xl bg-gradient-to-r px-4 py-3 text-center text-sm font-semibold text-white hover:opacity-90'
                   to={path.login}
                   onClick={() => setMobileOpen(false)}
                 >

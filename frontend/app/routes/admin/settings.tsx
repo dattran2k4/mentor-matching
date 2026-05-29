@@ -5,5 +5,10 @@ export function meta() {
 }
 
 export default function AdminSettingsPage() {
-  return <DashboardPage description='Cấu hình hệ thống và chính sách nền tảng.' title='Cài đặt hệ thống' />
+  return (
+    <DashboardPage
+      description='Cấu hình hệ thống và chính sách nền tảng.'
+      title='Cài đặt hệ thống'
+    />
+  )
 }

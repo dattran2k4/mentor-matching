@@ -6,5 +6,5 @@ export const subjects = [
   { id: 'science', name: 'Science', icon: 'Atom' },
   { id: 'business', name: 'Business', icon: 'Briefcase' },
   { id: 'finance', name: 'Finance', icon: 'Landmark' },
-  { id: 'law', name: 'Law', icon: 'Scale' },
+  { id: 'law', name: 'Law', icon: 'Scale' }
 ]

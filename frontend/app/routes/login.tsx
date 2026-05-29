@@ -1,6 +1,16 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Mail, Lock, ArrowLeft, ChevronRight, Info, Sparkles, UserCheck, ShieldCheck, Settings } from 'lucide-react'
+import {
+  Mail,
+  Lock,
+  ArrowLeft,
+  ChevronRight,
+  Info,
+  Sparkles,
+  UserCheck,
+  ShieldCheck,
+  Settings
+} from 'lucide-react'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { Link, useNavigate, useSearchParams } from 'react-router'
@@ -61,7 +71,8 @@ export default function LoginPage() {
       notify.success('Đăng nhập thành công!')
       navigate(destination, { replace: true })
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'Không thể đăng nhập. Vui lòng thử lại.'
+      const message =
+        error instanceof Error ? error.message : 'Không thể đăng nhập. Vui lòng thử lại.'
       notify.error(message)
     }
   }
@@ -79,11 +90,16 @@ export default function LoginPage() {
           initial={{ scale: 1 }}
           transition={{ duration: 20, repeat: Infinity, repeatType: 'reverse', ease: 'easeInOut' }}
         />
-        <div className='absolute inset-0 z-10 opacity-30' style={{ backgroundImage: 'url("https://www.transparenttextures.com/patterns/cubes.png")' }} />
+        <div
+          className='absolute inset-0 z-10 opacity-30'
+          style={{
+            backgroundImage: 'url("https://www.transparenttextures.com/patterns/cubes.png")'
+          }}
+        />
 
         <div className='relative z-20 flex h-full flex-col justify-between p-12 text-white'>
           <Link className='flex items-center gap-2 text-xl font-bold tracking-tight' to='/'>
-            <div className='flex h-10 w-10 items-center justify-center rounded-xl bg-white text-primary'>
+            <div className='text-primary flex h-10 w-10 items-center justify-center rounded-xl bg-white'>
               <Sparkles className='h-6 w-6' />
             </div>
             <span>Mentor Matching</span>
@@ -94,12 +110,12 @@ export default function LoginPage() {
             initial={{ opacity: 0, y: 20 }}
             transition={{ delay: 0.5 }}
           >
-            <h2 className='mb-6 font-display text-5xl font-bold leading-tight'>
+            <h2 className='font-display mb-6 text-5xl leading-tight font-bold'>
               Nâng tầm kỹ năng <br /> cùng đội ngũ Mentor tài năng.
             </h2>
             <p className='max-w-md text-lg text-white/80'>
-              Hàng ngàn sinh viên đã tìm thấy người thầy của mình. Hãy bắt đầu hành trình phát triển bản thân ngay
-              hôm nay.
+              Hàng ngàn sinh viên đã tìm thấy người thầy của mình. Hãy bắt đầu hành trình phát triển
+              bản thân ngay hôm nay.
             </p>
           </motion.div>
 
@@ -118,7 +134,7 @@ export default function LoginPage() {
             transition={{ duration: 0.5 }}
           >
             <Link
-              className='mb-8 inline-flex items-center gap-2 text-sm font-medium text-muted transition-colors hover:text-primary'
+              className='text-muted hover:text-primary mb-8 inline-flex items-center gap-2 text-sm font-medium transition-colors'
               to='/'
             >
               <ArrowLeft className='h-4 w-4' />
@@ -145,15 +161,15 @@ export default function LoginPage() {
 
             <form className='space-y-6' onSubmit={handleSubmit(handleLogin)}>
               <div className='space-y-2'>
-                <label className='text-sm font-semibold text-ink' htmlFor='email'>
+                <label className='text-ink text-sm font-semibold' htmlFor='email'>
                   Địa chỉ Email
                 </label>
                 <div className='relative'>
-                  <Mail className='absolute top-1/2 left-3 h-5 w-5 -translate-y-1/2 text-muted' />
+                  <Mail className='text-muted absolute top-1/2 left-3 h-5 w-5 -translate-y-1/2' />
                   <input
                     {...register('email')}
                     autoComplete='email'
-                    className='h-12 w-full rounded-xl border border-line bg-base pl-10 pr-4 text-ink transition-all focus:border-primary focus:bg-white focus:ring-4 focus:ring-primary/10 outline-hidden'
+                    className='border-line bg-base text-ink focus:border-primary focus:ring-primary/10 h-12 w-full rounded-xl border pr-4 pl-10 outline-hidden transition-all focus:bg-white focus:ring-4'
                     id='email'
                     placeholder='name@example.com'
                     type='email'
@@ -166,19 +182,22 @@ export default function LoginPage() {
 
               <div className='space-y-2'>
                 <div className='flex items-center justify-between'>
-                  <label className='text-sm font-semibold text-ink' htmlFor='password'>
+                  <label className='text-ink text-sm font-semibold' htmlFor='password'>
                     Mật khẩu
                   </label>
-                  <Link className='text-sm font-medium text-primary hover:underline' to='/forgot-password'>
+                  <Link
+                    className='text-primary text-sm font-medium hover:underline'
+                    to='/forgot-password'
+                  >
                     Quên mật khẩu?
                   </Link>
                 </div>
                 <div className='relative'>
-                  <Lock className='absolute top-1/2 left-3 h-5 w-5 -translate-y-1/2 text-muted' />
+                  <Lock className='text-muted absolute top-1/2 left-3 h-5 w-5 -translate-y-1/2' />
                   <input
                     {...register('password')}
                     autoComplete='current-password'
-                    className='h-12 w-full rounded-xl border border-line bg-base pl-10 pr-4 text-ink transition-all focus:border-primary focus:bg-white focus:ring-4 focus:ring-primary/10 outline-hidden'
+                    className='border-line bg-base text-ink focus:border-primary focus:ring-primary/10 h-12 w-full rounded-xl border pr-4 pl-10 outline-hidden transition-all focus:bg-white focus:ring-4'
                     id='password'
                     placeholder='••••••••'
                     type='password'
@@ -204,14 +223,16 @@ export default function LoginPage() {
             <div className='mt-10'>
               <div className='relative mb-8 flex items-center justify-center'>
                 <div className='absolute inset-0 flex items-center'>
-                  <div className='w-full border-t border-line' />
+                  <div className='border-line w-full border-t' />
                 </div>
-                <span className='relative bg-white px-4 text-sm font-medium text-muted'>Hoặc sử dụng</span>
+                <span className='text-muted relative bg-white px-4 text-sm font-medium'>
+                  Hoặc sử dụng
+                </span>
               </div>
 
               <div className='space-y-4'>
                 <button
-                  className='flex w-full items-center justify-center gap-2 rounded-xl border border-line py-3 text-sm font-semibold text-ink transition hover:bg-base'
+                  className='border-line text-ink hover:bg-base flex w-full items-center justify-center gap-2 rounded-xl border py-3 text-sm font-semibold transition'
                   type='button'
                   onClick={() => setShowTestAccounts(!showTestAccounts)}
                 >
@@ -223,7 +244,7 @@ export default function LoginPage() {
                   {showTestAccounts && (
                     <motion.div
                       animate={{ height: 'auto', opacity: 1 }}
-                      className='overflow-hidden rounded-2xl bg-base p-2'
+                      className='bg-base overflow-hidden rounded-2xl p-2'
                       exit={{ height: 0, opacity: 0 }}
                       initial={{ height: 0, opacity: 0 }}
                     >
@@ -231,22 +252,26 @@ export default function LoginPage() {
                         {testAccounts.map((account) => (
                           <li key={account.email}>
                             <button
-                              className='group flex w-full items-center justify-between rounded-xl bg-white p-3 text-left transition hover:ring-2 hover:ring-primary'
+                              className='group hover:ring-primary flex w-full items-center justify-between rounded-xl bg-white p-3 text-left transition hover:ring-2'
                               type='button'
                               onClick={() => fillTestAccount(account.email, account.password)}
                             >
                               <div className='flex items-center gap-3'>
-                                <div className='flex h-10 w-10 items-center justify-center rounded-lg bg-primary/5 text-primary group-hover:bg-primary group-hover:text-white transition-colors'>
-                                  {account.label === 'Học viên' && <UserCheck className='h-5 w-5' />}
-                                  {account.label === 'Mentor' && <ShieldCheck className='h-5 w-5' />}
+                                <div className='bg-primary/5 text-primary group-hover:bg-primary flex h-10 w-10 items-center justify-center rounded-lg transition-colors group-hover:text-white'>
+                                  {account.label === 'Học viên' && (
+                                    <UserCheck className='h-5 w-5' />
+                                  )}
+                                  {account.label === 'Mentor' && (
+                                    <ShieldCheck className='h-5 w-5' />
+                                  )}
                                   {account.label === 'Admin' && <Settings className='h-5 w-5' />}
                                 </div>
                                 <div>
                                   <div className='text-sm font-bold'>{account.label} Account</div>
-                                  <div className='text-xs text-muted'>{account.email}</div>
+                                  <div className='text-muted text-xs'>{account.email}</div>
                                 </div>
                               </div>
-                              <ChevronRight className='h-4 w-4 text-muted group-hover:text-primary' />
+                              <ChevronRight className='text-muted group-hover:text-primary h-4 w-4' />
                             </button>
                           </li>
                         ))}
@@ -257,21 +282,30 @@ export default function LoginPage() {
               </div>
             </div>
 
-            <p className='mt-10 text-center text-sm text-muted'>
+            <p className='text-muted mt-10 text-center text-sm'>
               Chưa có tài khoản?{' '}
-              <Link className='font-bold text-primary hover:underline' to='/register'>
+              <Link className='text-primary font-bold hover:underline' to='/register'>
                 Đăng ký ngay
               </Link>
             </p>
 
-            <div className='mt-12 flex justify-center gap-8 border-t border-line pt-8'>
-              <Link className='text-sm font-medium text-muted transition hover:text-primary' to={path.discover}>
+            <div className='border-line mt-12 flex justify-center gap-8 border-t pt-8'>
+              <Link
+                className='text-muted hover:text-primary text-sm font-medium transition'
+                to={path.discover}
+              >
                 Khám phá Mentor
               </Link>
-              <Link className='text-sm font-medium text-muted transition hover:text-primary' to='/help'>
+              <Link
+                className='text-muted hover:text-primary text-sm font-medium transition'
+                to='/help'
+              >
                 Hỗ trợ
               </Link>
-              <Link className='text-sm font-medium text-muted transition hover:text-primary' to='/terms'>
+              <Link
+                className='text-muted hover:text-primary text-sm font-medium transition'
+                to='/terms'
+              >
                 Điều khoản
               </Link>
             </div>
@@ -281,4 +315,3 @@ export default function LoginPage() {
     </div>
   )
 }
-

@@ -23,8 +23,8 @@ export function RoleGuard({ role, children }: RoleGuardProps) {
 
   if (isLoading) {
     return (
-      <div className='flex min-h-screen items-center justify-center bg-base'>
-        <p className='text-sm text-muted'>Đang tải...</p>
+      <div className='bg-base flex min-h-screen items-center justify-center'>
+        <p className='text-muted text-sm'>Đang tải...</p>
       </div>
     )
   }

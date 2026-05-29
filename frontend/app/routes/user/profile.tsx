@@ -5,5 +5,10 @@ export function meta() {
 }
 
 export default function UserProfilePage() {
-  return <DashboardPage description='Cập nhật thông tin cá nhân và mục tiêu học tập.' title='Hồ sơ học viên' />
+  return (
+    <DashboardPage
+      description='Cập nhật thông tin cá nhân và mục tiêu học tập.'
+      title='Hồ sơ học viên'
+    />
+  )
 }

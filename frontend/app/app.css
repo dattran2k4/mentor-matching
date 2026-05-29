@@ -1,14 +1,15 @@
 @import 'tailwindcss';
 
 @theme {
-  --font-sans: 'Inter', 'Outfit', ui-sans-serif, system-ui, sans-serif,
-    'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+  --font-sans:
+    'Inter', 'Outfit', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
+    'Segoe UI Symbol', 'Noto Color Emoji';
 
   --color-primary: #3b82f6; /* Modern Blue */
   --color-primary-dark: #2563eb;
   --color-primary-light: #60a5fa;
   --color-secondary: #8b5cf6; /* Vibrant Purple */
-  
+
   --color-base: #f8fafc;
   --color-surface: #ffffff;
   --color-ink: #0f172a;
@@ -20,7 +21,7 @@
   --shadow-soft: 0 4px 20px -2px rgba(15, 23, 42, 0.05);
   --shadow-lift: 0 20px 40px -10px rgba(37, 99, 235, 0.15);
   --shadow-glow: 0 0 30px -5px rgba(59, 130, 246, 0.3);
-  
+
   --radius-xl: 1rem;
   --radius-2xl: 1.5rem;
   --radius-3xl: 2rem;
@@ -36,8 +37,8 @@ html {
 }
 
 body {
-  @apply bg-base font-sans text-ink antialiased selection:bg-primary/20 selection:text-primary-dark overflow-x-hidden;
-  
+  @apply bg-base text-ink selection:bg-primary/20 selection:text-primary-dark overflow-x-hidden font-sans antialiased;
+
   @media (prefers-color-scheme: dark) {
     color-scheme: light;
   }
@@ -49,19 +50,24 @@ a {
 }
 
 @layer base {
-  h1, h2, h3, h4, h5, h6 {
-    @apply font-display tracking-tight text-ink;
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    @apply font-display text-ink tracking-tight;
   }
 }
 
 @layer utilities {
   .glass-panel {
-    @apply bg-white/70 backdrop-blur-md border border-white/40 shadow-soft;
+    @apply shadow-soft border border-white/40 bg-white/70 backdrop-blur-md;
   }
   .card-hover {
-    @apply transition-all duration-300 hover:-translate-y-1 hover:shadow-lift hover:border-primary/20;
+    @apply hover:shadow-lift hover:border-primary/20 transition-all duration-300 hover:-translate-y-1;
   }
   .text-gradient {
-    @apply bg-clip-text text-transparent bg-gradient-to-r from-primary to-secondary;
+    @apply from-primary to-secondary bg-gradient-to-r bg-clip-text text-transparent;
   }
 }

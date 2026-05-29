@@ -34,14 +34,21 @@ export function DashboardShell({
   const linkClass = ({ isActive }: { isActive: boolean }) =>
     clsx(
       'flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition',
-      isActive ? 'bg-white text-primary shadow-soft' : 'text-slate-600 hover:bg-white/70 hover:text-ink'
+      isActive
+        ? 'bg-white text-primary shadow-soft'
+        : 'text-slate-600 hover:bg-white/70 hover:text-ink'
     )
 
   const sidebar = (
-    <aside className='flex h-full flex-col border-r border-line bg-white'>
-      <div className='border-b border-line px-5 py-5'>
+    <aside className='border-line flex h-full flex-col border-r bg-white'>
+      <div className='border-line border-b px-5 py-5'>
         <Link className='block' to={brandHref} onClick={() => setSidebarOpen(false)}>
-          <span className={clsx('inline-block rounded-md px-2 py-1 text-xs font-bold uppercase tracking-wide text-white', accentClass)}>
+          <span
+            className={clsx(
+              'inline-block rounded-md px-2 py-1 text-xs font-bold tracking-wide text-white uppercase',
+              accentClass
+            )}
+          >
             {brandLabel}
           </span>
         </Link>
@@ -62,11 +69,17 @@ export function DashboardShell({
         ))}
       </nav>
 
-      <div className='space-y-2 border-t border-line px-4 py-4'>
-        <Link className='block text-sm font-medium text-slate-500 transition hover:text-primary' to={path.discover}>
+      <div className='border-line space-y-2 border-t px-4 py-4'>
+        <Link
+          className='hover:text-primary block text-sm font-medium text-slate-500 transition'
+          to={path.discover}
+        >
           Khám phá mentor
         </Link>
-        <Link className='block text-sm font-medium text-slate-500 transition hover:text-primary' to={homeLink}>
+        <Link
+          className='hover:text-primary block text-sm font-medium text-slate-500 transition'
+          to={homeLink}
+        >
           ← Về trang chủ
         </Link>
       </div>
@@ -74,11 +87,11 @@ export function DashboardShell({
   )
 
   return (
-    <div className='min-h-screen bg-base text-ink'>
+    <div className='bg-base text-ink min-h-screen'>
       {sidebarOpen && (
         <button
           aria-label='Đóng menu'
-          className='fixed inset-0 z-40 bg-ink/40 lg:hidden'
+          className='bg-ink/40 fixed inset-0 z-40 lg:hidden'
           type='button'
           onClick={() => setSidebarOpen(false)}
         />
@@ -87,7 +100,7 @@ export function DashboardShell({
       <div className='flex min-h-screen'>
         <div
           className={clsx(
-            'fixed inset-y-0 left-0 z-50 w-64 -translate-x-full transition-transform lg:static lg:translate-x-0 lg:shrink-0',
+            'fixed inset-y-0 left-0 z-50 w-64 -translate-x-full transition-transform lg:static lg:shrink-0 lg:translate-x-0',
             sidebarOpen && 'translate-x-0'
           )}
         >
@@ -95,28 +108,31 @@ export function DashboardShell({
         </div>
 
         <div className='min-w-0 flex-1'>
-          <header className='sticky top-0 z-30 flex items-center justify-between border-b border-line bg-white/90 px-4 py-3 backdrop-blur md:px-8'>
+          <header className='border-line sticky top-0 z-30 flex items-center justify-between border-b bg-white/90 px-4 py-3 backdrop-blur md:px-8'>
             <button
-              className='flex h-10 w-10 items-center justify-center rounded-lg border border-line text-slate-600 lg:hidden'
+              className='border-line flex h-10 w-10 items-center justify-center rounded-lg border text-slate-600 lg:hidden'
               type='button'
               onClick={() => setSidebarOpen(true)}
             >
               <Menu size={18} />
             </button>
 
-            <Link className='hidden text-sm font-medium text-muted transition hover:text-primary md:block' to={path.discover}>
+            <Link
+              className='text-muted hover:text-primary hidden text-sm font-medium transition md:block'
+              to={path.discover}
+            >
               Khám phá mentor
             </Link>
 
             <div className='flex items-center gap-2'>
               <Link
-                className='hidden rounded-full border border-line px-3 py-2 text-sm font-medium text-slate-600 transition hover:text-primary sm:inline-flex'
+                className='border-line hover:text-primary hidden rounded-full border px-3 py-2 text-sm font-medium text-slate-600 transition sm:inline-flex'
                 to={homeLink}
               >
                 Trang chủ
               </Link>
               <button
-                className='inline-flex items-center gap-1 rounded-full border border-line px-3 py-2 text-sm font-medium text-slate-600 transition hover:text-ink'
+                className='border-line hover:text-ink inline-flex items-center gap-1 rounded-full border px-3 py-2 text-sm font-medium text-slate-600 transition'
                 type='button'
                 onClick={handleLogout}
               >
@@ -127,7 +143,7 @@ export function DashboardShell({
 
             {sidebarOpen && (
               <button
-                className='absolute right-4 top-3 flex h-10 w-10 items-center justify-center rounded-lg border border-line lg:hidden'
+                className='border-line absolute top-3 right-4 flex h-10 w-10 items-center justify-center rounded-lg border lg:hidden'
                 type='button'
                 onClick={() => setSidebarOpen(false)}
               >
