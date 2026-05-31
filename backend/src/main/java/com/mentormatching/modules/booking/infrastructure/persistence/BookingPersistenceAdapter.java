@@ -12,6 +12,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Component;
 
 import com.mentormatching.modules.booking.application.dto.GetBookingsQuery;
+import com.mentormatching.modules.booking.application.dto.GetMentorBookingsQuery;
 import com.mentormatching.modules.booking.application.dto.GetMyBookingsQuery;
 import com.mentormatching.modules.booking.application.port.out.BookingRepositoryPort;
 import com.mentormatching.modules.booking.domain.Booking;
@@ -64,6 +65,15 @@ public class BookingPersistenceAdapter implements BookingRepositoryPort {
                 SORTABLE_FIELDS);
         Specification<BookingJpaEntity> specification = BookingSpecification.filterMyBookings(query.studentUserId(),
                 query.status(), query.meetingType());
+        return toPageResponse(bookingJpaRepository.findAll(specification, pageable));
+    }
+
+    @Override
+    public PageResponse<Booking> findMentorBookings(Long mentorId, GetMentorBookingsQuery query) {
+        Pageable pageable = PageableUtils.buildPageable(query.page(), query.size(), query.sortBy(), query.sortDir(),
+                SORTABLE_FIELDS);
+        Specification<BookingJpaEntity> specification = BookingSpecification.filterMentorBookings(mentorId,
+                query.status(), query.meetingType(), query.bookingDateFrom(), query.bookingDateTo());
         return toPageResponse(bookingJpaRepository.findAll(specification, pageable));
     }
 
