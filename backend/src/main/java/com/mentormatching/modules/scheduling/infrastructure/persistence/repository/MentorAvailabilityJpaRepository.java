@@ -11,5 +11,7 @@ public interface MentorAvailabilityJpaRepository extends JpaRepository<MentorAva
 
     List<MentorAvailabilityJpaEntity> findByMentorId(Long mentorId);
 
+    List<MentorAvailabilityJpaEntity> findByMentorIdOrderByAvailabilityTypeAscDayOfWeekAscAvailableDateAscStartTimeAsc(Long mentorId);
+
     List<MentorAvailabilityJpaEntity> findByAvailabilityType(AvailabilityType availabilityType);
 }

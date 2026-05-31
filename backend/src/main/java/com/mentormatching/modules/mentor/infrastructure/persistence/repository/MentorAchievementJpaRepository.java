@@ -9,4 +9,6 @@ import com.mentormatching.modules.mentor.infrastructure.persistence.entity.Mento
 public interface MentorAchievementJpaRepository extends JpaRepository<MentorAchievementJpaEntity, Long> {
 
     List<MentorAchievementJpaEntity> findByMentorId(Long mentorId);
+
+    List<MentorAchievementJpaEntity> findByMentorIdOrderByAchievedAtDescIdDesc(Long mentorId);
 }
