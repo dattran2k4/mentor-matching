@@ -1,0 +1,48 @@
+import {
+  Calendar,
+  Heart,
+  LayoutDashboard,
+  MessageSquare,
+  Settings,
+  Users,
+  UserCircle,
+  BookOpen,
+  DollarSign,
+  BarChart3,
+  Shield,
+  GraduationCap
+} from 'lucide-react'
+import type { LucideIcon } from 'lucide-react'
+
+import { path } from '@/config/path'
+
+export type DashboardNavItem = {
+  label: string
+  to: string
+  icon: LucideIcon
+  end?: boolean
+}
+
+export const userNavItems: DashboardNavItem[] = [
+  { label: 'Tổng quan', to: path.user.root, icon: LayoutDashboard, end: true },
+  { label: 'Lịch học', to: path.user.bookings, icon: Calendar },
+  { label: 'Yêu thích', to: path.user.favorites, icon: Heart },
+  { label: 'Tin nhắn', to: path.user.messages, icon: MessageSquare },
+  { label: 'Hồ sơ', to: path.user.profile, icon: UserCircle }
+]
+
+export const mentorNavItems: DashboardNavItem[] = [
+  { label: 'Tổng quan', to: path.mentorPanel.root, icon: LayoutDashboard, end: true },
+  { label: 'Lịch dạy', to: path.mentorPanel.schedule, icon: Calendar },
+  { label: 'Học viên', to: path.mentorPanel.students, icon: GraduationCap },
+  { label: 'Thu nhập', to: path.mentorPanel.earnings, icon: DollarSign },
+  { label: 'Hồ sơ mentor', to: path.mentorPanel.profile, icon: BookOpen }
+]
+
+export const adminNavItems: DashboardNavItem[] = [
+  { label: 'Tổng quan', to: path.admin.root, icon: LayoutDashboard, end: true },
+  { label: 'Người dùng', to: path.admin.users, icon: Users },
+  { label: 'Mentor', to: path.admin.mentors, icon: Shield },
+  { label: 'Báo cáo', to: path.admin.reports, icon: BarChart3 },
+  { label: 'Cài đặt', to: path.admin.settings, icon: Settings }
+]

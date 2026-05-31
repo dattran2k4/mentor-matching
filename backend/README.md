@@ -117,6 +117,19 @@ Booking:
 - `POST /api/v1/bookings`
 - `GET /api/v1/bookings/me`
 
+### Dev test accounts (profile `dev`)
+
+Seeded on startup by `UserDataSeeder`. Password for all accounts: **`123456`**
+
+| Role | Email | Dashboard (frontend) |
+|------|-------|----------------------|
+| Học viên (LEARNER) | `learner@test.com` | `/user` |
+| Mentor | `mentor@test.com` | `/mentor-panel` |
+| Admin | `admin@test.com` | `/admin` |
+
+Restart the backend after pulling changes so passwords are reset for these emails.
+
+## 8. Run with Docker Compose
 ## Docker Compose
 
 ```bash
