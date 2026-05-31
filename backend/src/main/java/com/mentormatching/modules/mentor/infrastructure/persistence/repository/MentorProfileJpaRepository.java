@@ -19,6 +19,8 @@ public interface MentorProfileJpaRepository extends JpaRepository<MentorProfileJ
 
     boolean existsByUserId(Long userId);
 
+    boolean existsByIdAndApprovalStatus(Long id, MentorApprovalStatus approvalStatus);
+
     @Query("""
             select mentor.id as id,
                    mentor.userId as userId,
@@ -56,5 +58,38 @@ public interface MentorProfileJpaRepository extends JpaRepository<MentorProfileJ
                                                        @Param("cityId") Long cityId,
                                                        @Param("districtId") Long districtId,
                                                        Pageable pageable);
-}
 
+    @Query("""
+            select mentor.id as id,
+                   mentor.userId as userId,
+                   user.fullName as fullName,
+                   mentor.avatarUrl as avatarUrl,
+                   mentor.gender as gender,
+                   mentor.hometownCityId as hometownCityId,
+                   hometownCity.name as hometownCityName,
+                   currentCity.id as currentCityId,
+                   currentCity.name as currentCityName,
+                   mentor.currentDistrictId as currentDistrictId,
+                   currentDistrict.name as currentDistrictName,
+                   mentor.headline as headline,
+                   mentor.introduction as introduction,
+                   mentor.teachingStyle as teachingStyle,
+                   mentor.experienceYears as experienceYears,
+                   mentor.currentPosition as currentPosition,
+                   mentor.workplace as workplace,
+                   mentor.education as education,
+                   mentor.major as major,
+                   mentor.meetingType as meetingType,
+                   mentor.createdAt as createdAt,
+                   mentor.updatedAt as updatedAt
+            from MentorProfileJpaEntity mentor
+            join UserJpaEntity user on user.id = mentor.userId
+            left join CityJpaEntity hometownCity on hometownCity.id = mentor.hometownCityId
+            left join DistrictJpaEntity currentDistrict on currentDistrict.id = mentor.currentDistrictId
+            left join CityJpaEntity currentCity on currentCity.id = currentDistrict.cityId
+            where mentor.id = :mentorId
+              and mentor.approvalStatus = :approvalStatus
+            """)
+    Optional<MentorDetailProjection> findApprovedMentorDetail(@Param("mentorId") Long mentorId,
+                                                             @Param("approvalStatus") MentorApprovalStatus approvalStatus);
+}
