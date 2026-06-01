@@ -1,5 +1,7 @@
 package com.mentormatching.modules.payment.application.service;
 
+import java.time.LocalDateTime;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -7,10 +9,12 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.mentormatching.modules.booking.domain.BookingStatus;
 import com.mentormatching.modules.payment.application.dto.CreatePaymentCommand;
+import com.mentormatching.modules.payment.application.dto.CheckoutSessionResult;
 import com.mentormatching.modules.payment.application.dto.PaymentBookingSnapshot;
 import com.mentormatching.modules.payment.application.dto.PaymentResult;
 import com.mentormatching.modules.payment.application.port.in.CreatePaymentUseCase;
 import com.mentormatching.modules.payment.application.port.out.PaymentBookingLookupPort;
+import com.mentormatching.modules.payment.application.port.out.PaymentCheckoutPort;
 import com.mentormatching.modules.payment.application.port.out.PaymentRepositoryPort;
 import com.mentormatching.modules.payment.domain.Payment;
 import com.mentormatching.modules.payment.domain.PaymentMethod;
@@ -25,11 +29,14 @@ public class PaymentService implements CreatePaymentUseCase {
 
     private final PaymentRepositoryPort paymentRepositoryPort;
     private final PaymentBookingLookupPort paymentBookingLookupPort;
+    private final PaymentCheckoutPort paymentCheckoutPort;
 
     public PaymentService(PaymentRepositoryPort paymentRepositoryPort,
-                          PaymentBookingLookupPort paymentBookingLookupPort) {
+                          PaymentBookingLookupPort paymentBookingLookupPort,
+                          PaymentCheckoutPort paymentCheckoutPort) {
         this.paymentRepositoryPort = paymentRepositoryPort;
         this.paymentBookingLookupPort = paymentBookingLookupPort;
+        this.paymentCheckoutPort = paymentCheckoutPort;
     }
 
     @Override
@@ -63,7 +70,7 @@ public class PaymentService implements CreatePaymentUseCase {
         if (payment.getStatus() == PaymentStatus.PENDING) {
             log.info("event=PAYMENT_REUSED paymentId={} bookingId={} payerUserId={} status={}",
                     payment.getId(), payment.getBookingId(), payment.getPayerUserId(), payment.getStatus());
-            return PaymentResult.from(payment);
+            return PaymentResult.from(ensureCheckoutSession(payment));
         }
         if (payment.getStatus() == PaymentStatus.PAID) {
             log.warn("event=PAYMENT_CREATE_REJECTED reason=PAYMENT_ALREADY_PAID paymentId={} bookingId={} payerUserId={}",
@@ -82,6 +89,29 @@ public class PaymentService implements CreatePaymentUseCase {
         log.info("event=PAYMENT_CREATED paymentId={} bookingId={} payerUserId={} amount={} status={}",
                 savedPayment.getId(), savedPayment.getBookingId(), savedPayment.getPayerUserId(),
                 savedPayment.getAmount(), savedPayment.getStatus());
-        return PaymentResult.from(savedPayment);
+        return PaymentResult.from(ensureCheckoutSession(savedPayment));
+    }
+
+    private Payment ensureCheckoutSession(Payment payment) {
+        if (hasReusableCheckoutSession(payment)) {
+            return payment;
+        }
+
+        CheckoutSessionResult checkoutSession = paymentCheckoutPort.createCheckoutSession(payment);
+        payment.attachCheckout(checkoutSession.providerReferenceId(), checkoutSession.checkoutUrl(),
+                checkoutSession.expiresAt());
+
+        Payment savedPayment = paymentRepositoryPort.save(payment);
+        log.info("event=PAYMENT_CHECKOUT_ATTACHED paymentId={} bookingId={} providerReferenceId={} expiresAt={}",
+                savedPayment.getId(), savedPayment.getBookingId(), savedPayment.getProviderReferenceId(),
+                savedPayment.getExpiresAt());
+        return savedPayment;
+    }
+
+    private boolean hasReusableCheckoutSession(Payment payment) {
+        return payment.getCheckoutUrl() != null
+                && !payment.getCheckoutUrl().isBlank()
+                && payment.getExpiresAt() != null
+                && payment.getExpiresAt().isAfter(LocalDateTime.now());
     }
 }

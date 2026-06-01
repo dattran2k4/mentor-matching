@@ -18,6 +18,7 @@ import com.mentormatching.modules.mentor.application.port.in.GetMentorAvailabili
 import com.mentormatching.modules.mentor.application.port.in.GetMentorDetailUseCase;
 import com.mentormatching.modules.mentor.application.port.in.GetMentorSubjectsUseCase;
 import com.mentormatching.modules.mentor.application.port.in.GetMentorSubjectSummaryUseCase;
+import com.mentormatching.modules.mentor.application.port.in.GetMentorSummaryByUserUseCase;
 import com.mentormatching.modules.mentor.application.port.in.GetMentorTraitsUseCase;
 import com.mentormatching.modules.mentor.application.port.in.GetMentorsUseCase;
 import com.mentormatching.modules.mentor.application.port.in.GetMentorSummaryUseCase;
@@ -32,7 +33,7 @@ import com.mentormatching.shared.response.PageResponse;
 @Service
 public class MentorQueryService implements GetMentorSummaryUseCase, GetMentorSubjectSummaryUseCase, GetMentorsUseCase,
         GetMentorDetailUseCase, GetMentorSubjectsUseCase, GetMentorTraitsUseCase, GetMentorAchievementsUseCase,
-        GetMentorAvailabilitiesUseCase {
+        GetMentorAvailabilitiesUseCase, GetMentorSummaryByUserUseCase {
 
     private final MentorProfileRepositoryPort mentorProfileRepositoryPort;
     private final MentorSubjectRepositoryPort mentorSubjectRepositoryPort;
@@ -84,6 +85,13 @@ public class MentorQueryService implements GetMentorSummaryUseCase, GetMentorSub
     @Override
     public MentorSummary getMentorSummary(Long mentorId) {
         MentorProfile mentor = mentorProfileRepositoryPort.findById(mentorId)
+                .orElseThrow(() -> new ResourceNotFoundException("Mentor profile not found"));
+        return new MentorSummary(mentor.getId(), mentor.getUserId(), mentor.getMeetingType());
+    }
+
+    @Override
+    public MentorSummary getMentorSummaryByUserId(Long userId) {
+        MentorProfile mentor = mentorProfileRepositoryPort.findByUserId(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("Mentor profile not found"));
         return new MentorSummary(mentor.getId(), mentor.getUserId(), mentor.getMeetingType());
     }

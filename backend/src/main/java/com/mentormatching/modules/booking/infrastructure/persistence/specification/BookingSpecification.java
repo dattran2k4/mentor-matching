@@ -76,6 +76,37 @@ public final class BookingSpecification {
         };
     }
 
+    public static Specification<BookingJpaEntity> filterMentorBookings(Long mentorId, BookingStatus status,
+                                                                       BookingMeetingType meetingType,
+                                                                       LocalDate bookingDateFrom,
+                                                                       LocalDate bookingDateTo) {
+        return (root, query, criteriaBuilder) -> {
+            Predicate predicate = criteriaBuilder.conjunction();
+
+            predicate = criteriaBuilder.and(predicate, criteriaBuilder.equal(root.get("mentorId"), mentorId));
+
+            if (status != null) {
+                predicate = criteriaBuilder.and(predicate, criteriaBuilder.equal(root.get("status"), status));
+            }
+
+            if (meetingType != null) {
+                predicate = criteriaBuilder.and(predicate, criteriaBuilder.equal(root.get("meetingType"), meetingType));
+            }
+
+            if (bookingDateFrom != null) {
+                predicate = criteriaBuilder.and(predicate,
+                        criteriaBuilder.greaterThanOrEqualTo(root.get("bookingDate"), bookingDateFrom));
+            }
+
+            if (bookingDateTo != null) {
+                predicate = criteriaBuilder.and(predicate,
+                        criteriaBuilder.lessThanOrEqualTo(root.get("bookingDate"), bookingDateTo));
+            }
+
+            return predicate;
+        };
+    }
+
     private static String containsPattern(String value) {
         return "%" + value.trim().toLowerCase() + "%";
     }
