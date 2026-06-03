@@ -15,6 +15,7 @@ import com.mentormatching.modules.payment.application.dto.PaymentBookingSnapshot
 import com.mentormatching.modules.payment.application.dto.PaymentResult;
 import com.mentormatching.modules.payment.application.port.in.CreatePaymentUseCase;
 import com.mentormatching.modules.payment.application.port.in.HandleStripeWebhookUseCase;
+import com.mentormatching.modules.payment.application.port.out.BookingConfirmationPort;
 import com.mentormatching.modules.payment.application.port.out.PaymentBookingLookupPort;
 import com.mentormatching.modules.payment.application.port.out.PaymentCheckoutPort;
 import com.mentormatching.modules.payment.application.port.out.PaymentRepositoryPort;
@@ -33,13 +34,16 @@ public class PaymentService implements CreatePaymentUseCase, HandleStripeWebhook
     private final PaymentRepositoryPort paymentRepositoryPort;
     private final PaymentBookingLookupPort paymentBookingLookupPort;
     private final PaymentCheckoutPort paymentCheckoutPort;
+    private final BookingConfirmationPort bookingConfirmationPort;
 
     public PaymentService(PaymentRepositoryPort paymentRepositoryPort,
                           PaymentBookingLookupPort paymentBookingLookupPort,
-                          PaymentCheckoutPort paymentCheckoutPort) {
+                          PaymentCheckoutPort paymentCheckoutPort,
+                          BookingConfirmationPort bookingConfirmationPort) {
         this.paymentRepositoryPort = paymentRepositoryPort;
         this.paymentBookingLookupPort = paymentBookingLookupPort;
         this.paymentCheckoutPort = paymentCheckoutPort;
+        this.bookingConfirmationPort = bookingConfirmationPort;
     }
 
     @Override
@@ -108,6 +112,9 @@ public class PaymentService implements CreatePaymentUseCase, HandleStripeWebhook
                 .orElseThrow(() -> new ResourceNotFoundException("Payment not found"));
         payment.markPaid(command.providerTransactionId());
         Payment savedPayment = paymentRepositoryPort.save(payment);
+
+        //Booking status change to confirmed
+        bookingConfirmationPort.confirmBooking(savedPayment.getBookingId());
 
         log.info("event=PAYMENT_MARKED_PAID paymentId={} bookingId={} providerReferenceId={} providerTransactionId={} status={}",
                 savedPayment.getId(), savedPayment.getBookingId(), savedPayment.getProviderReferenceId(),
