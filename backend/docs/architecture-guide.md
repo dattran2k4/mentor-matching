@@ -66,6 +66,9 @@ Application should work with domain objects and application DTOs, not JPA entiti
 
 Spring annotations such as `@Service` and `@Transactional` are currently accepted in application services for pragmatic MVP speed.
 
+Application services should use explicit constructors for dependency injection. Do not use Lombok
+`@RequiredArgsConstructor` in the application layer.
+
 ## Infrastructure Layer
 
 Infrastructure implements output ports and technical integrations.
@@ -86,6 +89,7 @@ Rules:
 - Spring Data repositories stay in infrastructure.
 - Persistence mappers convert JPA entities to domain objects and back.
 - External providers such as Stripe belong in infrastructure.
+- Lombok `@RequiredArgsConstructor` is allowed in infrastructure adapters.
 
 ## Presentation Layer
 

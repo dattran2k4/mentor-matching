@@ -1,6 +1,5 @@
 package com.mentormatching.modules.user.application.service;
 
-import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -14,11 +13,15 @@ import com.mentormatching.shared.exception.InvalidDataException;
 import com.mentormatching.shared.exception.ResourceNotFoundException;
 
 @Service
-@RequiredArgsConstructor
 public class UserProfileService implements UpdateCurrentUserUseCase {
 
     private final UserReadPort userReadPort;
     private final UserRepositoryPort userRepositoryPort;
+
+    public UserProfileService(UserReadPort userReadPort, UserRepositoryPort userRepositoryPort) {
+        this.userReadPort = userReadPort;
+        this.userRepositoryPort = userRepositoryPort;
+    }
 
     @Override
     @Transactional

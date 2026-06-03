@@ -2,6 +2,7 @@ package com.mentormatching.modules.user.infrastructure.persistence;
 
 import java.util.Optional;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import com.mentormatching.modules.user.application.port.out.LearnerProfileRepositoryPort;
@@ -10,16 +11,11 @@ import com.mentormatching.modules.user.infrastructure.persistence.mapper.Learner
 import com.mentormatching.modules.user.infrastructure.persistence.repository.LearnerProfileJpaRepository;
 
 @Component
+@RequiredArgsConstructor
 public class LearnerProfilePersistenceAdapter implements LearnerProfileRepositoryPort {
 
     private final LearnerProfileJpaRepository learnerProfileJpaRepository;
     private final LearnerProfilePersistenceMapper learnerProfilePersistenceMapper;
-
-    public LearnerProfilePersistenceAdapter(LearnerProfileJpaRepository learnerProfileJpaRepository,
-                                            LearnerProfilePersistenceMapper learnerProfilePersistenceMapper) {
-        this.learnerProfileJpaRepository = learnerProfileJpaRepository;
-        this.learnerProfilePersistenceMapper = learnerProfilePersistenceMapper;
-    }
 
     @Override
     public LearnerProfile save(LearnerProfile learnerProfile) {
