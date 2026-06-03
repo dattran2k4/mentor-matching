@@ -1,23 +1,40 @@
 # Feature Workflow
 
-Use this checklist when implementing a new feature.
+Use this flow when implementing a backend feature.
 
-## 1. Start From Domain
+## 1. Clarify The Use Case
 
-Define or update the domain model first when business rules are important.
+Identify:
+
+- Actor and role
+- Endpoint, if HTTP-facing
+- Request data
+- Business rules
+- Data owned by this module
+- Data needed from other modules
+- Response shape
+
+If the user only asks for investigation, do not edit files.
+
+## 2. Start With Domain When Business Rules Exist
+
+Create or update domain behavior first when the feature has business meaning.
 
 Examples:
-- Booking date/time must be valid.
-- Refresh token must not be expired or revoked.
-- Notification can be marked as read.
 
-Keep framework annotations out of domain classes.
+- `Booking.create(...)` validates booking date/time and amount snapshots.
+- `Payment.markPaid(...)` validates valid status transition.
+- `RefreshToken.issue(...)` validates token expiration.
 
-## 2. Add Application Use Case
+Domain should not know HTTP, database, or Spring.
+
+## 3. Add Application DTOs And Input Port
+
+Create command/query/result records in `application/dto`.
 
 Create an input port in `application/port/in`.
 
-Example:
+Examples:
 
 ```java
 public interface CreateBookingUseCase {
@@ -25,83 +42,77 @@ public interface CreateBookingUseCase {
 }
 ```
 
-Create command/result DTOs in `application/dto` when needed.
-
-## 3. Add Output Ports
-
-If the use case needs persistence or another technical dependency, add a port in `application/port/out`.
-
-Example:
-
 ```java
-public interface BookingRepositoryPort {
-    Booking save(Booking booking);
+public interface GetMentorsUseCase {
+    PageResponse<MentorListItem> getMentors(GetMentorsQuery query);
 }
 ```
 
-Application services should depend on ports, not infrastructure classes.
+## 4. Add Output Ports
 
-## 4. Implement Application Service
+If the use case needs persistence or external data, add output ports in `application/port/out`.
 
-The service coordinates the use case:
+Examples:
 
-- Convert command to domain object.
-- Call domain behavior.
-- Use output ports.
-- Return result.
+- `BookingRepositoryPort`
+- `PaymentRepositoryPort`
+- `BookingUserLookupPort`
+- `PaymentCheckoutPort`
 
-Avoid putting HTTP request/response logic here.
+Use repository-style names for persistence ports when that is clearer.
 
-## 5. Add Infrastructure Adapter
+## 5. Implement Application Service
 
-Implement output ports under `infrastructure`.
+Application service should:
+
+- Validate use-case level rules.
+- Call lookup ports for data owned by other modules.
+- Create or update domain objects.
+- Save via repository ports.
+- Return result DTO or domain object depending on existing module convention.
+
+## 6. Implement Infrastructure
 
 For persistence:
 
-```text
-XxxJpaEntity
-XxxJpaRepository
-XxxPersistenceMapper
-XxxPersistenceAdapter
-```
+- Add/update `JpaEntity`.
+- Add/update Spring Data `JpaRepository`.
+- Add/update mapper.
+- Implement output port in adapter.
 
-Mapper converts between JPA entity and domain object.
+For external providers:
 
-## 6. Add Presentation Endpoint
+- Put SDK-specific code in infrastructure.
+- Map provider data to application commands or DTOs.
 
-Create controller and request/response DTOs.
+## 7. Add Presentation
 
-Request DTO should map to application command.
+Add or update controller, request DTO, and response DTO.
 
-Response DTO should own response mapping when practical, for example:
+Rules:
 
-```java
-public static BookingResponse from(Booking booking) {
-    ...
-}
-```
+- Controller maps request to command/query.
+- Controller calls input port.
+- Controller returns `ApiResponse` through `ApiResponseFactory`.
+- Keep mapping in request/response DTOs when practical.
 
-## 7. Validate
+## 8. Verify
 
-Use request validation for simple input shape:
-
-- Required fields
-- String length
-- Enum format
-- Basic numeric ranges
-
-Use domain validation for business invariants:
-
-- Booking time must be after now.
-- End time must be after start time.
-- Price must be positive.
-
-## 8. Test Before PR
-
-Run from backend folder:
+From `backend`:
 
 ```bash
 ./mvnw -q test
 ```
 
-If DB schema changed, mention it clearly in the PR.
+Also test endpoint manually with Postman/curl when the feature is HTTP-facing.
+
+## 9. Summarize For PR
+
+Mention:
+
+- Endpoint changes
+- Use cases added
+- Ports/adapters added
+- DB/Flyway changes
+- Manual test data
+- Known limitations
