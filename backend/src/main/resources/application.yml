@@ -51,6 +51,7 @@ app:
   stripe:
     secret-key: ${STRIPE_SECRET_KEY:}
     webhook-secret: ${STRIPE_WEBHOOK_SECRET:}
+    currency: ${STRIPE_CURRENCY:vnd}
     success-url: ${STRIPE_SUCCESS_URL:http://localhost:5173/payment/success}
     cancel-url: ${STRIPE_CANCEL_URL:http://localhost:5173/payment/cancel}
 

@@ -76,6 +76,17 @@ public class Booking {
                 data.meetingType(), null, null, BookingStatus.PENDING, data.note(), null, null, now, now));
     }
 
+    public void confirm() {
+        if (status == BookingStatus.CONFIRMED) {
+            return;
+        }
+        if (status != BookingStatus.PENDING) {
+            throw new InvalidDataException("Only pending booking can be confirmed");
+        }
+        this.status = BookingStatus.CONFIRMED;
+        touch();
+    }
+
     public Long getId() {
         return id;
     }
@@ -212,5 +223,9 @@ public class Booking {
         if (value == null) {
             throw new InvalidDataException(message);
         }
+    }
+
+    private void touch() {
+        updatedAt = LocalDateTime.now();
     }
 }

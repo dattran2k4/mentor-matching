@@ -1,5 +1,6 @@
 package com.mentormatching.modules.booking.application.service;
 
+import java.time.LocalDate;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
@@ -11,10 +12,12 @@ import com.mentormatching.modules.booking.application.dto.BookingMentorSnapshot;
 import com.mentormatching.modules.booking.application.dto.BookingUserSnapshot;
 import com.mentormatching.modules.booking.application.dto.CreateBookingCommand;
 import com.mentormatching.modules.booking.application.dto.GetBookingsQuery;
+import com.mentormatching.modules.booking.application.dto.GetMentorBookingsQuery;
 import com.mentormatching.modules.booking.application.dto.GetMyBookingsQuery;
 import com.mentormatching.modules.booking.application.port.in.CreateBookingUseCase;
 import com.mentormatching.modules.booking.application.port.in.GetBookingPaymentSummaryUseCase;
 import com.mentormatching.modules.booking.application.port.in.GetBookingsUseCase;
+import com.mentormatching.modules.booking.application.port.in.GetMentorBookingsUseCase;
 import com.mentormatching.modules.booking.application.port.in.GetMyBookingsUseCase;
 import com.mentormatching.modules.booking.application.port.out.BookingAvailabilityLookupPort;
 import com.mentormatching.modules.booking.application.port.out.BookingMentorLookupPort;
@@ -31,7 +34,8 @@ import com.mentormatching.shared.exception.ResourceNotFoundException;
 import com.mentormatching.shared.response.PageResponse;
 
 @Service
-public class BookingService implements CreateBookingUseCase, GetBookingPaymentSummaryUseCase, GetBookingsUseCase, GetMyBookingsUseCase {
+public class BookingService implements CreateBookingUseCase, GetBookingPaymentSummaryUseCase, GetBookingsUseCase,
+        GetMyBookingsUseCase, GetMentorBookingsUseCase {
 
     private static final List<BookingStatus> SCHEDULE_BLOCKING_STATUSES = List.of(BookingStatus.PENDING,
             BookingStatus.CONFIRMED);
@@ -91,13 +95,27 @@ public class BookingService implements CreateBookingUseCase, GetBookingPaymentSu
     }
 
     @Override
+    @Transactional(readOnly = true)
     public PageResponse<Booking> getMyBookings(GetMyBookingsQuery query) {
         return bookingRepositoryPort.findMyBookings(query);
     }
 
+    @Override
+    @Transactional(readOnly = true)
+    public PageResponse<Booking> getMentorBookings(GetMentorBookingsQuery query) {
+        validateBookingDateRange(query.bookingDateFrom(), query.bookingDateTo());
+
+        // lấy mentor profile id từ user id
+        BookingMentorSnapshot mentor = bookingMentorLookupPort.getMentorSnapshotByUserId(query.mentorUserId());
+        return bookingRepositoryPort.findMentorBookings(mentor.mentorId(), query);
+    }
+
     private void validateBookingDateRange(GetBookingsQuery query) {
-        if (query.bookingDateFrom() != null && query.bookingDateTo() != null
-                && query.bookingDateFrom().isAfter(query.bookingDateTo())) {
+        validateBookingDateRange(query.bookingDateFrom(), query.bookingDateTo());
+    }
+
+    private void validateBookingDateRange(LocalDate bookingDateFrom, LocalDate bookingDateTo) {
+        if (bookingDateFrom != null && bookingDateTo != null && bookingDateFrom.isAfter(bookingDateTo)) {
             throw new InvalidDataException("Booking date from must not be after booking date to");
         }
     }
@@ -136,4 +154,3 @@ public class BookingService implements CreateBookingUseCase, GetBookingPaymentSu
         }
     }
 }
-

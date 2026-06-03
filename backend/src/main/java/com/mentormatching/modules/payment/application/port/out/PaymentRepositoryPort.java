@@ -14,6 +14,8 @@ public interface PaymentRepositoryPort {
 
     Optional<Payment> findByBookingId(Long bookingId);
 
+    Optional<Payment> findByProviderReferenceId(String providerReferenceId);
+
     List<Payment> findByPayerUserId(Long payerUserId);
 
     List<Payment> findByStatus(PaymentStatus status);

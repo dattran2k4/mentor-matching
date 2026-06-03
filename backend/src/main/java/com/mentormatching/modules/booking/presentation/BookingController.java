@@ -20,9 +20,11 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.mentormatching.modules.booking.application.dto.GetBookingsQuery;
+import com.mentormatching.modules.booking.application.dto.GetMentorBookingsQuery;
 import com.mentormatching.modules.booking.application.dto.GetMyBookingsQuery;
 import com.mentormatching.modules.booking.application.port.in.CreateBookingUseCase;
 import com.mentormatching.modules.booking.application.port.in.GetBookingsUseCase;
+import com.mentormatching.modules.booking.application.port.in.GetMentorBookingsUseCase;
 import com.mentormatching.modules.booking.application.port.in.GetMyBookingsUseCase;
 import com.mentormatching.modules.booking.domain.Booking;
 import com.mentormatching.modules.booking.domain.BookingMeetingType;
@@ -48,6 +50,7 @@ public class BookingController {
     private final CreateBookingUseCase createBookingUseCase;
     private final GetBookingsUseCase getBookingsUseCase;
     private final GetMyBookingsUseCase getMyBookingsUseCase;
+    private final GetMentorBookingsUseCase getMentorBookingsUseCase;
     private final ApiResponseFactory apiResponseFactory;
 
     @PostMapping
@@ -87,5 +90,21 @@ public class BookingController {
         PageResponse<Booking> bookings = getMyBookingsUseCase.getMyBookings(new GetMyBookingsQuery(
                 principal.getId(), page, size, sortBy, sortDir, status, meetingType));
         return apiResponseFactory.success(BookingResponse.from(bookings), "Get my bookings successfully");
+    }
+
+    @GetMapping("/mentor/me")
+    @PreAuthorize("hasRole('MENTOR')")
+    public ApiResponse<PageResponse<BookingResponse>> getMentorBookings(@AuthenticationPrincipal AuthenticatedPrincipal principal,
+                                                                        @RequestParam(defaultValue = DEFAULT_PAGE) @Min(1) int page,
+                                                                        @RequestParam(defaultValue = DEFAULT_SIZE) @Min(1) @Max(100) int size,
+                                                                        @RequestParam(defaultValue = DEFAULT_SORT_BY) String sortBy,
+                                                                        @RequestParam(defaultValue = DEFAULT_SORT_DIR) String sortDir,
+                                                                        @RequestParam(required = false) BookingStatus status,
+                                                                        @RequestParam(required = false) BookingMeetingType meetingType,
+                                                                        @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate bookingDateFrom,
+                                                                        @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate bookingDateTo) {
+        PageResponse<Booking> bookings = getMentorBookingsUseCase.getMentorBookings(new GetMentorBookingsQuery(
+                principal.getId(), page, size, sortBy, sortDir, status, meetingType, bookingDateFrom, bookingDateTo));
+        return apiResponseFactory.success(BookingResponse.from(bookings), "Get mentor bookings successfully");
     }
 }
