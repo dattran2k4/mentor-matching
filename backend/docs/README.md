@@ -1,33 +1,29 @@
-# Backend Team Docs
+# Backend Docs
 
-This folder contains short working notes for backend members. The goal is not to write perfect theory, but to keep the team aligned while the project is still evolving.
+These docs are intentionally short working notes for Codex threads and team members. They should reduce repeated context, not become a textbook.
 
-## Start Here
+## Recommended Reading By Task
 
-1. Read [Architecture Guide](./architecture-guide.md) before creating or changing a module.
-2. Read [Feature Workflow](./feature-workflow.md) before implementing a new endpoint/use case.
-3. Read [Database Notes](./database-notes.md) before changing DBML, JPA entities, or future Flyway migrations.
-4. Read [Team Conventions](./team-conventions.md) before opening a pull request.
+For any backend thread:
 
-## Current Direction
+1. Read `../../AGENTS.md`.
+2. Read `backend-context.md`.
+3. Read the focused doc for the task.
 
-The backend follows a feature-first modular monolith with Clean Architecture boundaries:
+## Files
 
-```text
-modules/{feature}
-├── domain
-├── application
-│   ├── dto
-│   ├── port
-│   │   ├── in
-│   │   └── out
-│   └── service
-├── infrastructure
-└── presentation
-```
+- `backend-context.md`: current backend stack, structure, and active direction.
+- `architecture-guide.md`: Clean Architecture and module boundary rules.
+- `feature-workflow.md`: recommended order for implementing features.
+- `database-notes.md`: DBML, Flyway, enum, and schema conventions.
+- `module-map.md`: current modules and implemented feature summary.
+- `payment-stripe.md`: Stripe Checkout and webhook context.
+- `team-conventions.md`: branch, commit, PR, and review conventions.
 
-Shared technical concerns live in `shared`, for example response, exception, security, validation, and config.
+## API Source Of Truth
+
+Endpoint details should come from controllers and Swagger UI, not from a manually maintained endpoint list. This keeps docs stable as features evolve.
 
 ## Important Reminder
 
-The database schema is still being discussed by the team. Avoid adding official Flyway migrations until core tables and enum values are more stable.
+If the user asks only for investigation, explanation, or advice, do not edit files. Editing is expected only when the user asks to implement, refactor, create, update, or fix.

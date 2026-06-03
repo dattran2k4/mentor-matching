@@ -1,23 +1,32 @@
 # Database Notes
 
-## Current Status
+## Current State
 
-The database schema is still being aligned with the team. Do not treat current tables as final until the DBML and business rules are reviewed.
+The project now uses Flyway migrations under:
 
-Important areas still under discussion:
+```text
+backend/src/main/resources/db/migration
+```
 
-- Flexible mentor availability instead of fixed time slots
-- Booking price snapshot and total amount calculation
-- Free trial sessions or discounted first sessions
-- Payment flow and provider integration
-- Notification API and delivery strategy
-- Future Flyway migration baseline
+Current migration pattern:
+
+- `V1__create_initial_schema.sql` creates the base schema.
+- Later migrations seed base/demo data or evolve tables.
+- Test profile disables Flyway and uses H2 `ddl-auto=create-drop`.
+
+## Flyway Rules
+
+- Do not edit a migration that has already been applied by teammates unless the team explicitly agrees to reset dev databases.
+- Add a new `V{n}__description.sql` for schema changes after shared migrations exist.
+- Keep migration names clear and lowercase with underscores.
+- Application migrations should not create the database itself. The database should be created by Docker/init script/DBA/local setup.
+- Prefer table-level charset/collation if the team wants schema portability across inconsistent MySQL defaults.
 
 ## Enum Style
 
-Java uses `@Enumerated(EnumType.STRING)`, so DB enum values should use uppercase names.
+Java uses `@Enumerated(EnumType.STRING)`, so DB values should match Java enum names.
 
-Good:
+Use uppercase values:
 
 ```text
 PENDING
@@ -25,21 +34,28 @@ CONFIRMED
 COMPLETED
 ```
 
-Avoid:
+Avoid lowercase values unless Java enum mapping is intentionally changed.
 
-```text
-pending
-confirmed
-completed
-```
+## Current Main Tables
 
-This keeps DBML, Java enums, and API values consistent.
+Core groups:
+
+- Auth: `auth_refresh_tokens`
+- User: `users`, `learner_profiles`
+- Location: `cities`, `districts`
+- Catalog: `categories`, `subjects`, `grades`, `subject_grades`
+- Mentor: `mentor_profiles`, `mentor_verifications`, `mentor_subjects`, achievements, traits, highlights
+- Scheduling: `mentor_availabilities`
+- Booking: `bookings`
+- Payment: `payments`
+- Review: `reviews`, review tags/options
+- Notification: `notifications`
 
 ## Snapshot Data
 
-Some modules should store denormalized snapshot fields.
+Bookings store historical snapshots because booking is a transaction record.
 
-Booking should store snapshot fields because it represents a historical transaction:
+Booking snapshot examples:
 
 - `student_name`
 - `mentor_name`
@@ -50,15 +66,13 @@ Booking should store snapshot fields because it represents a historical transact
 - `start_time`
 - `end_time`
 
-Profile tables usually should not store snapshot names unless there is a clear query/performance reason.
+Do not rely on live profile/catalog data to reconstruct old booking price or names.
 
-Example: `learner_profiles` can keep only `grade_id`, and the API can enrich `grade.name` from catalog when needed.
+## Availability Direction
 
-## Flexible Availability Direction
+The project moved away from fixed `time_slots`.
 
-Prefer flexible availability windows over fixed time slots.
-
-Recommended direction:
+Current direction:
 
 ```text
 mentor_availabilities
@@ -68,44 +82,28 @@ mentor_availabilities
 - available_date, used for SPECIFIC_DATE
 - start_time
 - end_time
-- is_active
+- created_at
+- updated_at
 ```
 
-Booking should store actual booked time:
+Booking stores actual booked time:
 
 ```text
 booking_date
 start_time
 end_time
-mentor_availability_id
 ```
 
-This allows bookings like `05:30-07:00` or `18:15-19:45` if business rules allow it.
+Booking does not need `time_slot_id`.
 
-## Flyway Timing
+## Payment Provider Tracking
 
-Do not create official Flyway migrations while core schema is still moving quickly.
+Payments include provider tracking fields for Stripe and future providers:
 
-Add Flyway when:
+- `provider_reference_id`: Stripe Checkout Session id for Stripe Checkout
+- `provider_transaction_id`: Stripe PaymentIntent id after successful payment
+- `checkout_url`
+- `expires_at`
+- `failure_reason`
 
-- DBML is stable enough for team development.
-- Main enum values are agreed.
-- Booking/payment pricing rules are agreed.
-- Mentor availability model is agreed.
-- Team needs repeatable schema setup across machines.
-
-For Spring Boot 4 with MySQL, expected dependencies are:
-
-```xml
-<dependency>
-    <groupId>org.springframework.boot</groupId>
-    <artifactId>spring-boot-starter-flyway</artifactId>
-</dependency>
-
-<dependency>
-    <groupId>org.flywaydb</groupId>
-    <artifactId>flyway-mysql</artifactId>
-</dependency>
-```
-
-Until Flyway is enabled, development may continue with Hibernate `ddl-auto=update`, but schema-changing PRs must describe the DB impact clearly.
+Future providers may map these fields differently, but keep names provider-neutral.
