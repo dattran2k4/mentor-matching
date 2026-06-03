@@ -39,6 +39,12 @@ public class PaymentPersistenceAdapter implements PaymentRepositoryPort {
     }
 
     @Override
+    public Optional<Payment> findByProviderReferenceId(String providerReferenceId) {
+        return paymentJpaRepository.findByProviderReferenceId(providerReferenceId)
+                .map(paymentPersistenceMapper::toDomain);
+    }
+
+    @Override
     public List<Payment> findByPayerUserId(Long payerUserId) {
         return paymentJpaRepository.findByPayerUserId(payerUserId).stream().map(paymentPersistenceMapper::toDomain).toList();
     }

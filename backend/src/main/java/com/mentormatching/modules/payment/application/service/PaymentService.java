@@ -10,9 +10,11 @@ import org.springframework.transaction.annotation.Transactional;
 import com.mentormatching.modules.booking.domain.BookingStatus;
 import com.mentormatching.modules.payment.application.dto.CreatePaymentCommand;
 import com.mentormatching.modules.payment.application.dto.CheckoutSessionResult;
+import com.mentormatching.modules.payment.application.dto.HandleStripeWebhookCommand;
 import com.mentormatching.modules.payment.application.dto.PaymentBookingSnapshot;
 import com.mentormatching.modules.payment.application.dto.PaymentResult;
 import com.mentormatching.modules.payment.application.port.in.CreatePaymentUseCase;
+import com.mentormatching.modules.payment.application.port.in.HandleStripeWebhookUseCase;
 import com.mentormatching.modules.payment.application.port.out.PaymentBookingLookupPort;
 import com.mentormatching.modules.payment.application.port.out.PaymentCheckoutPort;
 import com.mentormatching.modules.payment.application.port.out.PaymentRepositoryPort;
@@ -21,9 +23,10 @@ import com.mentormatching.modules.payment.domain.PaymentMethod;
 import com.mentormatching.modules.payment.domain.PaymentProvider;
 import com.mentormatching.modules.payment.domain.PaymentStatus;
 import com.mentormatching.shared.exception.InvalidDataException;
+import com.mentormatching.shared.exception.ResourceNotFoundException;
 
 @Service
-public class PaymentService implements CreatePaymentUseCase {
+public class PaymentService implements CreatePaymentUseCase, HandleStripeWebhookUseCase {
 
     private static final Logger log = LoggerFactory.getLogger(PaymentService.class);
 
@@ -53,6 +56,22 @@ public class PaymentService implements CreatePaymentUseCase {
                 .orElseGet(() -> createPendingPayment(command, booking));
     }
 
+    @Override
+    @Transactional
+    public void handleWebhookStripe(HandleStripeWebhookCommand command) {
+        log.info("event=STRIPE_WEBHOOK_RECEIVED stripeEventId={} stripeEventType={} providerReferenceId={} providerTransactionId={}",
+                command.eventId(), command.eventType(), command.providerReferenceId(),
+                command.providerTransactionId());
+
+        if (HandleStripeWebhookCommand.CHECKOUT_SESSION_COMPLETED.equals(command.eventType())) {
+            handleCheckoutSessionCompleted(command);
+            return;
+        }
+
+        log.info("event=STRIPE_WEBHOOK_IGNORED stripeEventId={} stripeEventType={}", command.eventId(),
+                command.eventType());
+    }
+
     private void validateBookingCanBePaid(CreatePaymentCommand command, PaymentBookingSnapshot booking) {
         if (!booking.studentUserId().equals(command.payerUserId())) {
             log.warn("event=PAYMENT_CREATE_REJECTED reason=BOOKING_OWNER_MISMATCH bookingId={} payerUserId={} bookingStudentUserId={}",
@@ -80,6 +99,28 @@ public class PaymentService implements CreatePaymentUseCase {
         log.warn("event=PAYMENT_CREATE_REJECTED reason=PAYMENT_NOT_REUSABLE paymentId={} bookingId={} payerUserId={} status={}",
                 payment.getId(), payment.getBookingId(), payment.getPayerUserId(), payment.getStatus());
         throw new InvalidDataException("Payment cannot be reused for this booking");
+    }
+
+    private void handleCheckoutSessionCompleted(HandleStripeWebhookCommand command) {
+        validateCheckoutCompletedCommand(command);
+
+        Payment payment = paymentRepositoryPort.findByProviderReferenceId(command.providerReferenceId())
+                .orElseThrow(() -> new ResourceNotFoundException("Payment not found"));
+        payment.markPaid(command.providerTransactionId());
+        Payment savedPayment = paymentRepositoryPort.save(payment);
+
+        log.info("event=PAYMENT_MARKED_PAID paymentId={} bookingId={} providerReferenceId={} providerTransactionId={} status={}",
+                savedPayment.getId(), savedPayment.getBookingId(), savedPayment.getProviderReferenceId(),
+                savedPayment.getProviderTransactionId(), savedPayment.getStatus());
+    }
+
+    private void validateCheckoutCompletedCommand(HandleStripeWebhookCommand command) {
+        if (command.providerReferenceId() == null || command.providerReferenceId().isBlank()) {
+            throw new InvalidDataException("Stripe checkout session id is required");
+        }
+        if (command.providerTransactionId() == null || command.providerTransactionId().isBlank()) {
+            throw new InvalidDataException("Stripe payment intent id is required");
+        }
     }
 
     private PaymentResult createPendingPayment(CreatePaymentCommand command, PaymentBookingSnapshot booking) {
