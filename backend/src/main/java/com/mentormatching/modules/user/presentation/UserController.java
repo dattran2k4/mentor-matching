@@ -1,25 +1,30 @@
 package com.mentormatching.modules.user.presentation;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import com.mentormatching.modules.user.application.port.in.GetCurrentUserUseCase;
+import com.mentormatching.modules.user.application.port.in.UpdateCurrentUserUseCase;
+import com.mentormatching.modules.user.presentation.dto.request.UpdateCurrentUserRequest;
 import com.mentormatching.modules.user.presentation.dto.response.CurrentUserResponse;
 import com.mentormatching.shared.response.ApiResponse;
 import com.mentormatching.shared.response.ApiResponseFactory;
 import com.mentormatching.shared.security.model.AuthenticatedPrincipal;
 
+import jakarta.validation.Valid;
+
 @RestController
 @RequiredArgsConstructor
+@Slf4j
 @RequestMapping("/api/v1/users")
 public class UserController {
 
     private final ApiResponseFactory apiResponseFactory;
     private final GetCurrentUserUseCase getCurrentUserUseCase;
+    private final UpdateCurrentUserUseCase updateCurrentUserUseCase;
 
     @GetMapping("/public-check")
     public ApiResponse<String> publicCheck() {
@@ -30,6 +35,13 @@ public class UserController {
     public ApiResponse<CurrentUserResponse> me(@AuthenticationPrincipal AuthenticatedPrincipal principal) {
         return apiResponseFactory.success(CurrentUserResponse.from(getCurrentUserUseCase.getCurrentUser(
                 principal.getId())));
+    }
+
+    @PutMapping("/me")
+    public ApiResponse<CurrentUserResponse> updateMe(@AuthenticationPrincipal AuthenticatedPrincipal principal,
+                                                     @Valid @RequestBody UpdateCurrentUserRequest request) {
+        return apiResponseFactory.success(CurrentUserResponse.from(updateCurrentUserUseCase.updateCurrentUser(
+                request.toCommand(principal))), "Update user profile successfully");
     }
 
     @GetMapping("/auth-check")

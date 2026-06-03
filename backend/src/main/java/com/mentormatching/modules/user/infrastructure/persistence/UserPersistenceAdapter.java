@@ -42,4 +42,9 @@ public class UserPersistenceAdapter implements UserRepositoryPort, UserReadPort 
     public boolean existsByPhone(String phone) {
         return userJpaRepository.existsByPhone(phone);
     }
+
+    @Override
+    public boolean existsByPhoneAndIdNot(String phone, Long id) {
+        return userJpaRepository.existsByPhoneAndIdNot(phone, id);
+    }
 }
