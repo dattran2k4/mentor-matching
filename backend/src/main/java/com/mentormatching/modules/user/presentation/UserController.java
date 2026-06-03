@@ -6,10 +6,12 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import com.mentormatching.modules.user.application.port.in.GetCurrentLearnerProfileUseCase;
 import com.mentormatching.modules.user.application.port.in.GetCurrentUserUseCase;
 import com.mentormatching.modules.user.application.port.in.UpdateCurrentUserUseCase;
 import com.mentormatching.modules.user.presentation.dto.request.UpdateCurrentUserRequest;
 import com.mentormatching.modules.user.presentation.dto.response.CurrentUserResponse;
+import com.mentormatching.modules.user.presentation.dto.response.LearnerProfileResponse;
 import com.mentormatching.shared.response.ApiResponse;
 import com.mentormatching.shared.response.ApiResponseFactory;
 import com.mentormatching.shared.security.model.AuthenticatedPrincipal;
@@ -24,6 +26,7 @@ public class UserController {
 
     private final ApiResponseFactory apiResponseFactory;
     private final GetCurrentUserUseCase getCurrentUserUseCase;
+    private final GetCurrentLearnerProfileUseCase getCurrentLearnerProfileUseCase;
     private final UpdateCurrentUserUseCase updateCurrentUserUseCase;
 
     @GetMapping("/public-check")
@@ -42,6 +45,12 @@ public class UserController {
                                                      @Valid @RequestBody UpdateCurrentUserRequest request) {
         return apiResponseFactory.success(CurrentUserResponse.from(updateCurrentUserUseCase.updateCurrentUser(
                 request.toCommand(principal))), "Update user profile successfully");
+    }
+
+    @PreAuthorize("isAuthenticated()")
+    @GetMapping("/me/learner-profile")
+    public ApiResponse<LearnerProfileResponse> getMyLearnerProfile(@AuthenticationPrincipal AuthenticatedPrincipal principal) {
+        return apiResponseFactory.success(LearnerProfileResponse.from(getCurrentLearnerProfileUseCase.getCurrentLearnerProfile(principal.getId())));
     }
 
     @GetMapping("/auth-check")
