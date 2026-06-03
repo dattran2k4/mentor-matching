@@ -1,20 +1,15 @@
 package com.mentormatching.modules.user.presentation.dto.response;
 
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
+import com.mentormatching.modules.user.application.dto.CurrentUserDetails;
+import com.mentormatching.modules.user.domain.UserRole;
+import com.mentormatching.modules.user.domain.UserStatus;
+import com.mentormatching.modules.user.domain.UserType;
 
-import com.mentormatching.shared.security.model.AuthenticatedPrincipal;
+public record CurrentUserResponse(Long id, String fullName, String email, String phone, UserRole role,
+                                  UserType userType, UserStatus status) {
 
-public record CurrentUserResponse(Long id, String fullName, String email, String role) {
-
-    public static CurrentUserResponse from(AuthenticatedPrincipal principal, Authentication authentication) {
-        String role = authentication.getAuthorities()
-                .stream()
-                .map(GrantedAuthority::getAuthority)
-                .filter(authority -> authority.startsWith("ROLE_"))
-                .map(authority -> authority.substring("ROLE_".length()))
-                .findFirst()
-                .orElse(null);
-        return new CurrentUserResponse(principal.getId(), principal.getFullName(), principal.getEmail(), role);
+    public static CurrentUserResponse from(CurrentUserDetails currentUser) {
+        return new CurrentUserResponse(currentUser.id(), currentUser.fullName(), currentUser.email(),
+                currentUser.phone(), currentUser.role(), currentUser.userType(), currentUser.status());
     }
 }
