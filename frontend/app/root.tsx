@@ -1,7 +1,9 @@
 import { isRouteErrorResponse, Links, Meta, Outlet, Scripts, ScrollRestoration } from 'react-router'
 import { QueryClientProvider } from '@tanstack/react-query'
+import { Toaster } from 'sonner'
 
 import { queryClient } from '@/lib/query-client'
+import { TooltipProvider } from '@/components/ui/tooltip'
 import type { Route } from './+types/root'
 import './app.css'
 
@@ -28,7 +30,11 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <Links />
       </head>
       <body>
-        {children}
+        {/* 1. Bọc TooltipProvider quanh children để dùng được Tooltip ở mọi trang */}
+        <TooltipProvider>{children}</TooltipProvider>
+
+        {/* 2. Đặt Toaster ở đây để hiển thị thông báo Pop-up toàn cục */}
+        <Toaster />
         <ScrollRestoration />
         <Scripts />
       </body>
