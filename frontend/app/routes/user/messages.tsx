@@ -1,150 +1,186 @@
-import { DashboardPage } from '@/components/DashboardPage'
+import { useMemo, useState } from 'react'
+import { Info, Search } from 'lucide-react'
 
-import { Send, Search, MoreVertical, Paperclip, Smile, Video } from 'lucide-react'
+import { DashboardPage } from '@/components/DashboardPage'
+import { EmptyState } from '@/components/EmptyState'
+import { learnerConversations } from '@/constants/learner-workspace'
 
 export function meta() {
   return [{ title: 'Tin nhắn | Học viên' }]
 }
 
 export default function UserMessagesPage() {
-  const contacts = [
-    {
-      id: 1,
-      name: 'Alex Johanson',
-      role: 'Mentor ReactJS',
-      avatar: 'AJ',
-      active: true,
-      lastMsg: 'Bạn có câu hỏi nào cho buổi chiều nay không?'
-    },
-    {
-      id: 2,
-      name: 'Sarah Chen',
-      role: 'Mentor NodeJS',
-      avatar: 'SC',
-      active: false,
-      lastMsg: 'Ok, mình đã nhận được tài liệu.'
-    },
-    {
-      id: 3,
-      name: 'John Smith',
-      role: 'Mentor Design',
-      avatar: 'JS',
-      active: false,
-      lastMsg: 'Hẹn gặp bạn vào thứ 2 tới nhé!'
+  const [searchQuery, setSearchQuery] = useState('')
+  const [selectedConversationId, setSelectedConversationId] = useState(
+    learnerConversations[0]?.id ?? ''
+  )
+
+  const filteredConversations = useMemo(() => {
+    const normalizedQuery = searchQuery.trim().toLowerCase()
+
+    if (normalizedQuery.length === 0) {
+      return learnerConversations
     }
-  ]
+
+    return learnerConversations.filter((conversation) =>
+      [conversation.mentorName, conversation.bookingContext, conversation.lastMessage]
+        .join(' ')
+        .toLowerCase()
+        .includes(normalizedQuery)
+    )
+  }, [searchQuery])
+
+  const selectedConversation =
+    filteredConversations.find((conversation) => conversation.id === selectedConversationId) ??
+    filteredConversations[0]
 
   return (
-    <DashboardPage description='Trao đổi trực tiếp với các mentor của bạn.' title='Tin nhắn'>
-      <div className='glass-panel grid h-[calc(100vh-280px)] min-h-[600px] overflow-hidden rounded-3xl border border-slate-200/60 bg-white/70 lg:grid-cols-[350px_1fr]'>
-        {/* Sidebar */}
-        <div className='flex hidden flex-col border-r border-slate-200/60 lg:flex'>
-          <div className='border-b border-slate-100 p-6'>
-            <div className='relative'>
-              <Search size={16} className='text-muted absolute top-1/2 left-3 -translate-y-1/2' />
-              <input
-                type='text'
-                placeholder='Tìm hội thoại...'
-                className='focus:ring-primary/20 w-full rounded-xl border-none bg-slate-50 py-2.5 pr-4 pl-10 text-sm focus:ring-2'
-              />
-            </div>
+    <DashboardPage
+      description='Theo dõi các trao đổi liên quan đến buổi học. Khu vực này đang ở bản xem trước vì backend nhắn tin chưa hoàn chỉnh.'
+      title='Tin nhắn'
+    >
+      <div className='flex flex-col gap-6'>
+        <section className='rounded-3xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900'>
+          <div className='flex items-start gap-3'>
+            <Info aria-hidden='true' className='mt-0.5 text-amber-700' size={18} />
+            <p>
+              Tin nhắn trực tiếp hiện mới là cấu trúc giao diện tĩnh. Khi backend hội thoại sẵn sàng,
+              lịch sử đọc, gửi tin và đồng bộ theo buổi học sẽ hiển thị tại đây.
+            </p>
           </div>
-          <div className='flex-1 space-y-2 overflow-y-auto p-4'>
-            {contacts.map((contact) => (
-              <div
-                key={contact.id}
-                className={`flex cursor-pointer gap-4 rounded-2xl p-4 transition-all ${contact.active ? 'bg-primary/5 border-primary/10 border shadow-sm' : 'border border-transparent hover:bg-slate-50'}`}
-              >
-                <div
-                  className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-xl font-bold ${contact.active ? 'bg-primary text-white' : 'bg-slate-100 text-slate-500'}`}
-                >
-                  {contact.avatar}
+        </section>
+
+        <div className='grid min-h-[640px] gap-0 overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm lg:grid-cols-[340px_1fr]'>
+          <aside className='border-b border-slate-200 lg:border-r lg:border-b-0'>
+            <div className='border-b border-slate-100 p-5'>
+              <div className='relative'>
+                <Search
+                  aria-hidden='true'
+                  className='text-muted absolute top-1/2 left-3 -translate-y-1/2'
+                  size={16}
+                />
+                <input
+                  className='focus:ring-primary/20 w-full rounded-xl border border-slate-200 bg-slate-50 py-2.5 pr-4 pl-10 text-sm focus:ring-2 focus:outline-none'
+                  id='conversation-search'
+                  onChange={(event) => setSearchQuery(event.target.value)}
+                  placeholder='Tìm theo mentor hoặc buổi học'
+                  type='search'
+                  value={searchQuery}
+                />
+              </div>
+            </div>
+
+            <div className='space-y-2 p-4'>
+              {filteredConversations.length === 0 ? (
+                <EmptyState
+                  className='min-h-[240px] rounded-2xl bg-slate-50'
+                  description='Thử tìm theo tên mentor hoặc quay lại danh sách đặt lịch để bắt đầu một buổi học mới.'
+                  title='Chưa có hội thoại phù hợp'
+                />
+              ) : (
+                filteredConversations.map((conversation) => {
+                  const isActive = conversation.id === selectedConversation?.id
+
+                  return (
+                    <button
+                      className={`flex w-full flex-col gap-2 rounded-2xl border p-4 text-left transition ${
+                        isActive
+                          ? 'border-primary/20 bg-primary/5 shadow-sm'
+                          : 'border-transparent hover:border-slate-200 hover:bg-slate-50'
+                      }`}
+                      key={conversation.id}
+                      onClick={() => setSelectedConversationId(conversation.id)}
+                      type='button'
+                    >
+                      <div className='flex items-start justify-between gap-3'>
+                        <div>
+                          <p className='text-ink font-semibold'>{conversation.mentorName}</p>
+                          <p className='text-muted text-xs'>{conversation.mentorHeadline}</p>
+                        </div>
+                        <span className='text-muted text-xs'>{conversation.lastMessageAt}</span>
+                      </div>
+                      <p className='text-muted text-sm'>{conversation.lastMessage}</p>
+                      <div className='flex items-center justify-between gap-3 text-xs'>
+                        <span className='rounded-full bg-slate-100 px-2.5 py-1 text-slate-600'>
+                          {conversation.statusLabel}
+                        </span>
+                        {conversation.unreadCount > 0 ? (
+                          <span className='bg-primary rounded-full px-2 py-1 font-semibold text-white'>
+                            {conversation.unreadCount} mới
+                          </span>
+                        ) : null}
+                      </div>
+                    </button>
+                  )
+                })
+              )}
+            </div>
+          </aside>
+
+          <section className='flex min-h-[420px] flex-col'>
+            {selectedConversation ? (
+              <>
+                <div className='border-b border-slate-100 p-5'>
+                  <p className='text-ink font-semibold'>{selectedConversation.mentorName}</p>
+                  <p className='text-muted mt-1 text-sm'>{selectedConversation.bookingContext}</p>
                 </div>
-                <div className='min-w-0 flex-1'>
-                  <div className='mb-0.5 flex items-center justify-between'>
-                    <p className='text-ink truncate text-sm font-bold'>{contact.name}</p>
-                    <span className='text-muted text-[10px]'>14:20</span>
-                  </div>
-                  <p className='text-muted truncate text-xs'>{contact.lastMsg}</p>
+
+                <div className='flex-1 space-y-4 bg-slate-50/70 p-5'>
+                  {selectedConversation.messages.map((message) => {
+                    const isLearner = message.author === 'learner'
+
+                    return (
+                      <div
+                        className={`flex ${isLearner ? 'justify-end' : 'justify-start'}`}
+                        key={message.id}
+                      >
+                        <div
+                          className={`max-w-[540px] rounded-2xl px-4 py-3 text-sm leading-relaxed shadow-sm ${
+                            isLearner
+                              ? 'bg-primary text-white'
+                              : 'border border-slate-200 bg-white text-slate-800'
+                          }`}
+                        >
+                          <p>{message.text}</p>
+                          <p
+                            className={`mt-2 text-xs ${
+                              isLearner ? 'text-white/80' : 'text-slate-500'
+                            }`}
+                          >
+                            {message.sentAt}
+                          </p>
+                        </div>
+                      </div>
+                    )
+                  })}
                 </div>
-              </div>
-            ))}
-          </div>
-        </div>
 
-        {/* Chat Area */}
-        <div className='flex h-full flex-col bg-white/30 backdrop-blur-sm'>
-          {/* Top Bar */}
-          <div className='flex items-center justify-between border-b border-slate-100 bg-white/50 p-5'>
-            <div className='flex items-center gap-4'>
-              <div className='bg-primary flex h-10 w-10 items-center justify-center rounded-xl font-bold text-white shadow-sm'>
-                AJ
-              </div>
-              <div>
-                <p className='text-ink font-bold'>Alex Johanson</p>
-                <p className='flex items-center gap-1 text-xs font-medium text-emerald-500'>
-                  <span className='h-1.5 w-1.5 rounded-full bg-emerald-500'></span> Đang hoạt động
-                </p>
-              </div>
-            </div>
-            <div className='flex items-center gap-2'>
-              <button className='rounded-xl border border-slate-200 p-2.5 text-slate-600 transition-colors hover:bg-slate-50'>
-                <Video size={18} />
-              </button>
-              <button className='rounded-xl border border-slate-200 p-2.5 text-slate-600 transition-colors hover:bg-slate-50'>
-                <MoreVertical size={18} />
-              </button>
-            </div>
-          </div>
-
-          {/* Messages */}
-          <div className='flex-1 space-y-6 overflow-y-auto p-6'>
-            <div className='flex max-w-[80%] gap-3'>
-              <div className='flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-slate-100 text-xs font-bold text-slate-500'>
-                AJ
-              </div>
-              <div className='text-ink rounded-2xl rounded-tl-none border border-slate-100 bg-white p-4 text-sm leading-relaxed shadow-sm'>
-                Chào bạn! Mình vừa xem qua bài tập của bạn. Rất tốt, đặc biệt là phần Tailwind CSS
-                layout.
-              </div>
-            </div>
-
-            <div className='ml-auto flex max-w-[80%] flex-row-reverse gap-3'>
-              <div className='bg-primary shadow-soft rounded-2xl rounded-tr-none p-4 text-sm leading-relaxed text-white'>
-                Dạ cảm ơn anh ạ! Em vẫn đang hơi vướng phần Framer Motion một chút, không biết chiều
-                nay mình có thể đi sâu vào phần đó không?
-              </div>
-            </div>
-
-            <div className='flex max-w-[80%] gap-3'>
-              <div className='flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-slate-100 text-xs font-bold text-slate-500'>
-                AJ
-              </div>
-              <div className='text-ink rounded-2xl rounded-tl-none border border-slate-100 bg-white p-4 text-sm leading-relaxed shadow-sm'>
-                Tất nhiên rồi! Bạn có câu hỏi nào cụ thể cho buổi chiều nay không?
-              </div>
-            </div>
-          </div>
-
-          {/* Input */}
-          <div className='border-t border-slate-100 bg-white/80 p-6'>
-            <div className='focus-within:border-primary/40 focus-within:ring-primary/10 flex items-center gap-3 rounded-2xl border border-slate-200 bg-slate-50 p-2 transition-all focus-within:ring-2'>
-              <button className='hover:text-primary p-2 text-slate-400 transition-colors'>
-                <Paperclip size={20} />
-              </button>
-              <input
-                type='text'
-                placeholder='Nhập tin nhắn...'
-                className='flex-1 border-none bg-transparent px-2 text-sm outline-none'
+                <div className='border-t border-slate-100 p-5'>
+                  <label
+                    className='text-muted mb-2 block text-sm font-medium'
+                    htmlFor='message-draft'
+                  >
+                    Nội dung phản hồi
+                  </label>
+                  <textarea
+                    className='focus:ring-primary/20 min-h-28 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm focus:ring-2 focus:outline-none'
+                    disabled
+                    id='message-draft'
+                    placeholder='Composer sẽ được bật khi backend nhắn tin và gửi theo buổi học sẵn sàng.'
+                  />
+                  <p className='text-muted mt-2 text-sm'>
+                    Gửi tin nhắn mới hiện chưa khả dụng trong milestone giao diện tĩnh này.
+                  </p>
+                </div>
+              </>
+            ) : (
+              <EmptyState
+                className='m-5 min-h-[320px]'
+                description='Khi bạn có trao đổi với mentor liên quan đến lịch học, hội thoại sẽ hiển thị ở đây.'
+                title='Chưa có hội thoại nào'
               />
-              <button className='hover:text-primary p-2 text-slate-400 transition-colors'>
-                <Smile size={20} />
-              </button>
-              <button className='bg-primary shadow-soft hover:shadow-glow rounded-xl p-3 text-white transition-all active:scale-95'>
-                <Send size={18} />
-              </button>
-            </div>
-          </div>
+            )}
+          </section>
         </div>
       </div>
     </DashboardPage>

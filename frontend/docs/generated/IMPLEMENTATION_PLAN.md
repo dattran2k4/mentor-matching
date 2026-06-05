@@ -292,6 +292,7 @@ Implementation should follow dependency order, not document order.
 
 ### Minimum Validation Gates
 
+- `npm run format:write`
 - `npm run lint`
 - `npm run typecheck`
 - `npm run test`

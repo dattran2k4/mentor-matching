@@ -28,6 +28,10 @@
   status: reusable foundation
   notes: good page wrapper; default placeholder now delegates to `EmptyState` so route placeholders share the same state pattern
 
+- component: `DashboardSectionHeader`
+  status: added in Milestone 3
+  notes: lightweight shared header for learner workspace sections with optional helper copy and right-aligned actions; first used to keep learner dashboard, bookings, favorites, and profile routes focused on composition instead of repeating section chrome
+
 - component: `RoleGuard`
   status: stable reusable foundation
   notes: should remain the standard role gate for learner, mentor, and admin route groups

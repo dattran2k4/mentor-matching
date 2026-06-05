@@ -271,6 +271,7 @@
 - goal: verify engineering quality gates
 - likely files affected: none unless fixes are required
 - acceptance criteria:
+  - `npm run format:write` passes
   - `npm run lint` passes
   - `npm run typecheck` passes
   - `npm run test` passes or documented if no meaningful tests exist

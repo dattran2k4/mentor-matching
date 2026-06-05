@@ -143,6 +143,7 @@ Use fixed separation:
 
 Every PR must pass:
 
+- `npm run format:write`
 - `npm run lint`
 - `npm run typecheck`
 - `npm run test` (when tests exist)

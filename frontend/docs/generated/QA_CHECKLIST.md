@@ -106,6 +106,7 @@ This checklist is tailored to Mentor Matching, not a generic UI project.
 
 ## Validation Commands
 
+- `npm run format:write`
 - `npm run lint`
 - `npm run typecheck`
 - `npm run test`

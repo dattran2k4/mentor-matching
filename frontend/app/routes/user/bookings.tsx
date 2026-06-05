@@ -1,19 +1,16 @@
 import { useMemo, useState } from 'react'
 import { motion } from 'framer-motion'
-import { Calendar, Clock, Filter, MoreVertical, Search, Video } from 'lucide-react'
+import { Calendar, Clock, Filter, MapPin, Search, Video } from 'lucide-react'
 
 import { DashboardPage } from '@/components/DashboardPage'
+import { DashboardSectionHeader } from '@/components/DashboardSectionHeader'
 import { EmptyState } from '@/components/EmptyState'
 import { StatusBadge } from '@/components/StatusBadge'
-import type { Booking, BookingStatus, PaymentStatus } from '@/types/booking'
+import { path } from '@/config/path'
+import { learnerBookings, type LearnerBookingItem } from '@/constants/learner-workspace'
 import { formatPrice, formatShortBookingDate, formatTimeRange } from '@/utils/format'
 
 type BookingFilter = 'ALL' | 'UPCOMING' | 'PAYMENT_DUE' | 'COMPLETED' | 'CANCELLED'
-
-type BookingRow = Booking & {
-  nextActionLabel: string
-  canJoin: boolean
-}
 
 const bookingFilters: Array<{ key: BookingFilter; label: string }> = [
   { key: 'ALL', label: 'Tất cả' },
@@ -23,70 +20,7 @@ const bookingFilters: Array<{ key: BookingFilter; label: string }> = [
   { key: 'CANCELLED', label: 'Đã hủy' }
 ]
 
-const mockBookings: BookingRow[] = [
-  {
-    id: 'booking-1',
-    snapshot: {
-      learnerName: 'Minh K.',
-      mentorName: 'Nguyễn Minh Anh',
-      subjectName: 'Toán',
-      gradeName: 'Lớp 9',
-      pricePerHour: 280000
-    },
-    bookingDate: '2026-06-11',
-    startTime: '14:00',
-    endTime: '15:30',
-    meetingType: 'ONLINE',
-    bookingStatus: 'CONFIRMED' satisfies BookingStatus,
-    paymentStatus: 'PAID' satisfies PaymentStatus,
-    totalAmount: 420000,
-    meetingLink: 'https://meet.google.com/example',
-    nextActionLabel: 'Vào buổi học',
-    canJoin: true
-  },
-  {
-    id: 'booking-2',
-    snapshot: {
-      learnerName: 'Minh K.',
-      mentorName: 'Trần Quốc Huy',
-      subjectName: 'Tiếng Anh',
-      gradeName: 'IELTS Foundation',
-      pricePerHour: 320000
-    },
-    bookingDate: '2026-06-12',
-    startTime: '10:00',
-    endTime: '11:00',
-    meetingType: 'ONLINE',
-    bookingStatus: 'PENDING' satisfies BookingStatus,
-    paymentStatus: 'PENDING' satisfies PaymentStatus,
-    totalAmount: 320000,
-    meetingLink: 'https://zoom.us/example',
-    nextActionLabel: 'Thanh toán',
-    canJoin: false
-  },
-  {
-    id: 'booking-3',
-    snapshot: {
-      learnerName: 'Minh K.',
-      mentorName: 'Lê Thu Hà',
-      subjectName: 'Vật lý',
-      gradeName: 'Lớp 11',
-      pricePerHour: 260000
-    },
-    bookingDate: '2026-06-02',
-    startTime: '09:00',
-    endTime: '10:30',
-    meetingType: 'HYBRID',
-    bookingStatus: 'COMPLETED' satisfies BookingStatus,
-    paymentStatus: 'PAID' satisfies PaymentStatus,
-    totalAmount: 390000,
-    meetingAddress: 'Quận 7, TP.HCM',
-    nextActionLabel: 'Đánh giá',
-    canJoin: false
-  }
-]
-
-const matchesFilter = (booking: BookingRow, filter: BookingFilter) => {
+const matchesFilter = (booking: LearnerBookingItem, filter: BookingFilter) => {
   switch (filter) {
     case 'UPCOMING':
       return booking.bookingStatus === 'CONFIRMED' || booking.bookingStatus === 'PENDING'
@@ -101,7 +35,7 @@ const matchesFilter = (booking: BookingRow, filter: BookingFilter) => {
   }
 }
 
-const getMeetingLabel = (booking: BookingRow) => {
+const getMeetingLabel = (booking: LearnerBookingItem) => {
   if (booking.meetingType === 'ONLINE') {
     return booking.meetingLink ? 'Google Meet / Zoom' : 'Buổi học online'
   }
@@ -124,7 +58,7 @@ export default function UserBookingsPage() {
   const filteredBookings = useMemo(() => {
     const normalizedQuery = searchQuery.trim().toLowerCase()
 
-    return mockBookings.filter((booking) => {
+    return learnerBookings.filter((booking) => {
       const matchesSearch =
         normalizedQuery.length === 0 ||
         booking.snapshot.mentorName.toLowerCase().includes(normalizedQuery) ||
@@ -135,61 +69,80 @@ export default function UserBookingsPage() {
     })
   }, [activeFilter, searchQuery])
 
+  const filterCounts = useMemo(
+    () =>
+      bookingFilters.reduce<Record<BookingFilter, number>>((accumulator, filter) => {
+        accumulator[filter.key] = learnerBookings.filter((booking) =>
+          matchesFilter(booking, filter.key)
+        ).length
+
+        return accumulator
+      }, {} as Record<BookingFilter, number>),
+    []
+  )
+
   return (
     <DashboardPage
-      description='Theo dõi buổi học sắp tới, trạng thái đặt lịch và các khoản cần thanh toán.'
+      description='Quản lý các buổi đã đặt, tách rõ trạng thái lịch học và trạng thái thanh toán để biết bước tiếp theo.'
       title='Lịch học'
     >
       <div className='flex flex-col gap-6'>
-        <div className='flex flex-wrap items-center justify-between gap-4'>
-          <div className='flex flex-wrap items-center gap-2 rounded-2xl bg-slate-100 p-1'>
-            {bookingFilters.map((filter) => {
-              const isActive = activeFilter === filter.key
+        <section className='rounded-3xl border border-slate-200 bg-white p-5 shadow-sm'>
+          <DashboardSectionHeader
+            title='Bộ lọc lịch học'
+            description='Tìm nhanh theo mentor, môn học hoặc xem riêng các buổi cần thanh toán.'
+          />
 
-              return (
-                <button
-                  key={filter.key}
-                  className={`rounded-xl px-4 py-2 text-sm font-semibold transition ${
-                    isActive ? 'text-primary bg-white shadow-sm' : 'text-muted hover:text-ink'
-                  }`}
-                  onClick={() => setActiveFilter(filter.key)}
-                  type='button'
-                >
-                  {filter.label}
-                </button>
-              )
-            })}
-          </div>
+          <div className='mt-5 flex flex-wrap items-center justify-between gap-4'>
+            <div className='flex flex-wrap items-center gap-2 rounded-2xl bg-slate-100 p-1'>
+              {bookingFilters.map((filter) => {
+                const isActive = activeFilter === filter.key
 
-          <div className='flex w-full flex-wrap items-center gap-3 md:w-auto'>
-            <label className='relative min-w-[240px] flex-1 md:flex-none' htmlFor='booking-search'>
-              <Search
-                aria-hidden='true'
-                className='text-muted absolute top-1/2 left-3 -translate-y-1/2'
-                size={16}
-              />
-              <input
-                className='focus:ring-primary/20 w-full rounded-xl border border-slate-200 bg-white py-2.5 pr-4 pl-10 text-sm transition focus:ring-2 focus:outline-none'
-                id='booking-search'
-                onChange={(event) => setSearchQuery(event.target.value)}
-                placeholder='Tìm theo mentor, môn học hoặc lớp'
-                type='search'
-                value={searchQuery}
-              />
-            </label>
-            <button
-              className='text-muted inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm font-medium'
-              type='button'
-            >
-              <Filter aria-hidden='true' size={16} />
-              Bộ lọc
-            </button>
+                return (
+                  <button
+                    key={filter.key}
+                    className={`rounded-xl px-4 py-2 text-sm font-semibold transition ${
+                      isActive ? 'text-primary bg-white shadow-sm' : 'text-muted hover:text-ink'
+                    }`}
+                    onClick={() => setActiveFilter(filter.key)}
+                    type='button'
+                  >
+                    {filter.label} ({filterCounts[filter.key]})
+                  </button>
+                )
+              })}
+            </div>
+
+            <div className='flex w-full flex-wrap items-center gap-3 lg:w-auto'>
+              <label className='relative min-w-[260px] flex-1 lg:flex-none' htmlFor='booking-search'>
+                <Search
+                  aria-hidden='true'
+                  className='text-muted absolute top-1/2 left-3 -translate-y-1/2'
+                  size={16}
+                />
+                <input
+                  className='focus:ring-primary/20 w-full rounded-xl border border-slate-200 bg-white py-2.5 pr-4 pl-10 text-sm transition focus:ring-2 focus:outline-none'
+                  id='booking-search'
+                  onChange={(event) => setSearchQuery(event.target.value)}
+                  placeholder='Tìm theo mentor, môn học hoặc lớp'
+                  type='search'
+                  value={searchQuery}
+                />
+              </label>
+              <button
+                className='text-muted inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm font-medium'
+                type='button'
+              >
+                <Filter aria-hidden='true' size={16} />
+                Bộ lọc nâng cao
+              </button>
+            </div>
           </div>
-        </div>
+        </section>
 
         {filteredBookings.length === 0 ? (
           <EmptyState
-            actionHref='/discover'
+            actionHref={path.discover}
             actionLabel='Tìm mentor'
             description='Hãy thử mở rộng bộ lọc hoặc bắt đầu tìm một mentor mới phù hợp với mục tiêu học tập của bạn.'
             title='Chưa có buổi học phù hợp'
@@ -239,30 +192,36 @@ export default function UserBookingsPage() {
                         <Calendar aria-hidden='true' className='text-primary' size={14} />
                         {formatShortBookingDate(booking.bookingDate)}
                       </p>
-                      <p>{getMeetingLabel(booking)}</p>
+                      <p className='flex items-center gap-2'>
+                        <MapPin aria-hidden='true' className='text-primary' size={14} />
+                        {getMeetingLabel(booking)}
+                      </p>
                       <p className='font-medium text-slate-700'>
                         {formatPrice(booking.totalAmount)}
                       </p>
                     </div>
+                    <p className='text-muted mt-3 text-sm'>{booking.summary}</p>
                   </div>
 
                   <div className='flex flex-wrap items-center gap-3 border-t border-slate-100 pt-4 lg:border-t-0 lg:pt-0'>
                     <button
                       className={`inline-flex min-w-[148px] items-center justify-center gap-2 rounded-xl px-4 py-3 text-sm font-semibold transition ${
-                        booking.canJoin
+                        booking.primaryAction.variant === 'primary'
                           ? 'bg-primary text-white shadow-sm hover:-translate-y-0.5'
                           : 'border border-slate-200 text-slate-700 hover:bg-slate-50'
                       }`}
                       type='button'
                     >
-                      {booking.canJoin ? <Video aria-hidden='true' size={16} /> : null}
-                      {booking.nextActionLabel}
+                      {booking.primaryAction.label === 'Vào buổi học' ? (
+                        <Video aria-hidden='true' size={16} />
+                      ) : null}
+                      {booking.primaryAction.label}
                     </button>
                     <button
-                      className='rounded-xl border border-slate-200 p-3 text-slate-500 transition hover:bg-slate-50 hover:text-slate-700'
+                      className='rounded-xl border border-slate-200 px-4 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50'
                       type='button'
                     >
-                      <MoreVertical aria-hidden='true' size={18} />
+                      {booking.secondaryAction.label}
                     </button>
                   </div>
                 </div>
