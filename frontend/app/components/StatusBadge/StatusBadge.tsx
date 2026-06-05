@@ -3,10 +3,7 @@ import { clsx } from 'clsx'
 import { twMerge } from 'tailwind-merge'
 
 import type { BookingStatus, PaymentStatus } from '@/types/booking'
-import type {
-  MentorApprovalStatus,
-  MentorVerificationStatus
-} from '@/types/mentor'
+import type { MentorApprovalStatus, MentorVerificationStatus } from '@/types/mentor'
 import type { UserStatus } from '@/types/user'
 
 type StatusBadgeKind = 'booking' | 'payment' | 'approval' | 'verification' | 'user'

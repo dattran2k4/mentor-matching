@@ -34,35 +34,35 @@
 
 - component: `Navbar`
   status: reusable with content revision
-  notes: public navigation is structurally useful, but product language should be realigned
+  notes: public navigation now uses Mentor Matching branding and discovery-first labels; keep it as the shared shell for public routes
 
 - component: `Footer`
-  status: reusable with content revision
-  notes: currently includes generic global mentorship messaging that should be adapted to tutoring domain
+  status: reusable with tutoring-domain revision
+  notes: footer now reinforces approved mentors, real booking flow, and practical discovery/login entry points instead of generic newsletter-style messaging
 
 - component: `SearchBar`
-  status: reusable with domain refactor
-  notes: should evolve toward subject, grade, mentor, and goal-oriented search rather than generic skill search
+  status: reusable with milestone 2 refactor
+  notes: now supports tutoring-domain placeholder copy, context-specific secondary input, and quick-tag shortcuts for home and discover surfaces
 
 - component: `FilterSidebar`
-  status: reusable with domain refactor
-  notes: strong structural candidate for discover filters; should be tied to real mentor/catalog concepts
+  status: reusable with milestone 2 refactor
+  notes: now groups filters by tutoring decision criteria such as subject, grade/goal, meeting type, price, availability, and trust; mobile and desktop share the same practical structure
 
 - component: `MentorCard`
-  status: reusable with initial domain refactor
-  notes: now consumes tutoring-aligned mentor mock data, shows approval status, subject/grade coverage, meeting type, price, rating, and availability hint; future work should continue toward the canonical mentor summary card
+  status: reusable with milestone 2 refactor
+  notes: now emphasizes mentor offerings, trust state, availability hint, and comparison-friendly metadata instead of a soft marketing-card treatment
 
 - component: `BookingSidebar`
-  status: reusable with initial workflow refactor
-  notes: good shell for booking summary; now references mentor offering, session, and VND tuition language, but still needs full offering/availability selection in later milestones
+  status: reusable with milestone 2 refactor
+  notes: now summarizes recommended offering, near-term availability windows, weekly schedule, trust badges, and session estimate; later milestones can layer interactive selection on top of this shell
 
 - component: `SectionTitle`
   status: reusable
   notes: suitable for public screens and profile sections; should be used more selectively in dense dashboards
 
 - component: `SubjectCard`
-  status: reusable with data refactor
-  notes: structure is useful, but dataset should reflect catalog subjects and grades
+  status: reusable with milestone 2 refactor
+  notes: now presents subject description and grade coverage so the home page can lead users into discovery from tutoring-domain entry points
 
 - component: `RatingStars`
   status: reusable

@@ -1,4 +1,4 @@
-import { Bell, LogOut, Menu, X, Sparkles } from 'lucide-react'
+import { Bell, GraduationCap, LogOut, Menu, X } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import { Link, NavLink, useNavigate } from 'react-router'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -53,7 +53,7 @@ const Navbar = () => {
       <NavLink to={path.discover} className={linkClass} onClick={() => setMobileOpen(false)}>
         {({ isActive }) => (
           <>
-            Khám phá
+            Tìm mentor
             {isActive && (
               <motion.div
                 layoutId='underline'
@@ -93,13 +93,13 @@ const Navbar = () => {
         <div className='flex items-center gap-8'>
           <Link className='group flex items-center gap-2' to='/'>
             <div className='bg-primary/10 text-primary group-hover:bg-primary rounded-xl p-2 transition-colors duration-300 group-hover:text-white'>
-              <Sparkles
+              <GraduationCap
                 size={20}
-                className='transition-transform duration-300 group-hover:rotate-12'
+                className='transition-transform duration-300 group-hover:-translate-y-0.5'
               />
             </div>
             <span className='text-ink group-hover:text-primary text-xl font-semibold tracking-tight transition-colors'>
-              EduMarket
+              Mentor Matching
             </span>
           </Link>
           <div className='hidden items-center gap-6 md:flex'>{navLinks}</div>

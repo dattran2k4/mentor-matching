@@ -89,3 +89,12 @@
 - rationale: this keeps shared types aligned with business objects instead of coupling them to a temporary UI presentation shape
 - alternatives considered: adding `booking-display.ts`, `mentor-display.ts`, and `approval-display.ts` under `frontend/app/types`
 - follow-up: Milestone 1 keeps initials, decorative color choices, testimonial avatars, and subject preview metadata outside `app/types`; if a presenter layer becomes necessary later, place it outside `app/types`
+
+## Decision 11: Milestone 2 public components favor comparison and booking context over decorative marketing shells
+
+- date: 2026-06-06
+- context: Home, Discover, and Mentor Profile needed to feel like a tutoring marketplace, while the older public component set still leaned on softer showcase-style composition
+- decision: refactor shared public components so search, filters, mentor cards, subject cards, booking sidebar, footer, and navbar all reinforce subject fit, trust, availability, and booking readiness first
+- rationale: these three screens share the same decision journey, so aligning the shell and shared components prevents route-specific one-off UI and keeps route files focused on composition
+- alternatives considered: only rewriting route files while leaving the existing public shell and shared components mostly unchanged
+- follow-up: later data-integration milestones can attach real filter state and offering selection behavior onto these shared tutoring-domain shells without redoing their structure

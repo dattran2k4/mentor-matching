@@ -124,7 +124,8 @@ export default function AdminMentorsPage() {
             <div>
               <h2 className='text-ink text-xl font-semibold'>Hồ sơ chờ duyệt</h2>
               <p className='text-muted text-sm'>
-                Ưu tiên kiểm tra xác minh, môn học đăng ký và ghi chú trước khi mentor xuất hiện công khai.
+                Ưu tiên kiểm tra xác minh, môn học đăng ký và ghi chú trước khi mentor xuất hiện
+                công khai.
               </p>
             </div>
           </div>
@@ -145,7 +146,7 @@ export default function AdminMentorsPage() {
                   transition={{ delay: index * 0.06 }}
                 >
                   <div className='flex flex-col gap-5 xl:flex-row xl:items-start'>
-                    <div className='bg-amber-100 text-amber-700 flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl text-lg font-semibold'>
+                    <div className='flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-amber-100 text-lg font-semibold text-amber-700'>
                       {getInitials(mentor.mentorName)}
                     </div>
 
@@ -219,7 +220,10 @@ export default function AdminMentorsPage() {
             </div>
 
             <div className='flex w-full flex-wrap items-center gap-3 lg:w-auto'>
-              <label className='relative min-w-[260px] flex-1 lg:flex-none' htmlFor='admin-mentor-search'>
+              <label
+                className='relative min-w-[260px] flex-1 lg:flex-none'
+                htmlFor='admin-mentor-search'
+              >
                 <Search
                   aria-hidden='true'
                   className='text-muted absolute top-1/2 left-3 -translate-y-1/2'

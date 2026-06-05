@@ -14,9 +14,7 @@ const TestimonialCard = ({ testimonial }: TestimonialCardProps) => {
         <p className='text-muted mt-4 text-sm'>{testimonial.text}</p>
       </div>
       <div className='mt-6 flex items-center gap-3'>
-        <div
-          className='bg-primary/10 text-primary flex h-11 w-11 items-center justify-center rounded-full text-sm font-semibold'
-        >
+        <div className='bg-primary/10 text-primary flex h-11 w-11 items-center justify-center rounded-full text-sm font-semibold'>
           {getInitials(testimonial.name)}
         </div>
         <div>

@@ -47,9 +47,7 @@ export default function UserFavoritesPage() {
               </button>
 
               <div className='flex flex-col items-center text-center'>
-                <div
-                  className='bg-primary/10 text-primary mb-4 flex h-20 w-20 items-center justify-center rounded-2xl text-2xl font-bold shadow-lg'
-                >
+                <div className='bg-primary/10 text-primary mb-4 flex h-20 w-20 items-center justify-center rounded-2xl text-2xl font-bold shadow-lg'>
                   {getInitials(mentor.name)}
                 </div>
                 <h3 className='text-ink text-lg font-bold'>{mentor.name}</h3>

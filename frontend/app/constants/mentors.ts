@@ -22,6 +22,11 @@ export const mentors: Mentor[] = [
     availabilitySummary: 'Tối Thứ 2, Thứ 4 và sáng Chủ nhật',
     teachingStyle:
       'Chẩn đoán lỗ hổng trước, chia bài theo mục tiêu tuần, giao bài ngắn sau mỗi buổi và phản hồi rõ phần cần sửa.',
+    achievements: [
+      'Theo sát học viên mất gốc và ôn thi chuyển cấp',
+      'Có báo cáo ngắn sau từng buổi cho phụ huynh',
+      'Ưu tiên mục tiêu điểm số và kỹ năng trình bày'
+    ],
     offerings: [
       {
         id: 'math-grade-9-foundation',
@@ -40,6 +45,41 @@ export const mentors: Mentor[] = [
         pricePerHour: 240000,
         active: true,
         teachingNote: 'Củng cố nền tảng và thói quen làm bài.'
+      }
+    ],
+    recurringAvailability: [
+      {
+        dayLabel: 'Thứ 2',
+        startTime: '19:00',
+        endTime: '21:00',
+        meetingTypes: ['ONLINE']
+      },
+      {
+        dayLabel: 'Thứ 4',
+        startTime: '19:00',
+        endTime: '21:30',
+        meetingTypes: ['ONLINE', 'HYBRID']
+      },
+      {
+        dayLabel: 'Chủ nhật',
+        startTime: '08:00',
+        endTime: '11:00',
+        meetingTypes: ['ONLINE', 'HYBRID']
+      }
+    ],
+    specificDateAvailability: [
+      {
+        dateLabel: '12/06',
+        startTime: '19:30',
+        endTime: '21:00',
+        meetingTypes: ['ONLINE'],
+        note: 'Tăng cường trước kỳ kiểm tra giữa kỳ'
+      },
+      {
+        dateLabel: '16/06',
+        startTime: '08:30',
+        endTime: '10:00',
+        meetingTypes: ['HYBRID']
       }
     ],
     experience: [
@@ -64,12 +104,14 @@ export const mentors: Mentor[] = [
       {
         name: 'Phụ huynh bé An',
         rating: 5,
-        text: 'Mentor chỉ ra đúng phần con bị hổng và chia bài rất vừa sức. Sau 6 tuần con tự tin hơn hẳn.'
+        text: 'Mentor chỉ ra đúng phần con bị hổng và chia bài rất vừa sức. Sau 6 tuần con tự tin hơn hẳn.',
+        tags: ['Tiến bộ rõ ràng', 'Phản hồi đều cho phụ huynh']
       },
       {
         name: 'Minh K.',
         rating: 5,
-        text: 'Cách giải thích dễ hiểu, có checklist lỗi sai sau mỗi buổi nên em biết cần luyện gì.'
+        text: 'Cách giải thích dễ hiểu, có checklist lỗi sai sau mỗi buổi nên em biết cần luyện gì.',
+        tags: ['Dễ hiểu', 'Bám sát mục tiêu thi']
       }
     ]
   },
@@ -94,6 +136,11 @@ export const mentors: Mentor[] = [
     availabilitySummary: 'Tối các ngày trong tuần',
     teachingStyle:
       'Kết hợp sửa phát âm, luyện phản xạ ngắn, từ vựng theo chủ đề và bài tập nghe-nói sau buổi học.',
+    achievements: [
+      'Thiết kế lộ trình theo mục tiêu điểm và kỹ năng',
+      'Phản hồi phát âm ngay trong buổi học',
+      'Phù hợp học viên cần tăng phản xạ giao tiếp'
+    ],
     offerings: [
       {
         id: 'english-grade-12-exam',
@@ -112,6 +159,35 @@ export const mentors: Mentor[] = [
         pricePerHour: 320000,
         active: true,
         teachingNote: 'Lộ trình cho mục tiêu 5.0-6.5.'
+      }
+    ],
+    recurringAvailability: [
+      {
+        dayLabel: 'Thứ 3',
+        startTime: '19:00',
+        endTime: '21:00',
+        meetingTypes: ['ONLINE']
+      },
+      {
+        dayLabel: 'Thứ 5',
+        startTime: '19:00',
+        endTime: '21:00',
+        meetingTypes: ['ONLINE']
+      },
+      {
+        dayLabel: 'Thứ 7',
+        startTime: '09:00',
+        endTime: '11:30',
+        meetingTypes: ['ONLINE']
+      }
+    ],
+    specificDateAvailability: [
+      {
+        dateLabel: '13/06',
+        startTime: '20:00',
+        endTime: '21:30',
+        meetingTypes: ['ONLINE'],
+        note: 'Có thể thêm buổi speaking thử'
       }
     ],
     experience: [
@@ -136,7 +212,8 @@ export const mentors: Mentor[] = [
       {
         name: 'Lan N.',
         rating: 5,
-        text: 'Mỗi buổi đều có mục tiêu rõ, sửa lỗi phát âm rất kỹ và bài tập không bị quá tải.'
+        text: 'Mỗi buổi đều có mục tiêu rõ, sửa lỗi phát âm rất kỹ và bài tập không bị quá tải.',
+        tags: ['Lộ trình rõ', 'Phù hợp học nền tảng']
       }
     ]
   },
@@ -161,6 +238,11 @@ export const mentors: Mentor[] = [
     availabilitySummary: 'Chiều Thứ 7 và Chủ nhật tại Quận 7 hoặc online',
     teachingStyle:
       'Dạy theo sơ đồ khái niệm, ví dụ đời sống và bài luyện theo cấp độ để học viên nắm chắc vì sao dùng công thức.',
+    achievements: [
+      'Dùng sơ đồ khái niệm để giảm học vẹt',
+      'Có thể học offline tại Quận 7',
+      'Phù hợp học viên cần hiểu bản chất công thức'
+    ],
     offerings: [
       {
         id: 'physics-grade-11',
@@ -170,6 +252,28 @@ export const mentors: Mentor[] = [
         pricePerHour: 260000,
         active: true,
         teachingNote: 'Điện học, quang học và bài tập vận dụng.'
+      }
+    ],
+    recurringAvailability: [
+      {
+        dayLabel: 'Thứ 7',
+        startTime: '14:00',
+        endTime: '17:30',
+        meetingTypes: ['OFFLINE', 'HYBRID']
+      },
+      {
+        dayLabel: 'Chủ nhật',
+        startTime: '15:00',
+        endTime: '18:00',
+        meetingTypes: ['ONLINE', 'HYBRID']
+      }
+    ],
+    specificDateAvailability: [
+      {
+        dateLabel: '15/06',
+        startTime: '19:00',
+        endTime: '20:30',
+        meetingTypes: ['ONLINE']
       }
     ],
     experience: [
@@ -189,7 +293,8 @@ export const mentors: Mentor[] = [
       {
         name: 'Quang P.',
         rating: 5,
-        text: 'Cô giải thích công thức bằng ví dụ nên em dễ nhớ hơn, không còn học thuộc máy móc.'
+        text: 'Cô giải thích công thức bằng ví dụ nên em dễ nhớ hơn, không còn học thuộc máy móc.',
+        tags: ['Hiểu bản chất', 'Ví dụ thực tế']
       }
     ]
   },
@@ -214,6 +319,11 @@ export const mentors: Mentor[] = [
     availabilitySummary: 'Tối Thứ 3, Thứ 5 và Chủ nhật',
     teachingStyle:
       'Học qua mini project, giải thích lỗi trực tiếp và dùng bài tập ngắn để hình thành tư duy thuật toán.',
+    achievements: [
+      'Phù hợp học sinh mới bắt đầu lập trình',
+      'Có mini project sau từng chặng',
+      'Đang chờ hoàn tất duyệt hồ sơ'
+    ],
     offerings: [
       {
         id: 'python-beginner',
@@ -223,6 +333,35 @@ export const mentors: Mentor[] = [
         pricePerHour: 300000,
         active: true,
         teachingNote: 'Biến, vòng lặp, hàm, cấu trúc dữ liệu và mini project.'
+      }
+    ],
+    recurringAvailability: [
+      {
+        dayLabel: 'Thứ 3',
+        startTime: '19:00',
+        endTime: '21:00',
+        meetingTypes: ['ONLINE']
+      },
+      {
+        dayLabel: 'Thứ 5',
+        startTime: '19:00',
+        endTime: '21:00',
+        meetingTypes: ['ONLINE']
+      },
+      {
+        dayLabel: 'Chủ nhật',
+        startTime: '09:00',
+        endTime: '11:30',
+        meetingTypes: ['ONLINE']
+      }
+    ],
+    specificDateAvailability: [
+      {
+        dateLabel: '18/06',
+        startTime: '20:00',
+        endTime: '21:00',
+        meetingTypes: ['ONLINE'],
+        note: 'Lịch sẽ mở rộng sau khi được duyệt'
       }
     ],
     experience: [
@@ -242,7 +381,8 @@ export const mentors: Mentor[] = [
       {
         name: 'Phụ huynh Minh T.',
         rating: 4,
-        text: 'Buổi học vui, có sản phẩm nhỏ sau mỗi chặng nên con có động lực tiếp tục.'
+        text: 'Buổi học vui, có sản phẩm nhỏ sau mỗi chặng nên con có động lực tiếp tục.',
+        tags: ['Có mini project', 'Dễ tạo hứng thú']
       }
     ]
   }

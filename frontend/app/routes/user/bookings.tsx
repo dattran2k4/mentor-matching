@@ -6,11 +6,7 @@ import { DashboardPage } from '@/components/DashboardPage'
 import { EmptyState } from '@/components/EmptyState'
 import { StatusBadge } from '@/components/StatusBadge'
 import type { Booking, BookingStatus, PaymentStatus } from '@/types/booking'
-import {
-  formatPrice,
-  formatShortBookingDate,
-  formatTimeRange
-} from '@/utils/format'
+import { formatPrice, formatShortBookingDate, formatTimeRange } from '@/utils/format'
 
 type BookingFilter = 'ALL' | 'UPCOMING' | 'PAYMENT_DUE' | 'COMPLETED' | 'CANCELLED'
 
@@ -154,9 +150,7 @@ export default function UserBookingsPage() {
                 <button
                   key={filter.key}
                   className={`rounded-xl px-4 py-2 text-sm font-semibold transition ${
-                    isActive
-                      ? 'bg-white text-primary shadow-sm'
-                      : 'text-muted hover:text-ink'
+                    isActive ? 'text-primary bg-white shadow-sm' : 'text-muted hover:text-ink'
                   }`}
                   onClick={() => setActiveFilter(filter.key)}
                   type='button'
@@ -246,7 +240,9 @@ export default function UserBookingsPage() {
                         {formatShortBookingDate(booking.bookingDate)}
                       </p>
                       <p>{getMeetingLabel(booking)}</p>
-                      <p className='font-medium text-slate-700'>{formatPrice(booking.totalAmount)}</p>
+                      <p className='font-medium text-slate-700'>
+                        {formatPrice(booking.totalAmount)}
+                      </p>
                     </div>
                   </div>
 

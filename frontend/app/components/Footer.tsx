@@ -1,18 +1,27 @@
 import { Link } from 'react-router'
+
 import { path } from '@/config/path'
 
 const Footer = () => {
   return (
-    <footer className='mt-16 bg-slate-100'>
-      <div className='mx-auto grid max-w-6xl gap-10 px-4 py-12 md:grid-cols-[1.4fr_1fr_1fr_1fr] md:px-6'>
+    <footer className='mt-16 border-t border-slate-200 bg-slate-50'>
+      <div className='mx-auto grid max-w-6xl gap-10 px-4 py-12 md:grid-cols-[1.3fr_1fr_1fr_1.1fr] md:px-6'>
         <div>
           <Link className='text-primary text-lg font-semibold' to='/'>
             Mentor Matching
           </Link>
           <p className='text-muted mt-3 text-sm'>
-            Kết nối học viên và phụ huynh với mentor đã được duyệt cho từng môn học, lớp và mục
-            tiêu học tập.
+            Kết nối học viên và phụ huynh với mentor đã được duyệt cho từng môn học, lớp và mục tiêu
+            học tập.
           </p>
+          <div className='mt-4 flex flex-wrap gap-2 text-xs'>
+            <span className='rounded-full border border-slate-200 bg-white px-3 py-1 text-slate-600'>
+              Mentor đã duyệt
+            </span>
+            <span className='rounded-full border border-slate-200 bg-white px-3 py-1 text-slate-600'>
+              Đặt buổi học theo khung giờ thật
+            </span>
+          </div>
         </div>
         <div>
           <p className='text-ink text-sm font-semibold'>Khám phá</p>
@@ -55,22 +64,24 @@ const Footer = () => {
           </ul>
         </div>
         <div>
-          <p className='text-ink text-sm font-semibold'>Cập nhật</p>
+          <p className='text-ink text-sm font-semibold'>Bắt đầu</p>
           <p className='text-muted mt-3 text-sm'>
-            Nhận thông tin về mentor mới, môn học nổi bật và gợi ý đặt lịch.
+            Bắt đầu với mục tiêu học tập rõ ràng và tìm mentor phù hợp theo môn học, lớp, học phí và
+            hình thức học.
           </p>
-          <div className='mt-4 flex items-center gap-2'>
-            <input
-              className='w-full rounded-full border border-slate-200 bg-white px-4 py-2 text-sm outline-none'
-              placeholder='Email của bạn'
-              type='email'
-            />
-            <button
-              className='bg-primary rounded-full px-4 py-2 text-sm font-semibold text-white'
-              type='button'
+          <div className='mt-4 space-y-3'>
+            <Link
+              className='bg-primary block rounded-2xl px-4 py-2.5 text-center text-sm font-semibold text-white transition hover:bg-blue-700'
+              to={path.discover}
             >
-              Nhận tin
-            </button>
+              Tìm mentor ngay
+            </Link>
+            <Link
+              className='block rounded-2xl border border-slate-200 px-4 py-2.5 text-center text-sm font-semibold text-slate-700 transition hover:bg-white'
+              to={path.login}
+            >
+              Đăng nhập để quản lý lịch học
+            </Link>
           </div>
         </div>
       </div>
