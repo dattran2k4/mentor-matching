@@ -3,6 +3,7 @@ import { Link, useParams } from 'react-router'
 import { motion } from 'framer-motion'
 
 import { path } from '@/config/path'
+import { getInitials } from '@/utils/format'
 import BookingSidebar from '../components/BookingSidebar'
 import RatingStars from '../components/RatingStars'
 import SectionTitle from '../components/SectionTitle'
@@ -34,37 +35,39 @@ const MentorProfile = () => {
           <div className='bg-secondary/10 pointer-events-none absolute -top-10 -right-10 h-40 w-40 rounded-full blur-2xl' />
           <div className='relative z-10 flex flex-wrap items-start gap-6'>
             <div
-              className={`flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br ${mentor.accent} text-lg font-semibold text-white`}
+              className='bg-primary/10 text-primary flex h-16 w-16 items-center justify-center rounded-2xl text-lg font-semibold'
             >
-              {mentor.initials}
+              {getInitials(mentor.name)}
             </div>
             <div className='flex-1'>
               <div className='flex items-center gap-2'>
                 <h1 className='text-ink text-2xl font-semibold'>{mentor.name}</h1>
-                {mentor.verified ? <BadgeCheck className='text-primary h-5 w-5' /> : null}
+                {mentor.verificationStatus === 'VERIFIED' ? (
+                  <BadgeCheck className='text-primary h-5 w-5' />
+                ) : null}
               </div>
-              <p className='text-muted text-sm'>{mentor.role}</p>
+              <p className='text-muted text-sm'>{mentor.headline}</p>
               <div className='text-muted mt-3 flex flex-wrap items-center gap-4 text-sm'>
                 <div className='flex items-center gap-2'>
                   <RatingStars rating={mentor.rating} size={14} />
-                  <span>{mentor.rating} rating</span>
+                  <span>{mentor.rating} sao</span>
                 </div>
                 <span className='flex items-center gap-2'>
-                  <Users size={16} /> {mentor.students} students
+                  <Users size={16} /> {mentor.activeStudentsCount} học viên
                 </span>
                 <span className='flex items-center gap-2'>
                   <Star size={16} className='text-amber-400' /> {mentor.reviewsCount}
-                  reviews
+                  đánh giá
                 </span>
               </div>
             </div>
             <div className='mt-4 flex w-full flex-wrap gap-2'>
-              {mentor.tags.map((tag: string) => (
+              {mentor.highlights.map((highlight: string) => (
                 <span
-                  key={tag}
+                  key={highlight}
                   className='text-muted hover:border-primary hover:text-primary rounded-full border border-slate-200/80 bg-white px-4 py-2 text-xs font-medium shadow-sm transition-colors'
                 >
-                  {tag}
+                  {highlight}
                 </span>
               ))}
             </div>
@@ -77,7 +80,7 @@ const MentorProfile = () => {
           transition={{ duration: 0.5, delay: 0.1 }}
           className='glass-panel rounded-3xl border border-slate-200/60 bg-white/70 p-8'
         >
-          <SectionTitle title='About me' subtitle={mentor.bio} />
+          <SectionTitle title='Giới thiệu' subtitle={mentor.introduction} />
         </motion.section>
 
         <motion.section
@@ -87,8 +90,8 @@ const MentorProfile = () => {
           className='glass-panel rounded-3xl border border-slate-200/60 bg-white/70 p-8'
         >
           <SectionTitle
-            title='Teaching style'
-            subtitle='Structured sessions, weekly milestones, and hands-on practice.'
+            title='Phong cách dạy'
+            subtitle={mentor.teachingStyle}
           />
           <div className='shadow-lift group mt-8 overflow-hidden rounded-3xl border border-slate-200/50 bg-slate-900'>
             <div className='relative flex h-64 items-center justify-center overflow-hidden text-white'>
@@ -97,7 +100,7 @@ const MentorProfile = () => {
                 <div className='flex h-16 w-16 items-center justify-center rounded-full bg-white/20 shadow-lg backdrop-blur-md transition-transform group-hover:bg-white/30 hover:scale-110 active:scale-95'>
                   <div className='ml-2 h-0 w-0 border-y-[10px] border-l-[16px] border-y-transparent border-l-white'></div>
                 </div>
-                <p className='text-sm font-medium tracking-wide'>Watch Intro video</p>
+                <p className='text-sm font-medium tracking-wide'>Xem video giới thiệu</p>
               </div>
             </div>
           </div>
@@ -114,7 +117,7 @@ const MentorProfile = () => {
               <div className='bg-primary/10 text-primary group-hover:bg-primary rounded-xl p-2 transition-colors group-hover:text-white'>
                 <Layers size={18} />
               </div>
-              <span className='text-lg'>Experience</span>
+              <span className='text-lg'>Kinh nghiệm</span>
             </div>
             <div className='text-muted relative mt-6 space-y-6 text-sm before:absolute before:inset-0 before:ml-2.5 before:h-full before:w-0.5 before:-translate-x-px before:bg-gradient-to-b before:from-transparent before:via-slate-200 before:to-transparent md:before:mx-auto md:before:translate-x-0'>
               {mentor.experience.map((item: Experience) => (
@@ -137,7 +140,7 @@ const MentorProfile = () => {
               <div className='bg-secondary/10 text-secondary group-hover:bg-secondary rounded-xl p-2 transition-colors group-hover:text-white'>
                 <GraduationCap size={18} />
               </div>
-              <span className='text-lg'>Education</span>
+              <span className='text-lg'>Học vấn</span>
             </div>
             <div className='text-muted mt-6 space-y-6 text-sm'>
               {mentor.education.map((item: Education) => (
@@ -159,7 +162,7 @@ const MentorProfile = () => {
           transition={{ duration: 0.5, delay: 0.4 }}
           className='glass-panel rounded-3xl border border-slate-200/60 bg-white/70 p-8'
         >
-          <SectionTitle title='Reviews' subtitle={`${mentor.reviewsCount} total reviews`} />
+          <SectionTitle title='Đánh giá' subtitle={`${mentor.reviewsCount} đánh giá từ học viên`} />
           <div className='mt-8 space-y-4'>
             {mentor.reviews.map((review: Review) => (
               <div

@@ -2,6 +2,7 @@ import { DashboardPage } from '@/components/DashboardPage'
 import { motion } from 'framer-motion'
 import { Heart, Search, Star, Trash2, ArrowRight } from 'lucide-react'
 import { Link } from 'react-router'
+import { getInitials } from '@/utils/format'
 import { mentors } from '../../constants/mentors'
 
 export function meta() {
@@ -47,12 +48,12 @@ export default function UserFavoritesPage() {
 
               <div className='flex flex-col items-center text-center'>
                 <div
-                  className={`h-20 w-20 rounded-2xl bg-gradient-to-br ${mentor.accent} mb-4 flex items-center justify-center text-2xl font-bold text-white shadow-lg`}
+                  className='bg-primary/10 text-primary mb-4 flex h-20 w-20 items-center justify-center rounded-2xl text-2xl font-bold shadow-lg'
                 >
-                  {mentor.initials}
+                  {getInitials(mentor.name)}
                 </div>
                 <h3 className='text-ink text-lg font-bold'>{mentor.name}</h3>
-                <p className='text-muted mb-3 text-sm'>{mentor.role}</p>
+                <p className='text-muted mb-3 text-sm'>{mentor.headline}</p>
                 <div className='mb-6 flex items-center gap-1'>
                   <Star size={14} className='fill-amber-400 text-amber-400' />
                   <span className='text-ink text-sm font-bold'>{mentor.rating}</span>

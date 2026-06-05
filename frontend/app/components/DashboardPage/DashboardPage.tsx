@@ -2,6 +2,8 @@ import type { ReactNode } from 'react'
 import { motion } from 'framer-motion'
 import { Sparkles } from 'lucide-react'
 
+import { EmptyState } from '@/components/EmptyState'
+
 type DashboardPageProps = {
   title: string
   description?: string
@@ -25,15 +27,12 @@ export function DashboardPage({ title, description, children }: DashboardPagePro
 
       <div className='relative z-10'>
         {children ?? (
-          <div className='glass-panel flex min-h-[300px] flex-col items-center justify-center rounded-3xl border border-slate-200/60 bg-white/60 p-12 text-center'>
-            <div className='bg-primary/10 text-primary mb-5 flex h-16 w-16 items-center justify-center rounded-full transition-transform group-hover:scale-110'>
-              <Sparkles size={28} />
-            </div>
-            <p className='text-ink text-lg font-medium'>Đang phát triển</p>
-            <p className='text-muted mt-2 max-w-sm text-sm'>
-              Tính năng này đang trong quá trình hoàn thiện. Bạn vui lòng quay lại sau nhé.
-            </p>
-          </div>
+          <EmptyState
+            className='glass-panel min-h-[300px] border-solid border-slate-200/60 bg-white/60'
+            description='Tính năng này đang trong quá trình hoàn thiện. Khi có dữ liệu hoặc workflow sẵn sàng, nội dung sẽ hiển thị tại đây.'
+            icon={<Sparkles aria-hidden='true' size={28} />}
+            title='Đang phát triển'
+          />
         )}
       </div>
     </motion.div>

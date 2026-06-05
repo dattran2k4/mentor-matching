@@ -3,6 +3,4 @@ export interface Testimonial {
   role: string
   rating: number
   text: string
-  initials: string
-  accent: string
 }

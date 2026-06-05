@@ -134,16 +134,14 @@ Prepare the frontend for confident implementation by establishing:
 
 ## Data And State Requirements
 
-### Domain View Models Needed Before Integration
+### Domain Types Needed Before Integration
 
-- mentor summary view model
-- mentor detail view model
-- mentor offering view model
-- mentor availability view model
-- booking row/detail view model
-- payment status display model
-- mentor approval display model
-- review summary display model
+- mentor domain types
+- mentor offering types
+- mentor availability types
+- booking and payment domain types
+- approval and verification domain types
+- route-local or mapper-owned presentation shapes where needed
 
 ### Shared State And Behavior Requirements
 
@@ -173,7 +171,7 @@ Includes:
 - standardize status badge rules
 - create shared empty/error states
 - normalize dashboard section patterns
-- define mentor, booking, and approval display models
+- define mentor, booking, payment, approval, and verification domain types clearly
 - realign public mock content to tutoring domain
 
 ### Phase 2: Static Public Marketplace

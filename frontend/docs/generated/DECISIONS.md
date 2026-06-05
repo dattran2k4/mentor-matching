@@ -71,3 +71,21 @@
 - rationale: this matches the implementation plan rule of foundation first and static UI before integration
 - alternatives considered: designing full-complexity interactive workflows before foundational components are ready
 - follow-up: schedule and admin review routes should start with clear list/summary/sheet structures before introducing advanced interaction patterns
+
+## Decision 9: shared status and state components are created before route rewrites
+
+- date: 2026-06-05
+- context: learner bookings, mentor cards, admin mentor review, and future payment surfaces all need consistent status semantics before API integration
+- decision: add `StatusBadge`, `EmptyState`, and `ScreenErrorState` under `frontend/app/components` using local component barrels
+- rationale: one shared vocabulary prevents ad hoc color pills and gives partial routes honest empty/error treatment without bespoke layout work
+- alternatives considered: leaving each route to render its own status and placeholder UI until integration
+- follow-up: later milestones should replace remaining ad hoc status labels in admin users, mentor schedule, mentor earnings, and dashboard health surfaces
+
+## Decision 10: display-specific shapes do not live in `app/types`
+
+- date: 2026-06-05
+- context: backend booking, mentor, approval, offering, and payment semantics are richer than the current static route data
+- decision: keep `frontend/app/types` for domain/object types only, and keep display-specific shapes local to the route or in a separate mapper/presenter layer if reuse becomes real
+- rationale: this keeps shared types aligned with business objects instead of coupling them to a temporary UI presentation shape
+- alternatives considered: adding `booking-display.ts`, `mentor-display.ts`, and `approval-display.ts` under `frontend/app/types`
+- follow-up: Milestone 1 keeps initials, decorative color choices, testimonial avatars, and subject preview metadata outside `app/types`; if a presenter layer becomes necessary later, place it outside `app/types`

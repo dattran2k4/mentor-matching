@@ -11,18 +11,30 @@ const BookingSidebar = ({ mentor }: BookingSidebarProps) => {
     <div className='shadow-soft sticky top-24 rounded-2xl border border-slate-200 bg-white p-5'>
       <div className='flex items-center justify-between'>
         <div>
-          <p className='text-muted text-sm'>Hourly rate</p>
-          <p className='text-ink text-2xl font-semibold'>{formatPrice(mentor.price)}</p>
+          <p className='text-muted text-sm'>Học phí từ</p>
+          <p className='text-ink text-2xl font-semibold'>{formatPrice(mentor.startingPrice)}</p>
         </div>
         <span className='bg-primary/10 text-primary rounded-full px-3 py-1 text-xs font-semibold'>
-          {mentor.rating} rating
+          {mentor.rating} sao
         </span>
+      </div>
+
+      <div className='mt-6'>
+        <p className='text-muted mb-2 text-xs font-semibold uppercase tracking-wide'>
+          Gợi ý môn học
+        </p>
+        <div className='rounded-2xl border border-slate-200 bg-slate-50 p-3 text-sm'>
+          <p className='text-ink font-semibold'>
+            {mentor.offerings[0]?.subject} · {mentor.offerings[0]?.grade}
+          </p>
+          <p className='text-muted mt-1 text-xs'>{mentor.offerings[0]?.teachingNote}</p>
+        </div>
       </div>
 
       <div className='mt-6'>
         <div className='text-ink flex items-center gap-2 text-sm font-semibold'>
           <CalendarDays size={16} />
-          November 2026
+          Tháng 11, 2026
         </div>
         <div className='text-muted mt-3 grid grid-cols-7 gap-2 text-xs'>
           {Array.from({ length: 28 }).map((_, index) => (
@@ -41,7 +53,7 @@ const BookingSidebar = ({ mentor }: BookingSidebarProps) => {
       <div className='mt-6'>
         <div className='text-ink flex items-center gap-2 text-sm font-semibold'>
           <Clock size={16} />
-          Available Times
+          Khung giờ có thể học
         </div>
         <div className='mt-3 grid grid-cols-2 gap-2 text-xs'>
           {['09:00 AM', '11:30 AM', '02:00 PM', '04:30 PM'].map((time) => (
@@ -61,19 +73,21 @@ const BookingSidebar = ({ mentor }: BookingSidebarProps) => {
 
       <div className='mt-6 rounded-2xl bg-slate-50 p-4 text-sm'>
         <div className='text-muted flex items-center justify-between'>
-          <span>1 session (60m)</span>
-          <span>{formatPrice(mentor.price)}</span>
+          <span>1 buổi học (60p)</span>
+          <span>{formatPrice(mentor.offerings[0]?.pricePerHour ?? mentor.startingPrice)}</span>
         </div>
         <div className='text-ink mt-2 flex items-center justify-between font-semibold'>
-          <span>Total</span>
-          <span>{formatPrice(mentor.price)}</span>
+          <span>Tạm tính</span>
+          <span>{formatPrice(mentor.offerings[0]?.pricePerHour ?? mentor.startingPrice)}</span>
         </div>
       </div>
 
       <button className='bg-primary shadow-lift mt-6 w-full rounded-full px-4 py-3 text-sm font-semibold text-white transition hover:translate-y-[-2px]'>
-        Book Now
+        Đặt buổi học
       </button>
-      <p className='text-muted mt-3 text-center text-xs'>100% satisfaction guarantee</p>
+      <p className='text-muted mt-3 text-center text-xs'>
+        Chọn môn học và khung giờ trước khi gửi yêu cầu đặt lịch.
+      </p>
     </div>
   )
 }

@@ -1,8 +1,11 @@
 import { BadgeCheck, Clock, Users } from 'lucide-react'
 import { motion } from 'framer-motion'
 import { Link } from 'react-router'
+
+import { StatusBadge } from '@/components/StatusBadge'
+import { formatPrice, getInitials } from '@/utils/format'
+
 import RatingStars from './RatingStars'
-import { formatPrice } from '../utils/format'
 import type { Mentor } from '../types/mentor'
 
 interface MentorCardProps {
@@ -20,22 +23,31 @@ const MentorCard = ({ mentor }: MentorCardProps) => {
       <div className='relative z-10 flex items-start justify-between'>
         <div className='flex items-center gap-4'>
           <div
-            className={`flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br ${mentor.accent} text-lg font-bold text-white shadow-md`}
+            className='bg-primary/10 text-primary flex h-14 w-14 items-center justify-center rounded-2xl text-lg font-bold'
           >
-            {mentor.initials}
+            {getInitials(mentor.name)}
           </div>
           <div>
             <div className='flex items-center gap-2'>
               <h3 className='text-ink text-base font-semibold'>{mentor.name}</h3>
-              {mentor.verified ? <BadgeCheck className='text-primary h-4 w-4' /> : null}
+              {mentor.verificationStatus === 'VERIFIED' ? (
+                <BadgeCheck className='text-primary h-4 w-4' />
+              ) : null}
             </div>
-            <p className='text-muted text-xs'>{mentor.role}</p>
+            <p className='text-muted text-xs'>{mentor.headline}</p>
           </div>
         </div>
         <div className='text-right'>
-          <p className='text-ink text-sm font-semibold'>{formatPrice(mentor.price)}</p>
-          <p className='text-muted text-xs'>per hour</p>
+          <p className='text-ink text-sm font-semibold'>{formatPrice(mentor.startingPrice)}</p>
+          <p className='text-muted text-xs'>mỗi giờ</p>
         </div>
+      </div>
+
+      <div className='mt-4 flex flex-wrap gap-2'>
+        <StatusBadge kind='approval' status={mentor.approvalStatus} />
+        <span className='rounded-full border border-slate-200 bg-slate-50 px-2.5 py-1 text-xs font-semibold text-slate-600'>
+          {mentor.meetingTypes.join(' / ')}
+        </span>
       </div>
 
       <div className='mt-4 flex items-center justify-between'>
@@ -50,20 +62,25 @@ const MentorCard = ({ mentor }: MentorCardProps) => {
           </span>
           <span className='flex items-center gap-1'>
             <Users size={14} />
-            {mentor.students}
+            {mentor.activeStudentsCount}
           </span>
         </div>
       </div>
 
-      <p className='text-muted mt-4 text-sm'>{mentor.bio}</p>
+      <p className='text-muted mt-4 text-sm'>{mentor.introduction}</p>
+
+      <p className='text-ink mt-4 text-xs font-semibold'>
+        {mentor.subjects.join(', ')} · {mentor.grades.slice(0, 2).join(', ')}
+      </p>
+      <p className='text-muted mt-1 text-xs'>{mentor.availabilitySummary}</p>
 
       <div className='mt-5 flex flex-wrap gap-2'>
-        {mentor.tags.map((tag: string) => (
+        {mentor.highlights.map((highlight: string) => (
           <span
-            key={tag}
+            key={highlight}
             className='text-muted rounded-full border border-slate-200/80 bg-slate-50/80 px-3 py-1.5 text-xs shadow-sm'
           >
-            {tag}
+            {highlight}
           </span>
         ))}
       </div>
@@ -73,13 +90,13 @@ const MentorCard = ({ mentor }: MentorCardProps) => {
           to={`/mentor/${mentor.id}`}
           className='border-primary/30 text-primary hover:bg-primary/5 hover:border-primary flex-1 shrink-0 rounded-full border px-4 py-2.5 text-center text-sm font-semibold transition-all'
         >
-          View Profile
+          Xem hồ sơ
         </Link>
         <Link
           to={`/mentor/${mentor.id}`}
           className='from-primary to-primary-light shadow-soft hover:shadow-glow flex-1 rounded-full bg-gradient-to-r px-4 py-2.5 text-center text-sm font-semibold text-white transition-all hover:-translate-y-0.5'
         >
-          Book Now
+          Đặt buổi học
         </Link>
       </div>
     </motion.article>

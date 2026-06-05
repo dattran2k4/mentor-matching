@@ -7,7 +7,8 @@ const SearchBar = () => {
         <Search className='text-muted h-4 w-4' />
         <input
           type='text'
-          placeholder='Search by name, subject, or skill'
+          aria-label='Tìm theo môn học, mentor hoặc mục tiêu học tập'
+          placeholder='Môn học, mentor hoặc mục tiêu học tập'
           className='text-ink w-full bg-transparent text-sm outline-none'
         />
       </div>
@@ -15,12 +16,13 @@ const SearchBar = () => {
         <MapPin className='text-muted h-4 w-4' />
         <input
           type='text'
-          placeholder='Location or time zone'
+          aria-label='Khu vực hoặc hình thức học'
+          placeholder='Khu vực hoặc học online/offline'
           className='text-ink w-full bg-transparent text-sm outline-none'
         />
       </div>
       <button className='bg-primary shadow-lift rounded-xl px-6 py-3 text-sm font-semibold text-white transition hover:translate-y-[-2px]'>
-        Find Mentors
+        Tìm mentor
       </button>
     </div>
   )

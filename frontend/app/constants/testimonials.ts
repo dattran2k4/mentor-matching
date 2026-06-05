@@ -1,29 +1,23 @@
 export const testimonials = [
   {
     id: 't-1',
-    name: 'Amina Noor',
-    role: 'Software Engineer',
+    name: 'Phụ huynh Minh An',
+    role: 'Phụ huynh học sinh lớp 9',
     rating: 5,
-    text: 'I shipped a new portfolio in three weeks. The feedback loop was fast and actionable.',
-    initials: 'AN',
-    accent: 'from-blue-500/80 to-indigo-400/80'
+    text: 'Mentor giúp con tôi lấp lỗ hổng Toán rất rõ ràng. Mỗi tuần gia đình đều nhận được nhận xét ngắn và bài cần luyện.'
   },
   {
     id: 't-2',
-    name: 'Laura Wu',
-    role: 'Product Manager',
+    name: 'Lan N.',
+    role: 'Học viên IELTS Foundation',
     rating: 5,
-    text: 'The sessions were structured and focused on my career goals. I got promoted last quarter.',
-    initials: 'LW',
-    accent: 'from-cyan-500/80 to-sky-400/80'
+    text: 'Lộ trình học vừa sức, buổi nào cũng có mục tiêu cụ thể. Tôi biết mình đang tiến bộ ở kỹ năng nào.'
   },
   {
     id: 't-3',
-    name: 'Mark S.',
-    role: 'Data Analyst',
+    name: 'Quang P.',
+    role: 'Học sinh lớp 11',
     rating: 4,
-    text: 'Clear explanations and thoughtful homework. The mentor helped me land my first role.',
-    initials: 'MS',
-    accent: 'from-emerald-500/80 to-teal-400/80'
+    text: 'Các buổi Vật lý dễ hiểu hơn vì mentor giải thích bằng ví dụ thực tế trước khi vào công thức.'
   }
 ]

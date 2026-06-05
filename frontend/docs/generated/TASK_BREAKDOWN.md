@@ -45,17 +45,18 @@
   - reusable screen error/retry state exists
   - placeholder routes can use them without bespoke layout invention
 
-### Task 1.4: Define frontend view models for mentor, booking, and approval displays
+### Task 1.4: Clarify domain types and local presentation shapes
 
 - suggested order: 4
 - complexity: `M`
 - dependencies: project context, screen specs, backend domain semantics
-- goal: create stable frontend-facing shapes for repeated UI consumption before data integration
-- likely files affected: `app/types`, maybe `app/utils` or dedicated view-model modules
+- goal: keep shared types aligned to domain objects while letting presentation-only shapes stay local or move into a separate mapper layer if reuse becomes necessary
+- likely files affected: `app/types`, route modules, maybe dedicated mapper/presenter modules if justified later
 - acceptance criteria:
-  - mentor summary/detail shapes are explicit
-  - booking row/detail shapes are explicit
-  - approval display shape is explicit
+  - shared types describe domain objects and statuses clearly
+  - booking and payment statuses live with booking-related types
+  - mentor approval and verification statuses live with mentor-related types
+  - presentation-only shapes do not pollute `app/types`
   - types align with framework docs and do not use `any`
 
 ## Milestone 2: Public Marketplace Static UI

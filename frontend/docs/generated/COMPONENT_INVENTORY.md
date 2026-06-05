@@ -8,13 +8,25 @@
 
 ## Existing Reusable Components
 
+- component: `StatusBadge`
+  status: added in Milestone 1
+  notes: shared status vocabulary for booking, payment, mentor approval, verification, and user states; currently adopted by learner bookings, mentor cards, mentor profile, and admin mentor review surfaces
+
+- component: `EmptyState`
+  status: added in Milestone 1
+  notes: shared empty/placeholder state with icon, title, helper copy, and optional action; used by `DashboardPage` default content plus filtered empty states in learner bookings and admin mentor management
+
+- component: `ScreenErrorState`
+  status: added in Milestone 1
+  notes: shared screen-level error/retry surface built on `EmptyState`; ready for API-backed routes as data integration expands
+
 - component: `DashboardShell`
   status: stable reusable foundation
   notes: correct choice for all role dashboards; should remain the workspace shell
 
 - component: `DashboardPage`
-  status: reusable with minor revision
-  notes: good page wrapper, but default empty state is too generic for long-term workflow use
+  status: reusable foundation
+  notes: good page wrapper; default placeholder now delegates to `EmptyState` so route placeholders share the same state pattern
 
 - component: `RoleGuard`
   status: stable reusable foundation
@@ -37,12 +49,12 @@
   notes: strong structural candidate for discover filters; should be tied to real mentor/catalog concepts
 
 - component: `MentorCard`
-  status: reusable with domain refactor
-  notes: should become the canonical mentor summary card after replacing generic expert fields with tutoring fields
+  status: reusable with initial domain refactor
+  notes: now consumes tutoring-aligned mentor mock data, shows approval status, subject/grade coverage, meeting type, price, rating, and availability hint; future work should continue toward the canonical mentor summary card
 
 - component: `BookingSidebar`
-  status: reusable with workflow refactor
-  notes: good shell for booking summary, but must reflect mentor offering, availability, and session semantics
+  status: reusable with initial workflow refactor
+  notes: good shell for booking summary; now references mentor offering, session, and VND tuition language, but still needs full offering/availability selection in later milestones
 
 - component: `SectionTitle`
   status: reusable
@@ -117,18 +129,6 @@
   likely consumers: most dashboard routes
 
 ## Candidate Shared Components To Add
-
-- component: `StatusBadge`
-  reason: booking, payment, approval, and verification states need a single display vocabulary
-  likely consumers: learner bookings, mentor schedule, mentor dashboard, admin dashboard, admin mentors, earnings
-
-- component: `EmptyState`
-  reason: several routes are placeholder or partially supported and need a shared honest pattern
-  likely consumers: favorites, messages, reports, settings, empty dashboards
-
-- component: `ScreenErrorState`
-  reason: screen-level retry/error handling should be consistent before API integration expands
-  likely consumers: discover, mentor profile, bookings, admin lists
 
 - component: `DashboardSectionHeader`
   reason: role dashboards currently improvise subsection headers and action rows

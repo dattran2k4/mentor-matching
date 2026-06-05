@@ -1,179 +1,249 @@
-export const mentors = [
+import type { Mentor } from '@/types/mentor'
+
+export const mentors: Mentor[] = [
   {
-    id: 'sarah-jenkins',
-    name: 'Dr. Sarah Jenkins',
-    role: 'Senior Full-Stack Architect',
-    verified: true,
+    id: 'nguyen-minh-anh',
+    name: 'Nguyễn Minh Anh',
+    headline: 'Mentor Toán THCS, luyện nền tảng và tư duy giải bài',
+    approvalStatus: 'APPROVED',
+    verificationStatus: 'VERIFIED',
     rating: 4.9,
     reviewsCount: 112,
-    responseTime: '1 hour',
-    students: 2100,
-    price: 120,
-    expertise: 'Product and Data Systems',
-    tags: ['System Design', 'Backend', 'Mentorship'],
-    bio: 'With 8+ years of experience in large-scale systems, Sarah helps learners build reliable architectures and practical engineering habits.',
-    subjects: ['Python', 'System Design', 'Cloud'],
-    experience: [
+    responseTime: 'Trong 1 giờ',
+    activeStudentsCount: 186,
+    startingPrice: 280000,
+    expertise: 'Toán THCS và ôn thi chuyển cấp',
+    highlights: ['Toán lớp 8-9', 'Ôn thi lớp 10', 'Học online'],
+    introduction:
+      'Minh Anh giúp học viên mất gốc Toán xây lại nền tảng, luyện phương pháp trình bày và bám sát mục tiêu kiểm tra hoặc thi chuyển cấp.',
+    subjects: ['Toán'],
+    grades: ['Lớp 8', 'Lớp 9', 'Ôn thi lớp 10'],
+    meetingTypes: ['ONLINE', 'HYBRID'],
+    availabilitySummary: 'Tối Thứ 2, Thứ 4 và sáng Chủ nhật',
+    teachingStyle:
+      'Chẩn đoán lỗ hổng trước, chia bài theo mục tiêu tuần, giao bài ngắn sau mỗi buổi và phản hồi rõ phần cần sửa.',
+    offerings: [
       {
-        title: 'Staff Engineer',
-        company: 'Strata Labs',
-        period: '2020 - Present'
+        id: 'math-grade-9-foundation',
+        subject: 'Toán',
+        grade: 'Lớp 9',
+        proficiency: 'ADVANCED',
+        pricePerHour: 280000,
+        active: true,
+        teachingNote: 'Tập trung đại số, hình học và đề chuyển cấp.'
       },
       {
-        title: 'Senior Software Engineer',
-        company: 'PixelWorks',
-        period: '2017 - 2020'
+        id: 'math-grade-8-foundation',
+        subject: 'Toán',
+        grade: 'Lớp 8',
+        proficiency: 'INTERMEDIATE',
+        pricePerHour: 240000,
+        active: true,
+        teachingNote: 'Củng cố nền tảng và thói quen làm bài.'
+      }
+    ],
+    experience: [
+      {
+        title: 'Mentor Toán cá nhân',
+        company: 'Mentor Matching',
+        period: '2021 - nay'
+      },
+      {
+        title: 'Giáo viên Toán',
+        company: 'Trung tâm Bright Math',
+        period: '2018 - 2021'
       }
     ],
     education: [
       {
-        degree: 'MSc in Software Engineering',
-        school: 'MIT'
-      },
-      {
-        degree: 'BSc in Computer Science',
-        school: 'Stanford University'
+        degree: 'Cử nhân Sư phạm Toán',
+        school: 'Đại học Sư phạm TP.HCM'
       }
     ],
     reviews: [
       {
-        name: 'Mason T.',
+        name: 'Phụ huynh bé An',
         rating: 5,
-        text: 'Sarah made system design feel approachable and actionable. Sessions were focused and practical.'
+        text: 'Mentor chỉ ra đúng phần con bị hổng và chia bài rất vừa sức. Sau 6 tuần con tự tin hơn hẳn.'
       },
       {
-        name: 'Elena R.',
+        name: 'Minh K.',
         rating: 5,
-        text: 'Great mentor with clear explanations and real-world insights. Highly recommend.'
+        text: 'Cách giải thích dễ hiểu, có checklist lỗi sai sau mỗi buổi nên em biết cần luyện gì.'
       }
-    ],
-    initials: 'SJ',
-    accent: 'from-blue-500/80 to-cyan-400/80'
+    ]
   },
   {
-    id: 'james-chen',
-    name: 'James Chen',
-    role: 'Senior ML Engineer at Google',
-    verified: true,
+    id: 'tran-quoc-huy',
+    name: 'Trần Quốc Huy',
+    headline: 'Mentor Tiếng Anh giao tiếp và IELTS nền tảng',
+    approvalStatus: 'APPROVED',
+    verificationStatus: 'VERIFIED',
     rating: 4.8,
     reviewsCount: 86,
-    responseTime: '2 hours',
-    students: 1750,
-    price: 95,
-    expertise: 'Machine Learning and AI',
-    tags: ['Python', 'ML Ops', 'AI'],
-    bio: 'James guides learners through applied machine learning, from feature engineering to production ML systems.',
-    subjects: ['Python', 'Data Science', 'Deep Learning'],
-    experience: [
+    responseTime: 'Trong 2 giờ',
+    activeStudentsCount: 142,
+    startingPrice: 320000,
+    expertise: 'Tiếng Anh THPT, IELTS 5.0-6.5',
+    highlights: ['IELTS cơ bản', 'Tiếng Anh THPT', 'Online'],
+    introduction:
+      'Quốc Huy xây lộ trình học tiếng Anh theo mục tiêu cụ thể: cải thiện điểm trên lớp, luyện nói tự tin hoặc chuẩn bị IELTS mức nền tảng.',
+    subjects: ['Tiếng Anh'],
+    grades: ['Lớp 10', 'Lớp 11', 'Lớp 12', 'IELTS Foundation'],
+    meetingTypes: ['ONLINE'],
+    availabilitySummary: 'Tối các ngày trong tuần',
+    teachingStyle:
+      'Kết hợp sửa phát âm, luyện phản xạ ngắn, từ vựng theo chủ đề và bài tập nghe-nói sau buổi học.',
+    offerings: [
       {
-        title: 'Senior ML Engineer',
-        company: 'Google',
-        period: '2019 - Present'
+        id: 'english-grade-12-exam',
+        subject: 'Tiếng Anh',
+        grade: 'Lớp 12',
+        proficiency: 'ADVANCED',
+        pricePerHour: 300000,
+        active: true,
+        teachingNote: 'Ôn ngữ pháp, đọc hiểu và chiến thuật làm đề.'
       },
       {
-        title: 'ML Engineer',
-        company: 'Nimbus AI',
-        period: '2016 - 2019'
+        id: 'ielts-foundation',
+        subject: 'IELTS',
+        grade: 'Foundation',
+        proficiency: 'INTERMEDIATE',
+        pricePerHour: 320000,
+        active: true,
+        teachingNote: 'Lộ trình cho mục tiêu 5.0-6.5.'
+      }
+    ],
+    experience: [
+      {
+        title: 'IELTS Mentor',
+        company: 'English Pathway',
+        period: '2020 - nay'
+      },
+      {
+        title: 'Trợ giảng Tiếng Anh',
+        company: 'Đại học Ngoại ngữ',
+        period: '2018 - 2020'
       }
     ],
     education: [
       {
-        degree: 'MSc in Artificial Intelligence',
-        school: 'Carnegie Mellon University'
+        degree: 'Cử nhân Ngôn ngữ Anh',
+        school: 'Đại học Khoa học Xã hội và Nhân văn'
       }
     ],
     reviews: [
       {
-        name: 'Rita K.',
+        name: 'Lan N.',
         rating: 5,
-        text: 'Clear learning plan and useful feedback. My portfolio improved quickly.'
+        text: 'Mỗi buổi đều có mục tiêu rõ, sửa lỗi phát âm rất kỹ và bài tập không bị quá tải.'
       }
-    ],
-    initials: 'JC',
-    accent: 'from-indigo-500/80 to-sky-400/80'
+    ]
   },
   {
-    id: 'elena-rodriguez',
-    name: 'Elena Rodriguez',
-    role: 'Product Design Lead at Lumina',
-    verified: true,
+    id: 'le-thu-ha',
+    name: 'Lê Thu Hà',
+    headline: 'Mentor Vật lý THPT, học qua ví dụ thực tế',
+    approvalStatus: 'APPROVED',
+    verificationStatus: 'VERIFIED',
     rating: 4.7,
     reviewsCount: 64,
-    responseTime: '3 hours',
-    students: 980,
-    price: 80,
-    expertise: 'UX and Product Design',
-    tags: ['Design Systems', 'UX', 'Product'],
-    bio: 'Elena helps designers build strong portfolios, storytelling, and research-driven UX practices.',
-    subjects: ['Design', 'Prototyping', 'User Research'],
+    responseTime: 'Trong 3 giờ',
+    activeStudentsCount: 98,
+    startingPrice: 260000,
+    expertise: 'Vật lý lớp 10-12',
+    highlights: ['Vật lý THPT', 'Mất gốc', 'Hybrid'],
+    introduction:
+      'Thu Hà giúp học viên hiểu bản chất công thức qua ví dụ gần gũi, sau đó luyện dạng bài theo mức độ từ cơ bản đến nâng cao.',
+    subjects: ['Vật lý'],
+    grades: ['Lớp 10', 'Lớp 11', 'Lớp 12'],
+    meetingTypes: ['HYBRID', 'OFFLINE'],
+    availabilitySummary: 'Chiều Thứ 7 và Chủ nhật tại Quận 7 hoặc online',
+    teachingStyle:
+      'Dạy theo sơ đồ khái niệm, ví dụ đời sống và bài luyện theo cấp độ để học viên nắm chắc vì sao dùng công thức.',
+    offerings: [
+      {
+        id: 'physics-grade-11',
+        subject: 'Vật lý',
+        grade: 'Lớp 11',
+        proficiency: 'INTERMEDIATE',
+        pricePerHour: 260000,
+        active: true,
+        teachingNote: 'Điện học, quang học và bài tập vận dụng.'
+      }
+    ],
     experience: [
       {
-        title: 'Design Lead',
-        company: 'Lumina',
-        period: '2021 - Present'
-      },
-      {
-        title: 'Senior Product Designer',
-        company: 'Northwind',
-        period: '2017 - 2021'
+        title: 'Mentor Vật lý',
+        company: 'STEM Lab Sài Gòn',
+        period: '2019 - nay'
       }
     ],
     education: [
       {
-        degree: 'BA in Interaction Design',
-        school: 'Parsons School of Design'
+        degree: 'Thạc sĩ Vật lý ứng dụng',
+        school: 'Đại học Khoa học Tự nhiên'
       }
     ],
     reviews: [
       {
-        name: 'Tessa N.',
+        name: 'Quang P.',
         rating: 5,
-        text: 'Portfolio feedback was detailed and kind. I landed interviews in two weeks.'
+        text: 'Cô giải thích công thức bằng ví dụ nên em dễ nhớ hơn, không còn học thuộc máy móc.'
       }
-    ],
-    initials: 'ER',
-    accent: 'from-blue-500/80 to-violet-400/80'
+    ]
   },
   {
-    id: 'marcus-chen',
-    name: 'Marcus Chen',
-    role: 'Data Analytics Manager at Stripe',
-    verified: false,
+    id: 'pham-gia-bao',
+    name: 'Phạm Gia Bảo',
+    headline: 'Mentor lập trình Python cho học sinh mới bắt đầu',
+    approvalStatus: 'PENDING',
+    verificationStatus: 'PENDING',
     rating: 4.6,
     reviewsCount: 51,
-    responseTime: '4 hours',
-    students: 720,
-    price: 75,
-    expertise: 'Analytics and Business Intelligence',
-    tags: ['SQL', 'Analytics', 'Storytelling'],
-    bio: 'Marcus teaches data storytelling, KPI design, and real-world analytics workflows for product teams.',
-    subjects: ['SQL', 'Analytics', 'Business'],
+    responseTime: 'Trong 4 giờ',
+    activeStudentsCount: 74,
+    startingPrice: 300000,
+    expertise: 'Python cơ bản và tư duy thuật toán',
+    highlights: ['Python', 'Tin học', 'Dự án nhỏ'],
+    introduction:
+      'Gia Bảo hướng dẫn học sinh làm quen với Python qua bài tập trực quan, mini project và cách debug từng bước.',
+    subjects: ['Lập trình'],
+    grades: ['THCS', 'THPT', 'Người mới bắt đầu'],
+    meetingTypes: ['ONLINE'],
+    availabilitySummary: 'Tối Thứ 3, Thứ 5 và Chủ nhật',
+    teachingStyle:
+      'Học qua mini project, giải thích lỗi trực tiếp và dùng bài tập ngắn để hình thành tư duy thuật toán.',
+    offerings: [
+      {
+        id: 'python-beginner',
+        subject: 'Lập trình Python',
+        grade: 'Người mới bắt đầu',
+        proficiency: 'INTERMEDIATE',
+        pricePerHour: 300000,
+        active: true,
+        teachingNote: 'Biến, vòng lặp, hàm, cấu trúc dữ liệu và mini project.'
+      }
+    ],
     experience: [
       {
-        title: 'Analytics Manager',
-        company: 'Stripe',
-        period: '2022 - Present'
-      },
-      {
-        title: 'Senior Data Analyst',
-        company: 'Atlas Labs',
-        period: '2018 - 2022'
+        title: 'Mentor lập trình thiếu niên',
+        company: 'Code Starter',
+        period: '2022 - nay'
       }
     ],
     education: [
       {
-        degree: 'BSc in Business Analytics',
-        school: 'UC Berkeley'
+        degree: 'Kỹ sư Công nghệ thông tin',
+        school: 'Đại học Bách khoa TP.HCM'
       }
     ],
     reviews: [
       {
-        name: 'Amir S.',
+        name: 'Phụ huynh Minh T.',
         rating: 4,
-        text: 'Great practical exercises and dashboards. Loved the focus on business context.'
+        text: 'Buổi học vui, có sản phẩm nhỏ sau mỗi chặng nên con có động lực tiếp tục.'
       }
-    ],
-    initials: 'MC',
-    accent: 'from-emerald-500/80 to-cyan-400/80'
+    ]
   }
 ]

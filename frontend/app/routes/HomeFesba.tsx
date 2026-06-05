@@ -60,15 +60,15 @@ const Home = () => {
               <span className='bg-primary absolute inline-flex h-full w-full animate-ping rounded-full opacity-75'></span>
               <span className='bg-primary relative inline-flex h-2 w-2 rounded-full'></span>
             </span>
-            Curated mentors for ambitious learners
+            Mentor đã duyệt cho từng mục tiêu học tập
           </div>
           <h1 className='text-ink text-4xl leading-[1.1] font-semibold tracking-tight md:text-5xl lg:text-6xl'>
-            Find the perfect mentor to{' '}
-            <span className='text-gradient'>accelerate your future.</span>
+            Tìm mentor phù hợp để{' '}
+            <span className='text-gradient'>học đúng thứ, đúng nhịp.</span>
           </h1>
           <p className='text-muted max-w-lg text-base leading-relaxed md:text-lg'>
-            Expert-led personalized sessions, built for developers, designers, and ambitious
-            professionals.
+            Tìm theo môn học, lớp, mục tiêu học tập và hình thức học phù hợp. Mỗi hồ sơ mentor đều
+            hiển thị học phí, đánh giá, cách dạy và trạng thái duyệt rõ ràng.
           </p>
           <div className='glass-panel rounded-2xl p-2'>
             <SearchBar />
@@ -94,9 +94,9 @@ const Home = () => {
       >
         <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10 mix-blend-overlay"></div>
         {[
-          { value: '12,000+', label: 'Active mentors' },
-          { value: '500K+', label: 'Sessions booked' },
-          { value: '150+', label: 'Subjects covered' }
+          { value: '240+', label: 'Mentor đã duyệt' },
+          { value: '8,500+', label: 'Buổi học đã đặt' },
+          { value: '40+', label: 'Môn học và cấp lớp' }
         ].map((stat, i) => (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -117,15 +117,15 @@ const Home = () => {
       <section className='flex flex-col gap-8'>
         <div className='flex items-end justify-between gap-4'>
           <SectionTitle
-            eyebrow='Top Rated'
-            title='Top-rated mentors'
-            subtitle='Learn from industry experts with high student ratings.'
+            eyebrow='Mentor nổi bật'
+            title='Mentor được học viên đánh giá cao'
+            subtitle='So sánh môn học, lớp, học phí, hình thức học và tín nhiệm ngay trên từng hồ sơ.'
           />
           <Link
             to={path.discover}
             className='text-primary hidden items-center gap-2 text-sm font-semibold md:flex'
           >
-            View all <ArrowUpRight size={16} />
+            Xem tất cả <ArrowUpRight size={16} />
           </Link>
         </div>
         <div className='grid gap-6 md:grid-cols-2 xl:grid-cols-3'>
@@ -137,9 +137,9 @@ const Home = () => {
 
       <section className='flex flex-col gap-8'>
         <SectionTitle
-          eyebrow='Explore'
-          title='Popular subjects'
-          subtitle='Choose a track and start building your next skill.'
+          eyebrow='Môn học'
+          title='Bắt đầu từ môn học và cấp lớp'
+          subtitle='Chọn đúng nền tảng cần cải thiện trước khi xem mentor phù hợp.'
         />
         <div className='grid gap-4 sm:grid-cols-2 lg:grid-cols-4'>
           {subjects.map((subject) => (
@@ -157,17 +157,17 @@ const Home = () => {
           <div className='pointer-events-none absolute -top-20 -right-20 h-64 w-64 rounded-full bg-white/10 blur-3xl'></div>
           <div>
             <p className='text-sm font-semibold tracking-[0.2em] text-blue-200 uppercase'>
-              Ready to start?
+              Sẵn sàng bắt đầu?
             </p>
             <h3 className='mt-4 max-w-sm text-4xl leading-tight font-semibold'>
-              Join thousands of students and fast-track your learning.
+              Tìm mentor, chọn buổi học và theo dõi tiến độ học tập của bạn.
             </h3>
           </div>
           <Link
             to={path.discover}
             className='text-primary mt-8 inline-flex w-fit rounded-full bg-white px-8 py-4 text-sm font-semibold transition-transform hover:scale-105 hover:shadow-lg active:scale-95'
           >
-            Start learning now
+            Tìm mentor ngay
           </Link>
         </motion.div>
 
@@ -179,21 +179,21 @@ const Home = () => {
           <div className='bg-secondary/5 pointer-events-none absolute -right-10 -bottom-10 h-40 w-40 rounded-full blur-2xl'></div>
           <div>
             <p className='text-secondary text-sm font-semibold tracking-[0.2em] uppercase'>
-              Become a mentor
+              Dành cho mentor
             </p>
             <h3 className='text-ink mt-4 max-w-sm text-4xl leading-tight font-semibold'>
-              Teach learners and earn on your schedule.
+              Dạy học viên theo lịch của bạn và xây dựng hồ sơ uy tín.
             </h3>
             <p className='text-muted mt-4 max-w-md text-base leading-relaxed'>
-              Share expertise, grow your network, and help others reach their goals while earning a
-              steady income.
+              Tạo hồ sơ giảng dạy, khai báo môn học và học phí, cập nhật khung giờ rảnh và chờ
+              duyệt trước khi xuất hiện công khai.
             </p>
           </div>
           <Link
             to={path.mentorPanel.root}
             className='bg-ink shadow-lift group mt-8 inline-flex w-fit rounded-full px-8 py-4 text-sm font-semibold text-white transition-transform hover:scale-105 active:scale-95'
           >
-            Apply to become a Mentor{' '}
+            Bắt đầu hồ sơ mentor{' '}
             <ArrowUpRight
               size={18}
               className='ml-2 transition-transform group-hover:translate-x-1 group-hover:-translate-y-1'
@@ -204,9 +204,9 @@ const Home = () => {
 
       <section className='flex flex-col gap-8'>
         <SectionTitle
-          eyebrow='Success stories'
-          title='What students are saying'
-          subtitle='Real feedback from learners across the platform.'
+          eyebrow='Phản hồi'
+          title='Học viên và phụ huynh nói gì'
+          subtitle='Phản hồi về buổi học, cách dạy và tiến độ học tập.'
         />
         <div className='grid gap-6 md:grid-cols-3'>
           {testimonials.map((testimonial) => (

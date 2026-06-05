@@ -1,4 +1,5 @@
 import RatingStars from './RatingStars'
+import { getInitials } from '@/utils/format'
 import type { Testimonial } from '../types/testimonial'
 
 interface TestimonialCardProps {
@@ -14,9 +15,9 @@ const TestimonialCard = ({ testimonial }: TestimonialCardProps) => {
       </div>
       <div className='mt-6 flex items-center gap-3'>
         <div
-          className={`flex h-11 w-11 items-center justify-center rounded-full bg-gradient-to-br ${testimonial.accent} text-sm font-semibold text-white`}
+          className='bg-primary/10 text-primary flex h-11 w-11 items-center justify-center rounded-full text-sm font-semibold'
         >
-          {testimonial.initials}
+          {getInitials(testimonial.name)}
         </div>
         <div>
           <p className='text-ink text-sm font-semibold'>{testimonial.name}</p>

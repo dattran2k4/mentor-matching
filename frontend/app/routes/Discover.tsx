@@ -15,17 +15,17 @@ const Discover = () => {
       <div className='flex flex-wrap items-center justify-between gap-4'>
         <div>
           <h1 className='mb-2 text-3xl font-bold tracking-tight md:text-4xl'>
-            <span className='text-gradient'>Mentor discovery</span>
+            <span className='text-gradient'>Tìm mentor</span>
           </h1>
           <p className='text-muted'>
-            Browse verified mentors and filter by goals, price, and availability.
+            Lọc theo môn học, lớp, hình thức học, học phí và tín nhiệm để so sánh mentor phù hợp.
           </p>
         </div>
         <button
           className='text-ink flex items-center gap-2 rounded-full border border-slate-200 px-4 py-2 text-sm font-semibold md:hidden'
           onClick={() => setFiltersOpen(true)}
         >
-          <Filter size={16} /> Filters
+          <Filter size={16} /> Bộ lọc
         </button>
       </div>
 

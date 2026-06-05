@@ -3,10 +3,10 @@ import { motion } from 'framer-motion'
 import { Link } from 'react-router'
 
 import { path } from '@/config/path'
-import type { Subject } from '../types/subject'
+import type { SubjectPreview } from '@/constants/subjects'
 
 interface SubjectCardProps {
-  subject: Subject
+  subject: SubjectPreview
 }
 
 const SubjectCard = ({ subject }: SubjectCardProps) => {
