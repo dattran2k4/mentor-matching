@@ -56,7 +56,11 @@ export default function UserFavoritesPage() {
 
           <div className='mt-5 flex flex-wrap items-center justify-between gap-4'>
             <label className='relative max-w-md flex-1' htmlFor='favorite-search'>
-              <Search aria-hidden='true' className='text-muted absolute top-1/2 left-4 -translate-y-1/2' size={18} />
+              <Search
+                aria-hidden='true'
+                className='text-muted absolute top-1/2 left-4 -translate-y-1/2'
+                size={18}
+              />
               <input
                 className='focus:ring-primary/20 w-full rounded-2xl border border-slate-200 bg-white py-3 pr-4 pl-12 text-sm shadow-sm focus:ring-2 focus:outline-none'
                 id='favorite-search'

@@ -44,8 +44,8 @@ export default function UserMessagesPage() {
           <div className='flex items-start gap-3'>
             <Info aria-hidden='true' className='mt-0.5 text-amber-700' size={18} />
             <p>
-              Tin nhắn trực tiếp hiện mới là cấu trúc giao diện tĩnh. Khi backend hội thoại sẵn sàng,
-              lịch sử đọc, gửi tin và đồng bộ theo buổi học sẽ hiển thị tại đây.
+              Tin nhắn trực tiếp hiện mới là cấu trúc giao diện tĩnh. Khi backend hội thoại sẵn
+              sàng, lịch sử đọc, gửi tin và đồng bộ theo buổi học sẽ hiển thị tại đây.
             </p>
           </div>
         </section>

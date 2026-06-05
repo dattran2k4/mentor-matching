@@ -227,7 +227,9 @@ function matchesSearch(mentor: Mentor, keyword: string, context: string) {
     mentor.teachingStyle,
     ...mentor.subjects,
     ...mentor.grades,
-    ...mentor.offerings.map((offering) => `${offering.subject} ${offering.grade} ${offering.teachingNote}`)
+    ...mentor.offerings.map(
+      (offering) => `${offering.subject} ${offering.grade} ${offering.teachingNote}`
+    )
   ]
     .join(' ')
     .toLowerCase()
@@ -236,7 +238,9 @@ function matchesSearch(mentor: Mentor, keyword: string, context: string) {
     mentor.availabilitySummary,
     ...mentor.meetingTypes,
     ...mentor.grades,
-    ...mentor.recurringAvailability.map((window) => `${window.dayLabel} ${window.startTime} ${window.endTime}`),
+    ...mentor.recurringAvailability.map(
+      (window) => `${window.dayLabel} ${window.startTime} ${window.endTime}`
+    ),
     ...mentor.specificDateAvailability.map((window) => `${window.dateLabel} ${window.note ?? ''}`)
   ]
     .join(' ')
@@ -261,9 +265,7 @@ function matchesSingleFilter(mentor: Mentor, filter: string) {
     case 'grade':
       if (rawValue === 'THPT') {
         return mentor.grades.some((grade) => {
-          return (
-            grade.includes('Lớp 10') || grade.includes('Lớp 11') || grade.includes('Lớp 12')
-          )
+          return grade.includes('Lớp 10') || grade.includes('Lớp 11') || grade.includes('Lớp 12')
         })
       }
 

@@ -207,7 +207,7 @@ export default function UserDashboardPage() {
           <div className='mt-6 grid gap-3'>
             {quickActions.map((action) => (
               <Link
-                className='group rounded-2xl border border-slate-200 p-4 transition hover:border-primary/30 hover:bg-primary/5'
+                className='group hover:border-primary/30 hover:bg-primary/5 rounded-2xl border border-slate-200 p-4 transition'
                 key={action.title}
                 to={action.href}
               >

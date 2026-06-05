@@ -192,15 +192,15 @@ const Home = () => {
               <div className='rounded-2xl bg-white/8 p-4'>
                 <p className='font-semibold'>Thông tin học và học phí hiển thị ngay</p>
                 <p className='mt-2 text-sm leading-relaxed text-slate-300'>
-                  Mỗi hồ sơ đều cho thấy môn dạy, cấp lớp, mức học phí, hình thức học và phản hồi
-                  từ người học trước đó.
+                  Mỗi hồ sơ đều cho thấy môn dạy, cấp lớp, mức học phí, hình thức học và phản hồi từ
+                  người học trước đó.
                 </p>
               </div>
               <div className='rounded-2xl bg-white/8 p-4'>
                 <p className='font-semibold'>Tín hiệu tin cậy xuất hiện gần quyết định</p>
                 <p className='mt-2 text-sm leading-relaxed text-slate-300'>
-                  Trạng thái duyệt và xác minh được giữ ngay trong luồng khám phá để người học
-                  không phải tự dò tìm.
+                  Trạng thái duyệt và xác minh được giữ ngay trong luồng khám phá để người học không
+                  phải tự dò tìm.
                 </p>
               </div>
             </div>

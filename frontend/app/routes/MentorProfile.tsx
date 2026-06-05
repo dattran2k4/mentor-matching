@@ -186,11 +186,7 @@ type OfferingsSectionProps = {
   onSelectOffering: (offeringId: string) => void
 }
 
-function OfferingsSection({
-  mentor,
-  onSelectOffering,
-  selectedOfferingId
-}: OfferingsSectionProps) {
+function OfferingsSection({ mentor, onSelectOffering, selectedOfferingId }: OfferingsSectionProps) {
   return (
     <section className='rounded-3xl border border-slate-200 bg-white p-6'>
       <SectionTitle
@@ -233,7 +229,10 @@ function AvailabilitySection({ mentor }: AvailabilitySectionProps) {
           </div>
           <div className='mt-3 space-y-3'>
             {mentor.recurringAvailability.map((window) => (
-              <div key={`${window.dayLabel}-${window.startTime}`} className='rounded-2xl bg-white p-3'>
+              <div
+                key={`${window.dayLabel}-${window.startTime}`}
+                className='rounded-2xl bg-white p-3'
+              >
                 <p className='text-ink text-sm font-semibold'>{window.dayLabel}</p>
                 <p className='text-muted mt-1 text-xs'>
                   {window.startTime} - {window.endTime}
@@ -251,7 +250,10 @@ function AvailabilitySection({ mentor }: AvailabilitySectionProps) {
           </div>
           <div className='mt-3 space-y-3'>
             {mentor.specificDateAvailability.map((window) => (
-              <div key={`${window.dateLabel}-${window.startTime}`} className='rounded-2xl bg-white p-3'>
+              <div
+                key={`${window.dateLabel}-${window.startTime}`}
+                className='rounded-2xl bg-white p-3'
+              >
                 <p className='text-ink text-sm font-semibold'>{window.dateLabel}</p>
                 <p className='text-muted mt-1 text-xs'>
                   {window.startTime} - {window.endTime}

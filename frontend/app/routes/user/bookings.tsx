@@ -71,13 +71,16 @@ export default function UserBookingsPage() {
 
   const filterCounts = useMemo(
     () =>
-      bookingFilters.reduce<Record<BookingFilter, number>>((accumulator, filter) => {
-        accumulator[filter.key] = learnerBookings.filter((booking) =>
-          matchesFilter(booking, filter.key)
-        ).length
+      bookingFilters.reduce<Record<BookingFilter, number>>(
+        (accumulator, filter) => {
+          accumulator[filter.key] = learnerBookings.filter((booking) =>
+            matchesFilter(booking, filter.key)
+          ).length
 
-        return accumulator
-      }, {} as Record<BookingFilter, number>),
+          return accumulator
+        },
+        {} as Record<BookingFilter, number>
+      ),
     []
   )
 
@@ -114,7 +117,10 @@ export default function UserBookingsPage() {
             </div>
 
             <div className='flex w-full flex-wrap items-center gap-3 lg:w-auto'>
-              <label className='relative min-w-[260px] flex-1 lg:flex-none' htmlFor='booking-search'>
+              <label
+                className='relative min-w-[260px] flex-1 lg:flex-none'
+                htmlFor='booking-search'
+              >
                 <Search
                   aria-hidden='true'
                   className='text-muted absolute top-1/2 left-3 -translate-y-1/2'
