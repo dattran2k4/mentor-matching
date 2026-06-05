@@ -125,6 +125,7 @@ Always read:
 
 For code changes, prefer running from `frontend`:
 
+- `npm run format:write`
 - `npm run lint`
 - `npm run typecheck`
 - `npm run test`

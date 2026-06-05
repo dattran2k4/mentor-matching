@@ -68,4 +68,5 @@ A frontend task is complete when:
 - code follows `frontend/RULES.md`
 - shared patterns are extracted when appropriate
 - affected docs are updated
+- `npm run format:write` is run when code changes are made
 - lint, typecheck, tests, and build are considered and run when feasible
