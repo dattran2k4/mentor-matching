@@ -7,7 +7,7 @@ const Footer = () => {
     <footer className='mt-16 border-t border-slate-200 bg-slate-50'>
       <div className='mx-auto grid max-w-6xl gap-10 px-4 py-12 md:grid-cols-[1.3fr_1fr_1fr_1.1fr] md:px-6'>
         <div>
-          <Link className='text-primary text-lg font-semibold' to='/'>
+          <Link className='text-primary text-lg font-semibold' to={path.home}>
             Mentor Matching
           </Link>
           <p className='text-muted mt-3 text-sm'>
@@ -32,7 +32,7 @@ const Footer = () => {
               </Link>
             </li>
             <li>
-              <Link className='hover:text-primary transition' to='/'>
+              <Link className='hover:text-primary transition' to={path.home}>
                 Trang chủ
               </Link>
             </li>
@@ -66,8 +66,8 @@ const Footer = () => {
         <div>
           <p className='text-ink text-sm font-semibold'>Bắt đầu</p>
           <p className='text-muted mt-3 text-sm'>
-            Bắt đầu với mục tiêu học tập rõ ràng và tìm mentor phù hợp theo môn học, lớp, học phí và
-            hình thức học.
+            Bắt đầu với nhu cầu học cụ thể, chọn mentor theo môn học, cấp lớp, học phí và hình thức
+            học phù hợp rồi gửi yêu cầu đặt buổi đầu tiên.
           </p>
           <div className='mt-4 space-y-3'>
             <Link

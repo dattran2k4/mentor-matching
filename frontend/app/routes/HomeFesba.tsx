@@ -12,6 +12,8 @@ import { mentors } from '@/constants/mentors'
 import { subjects } from '@/constants/subjects'
 import { testimonials } from '@/constants/testimonials'
 
+const featuredMentors = mentors.filter((mentor) => mentor.approvalStatus === 'APPROVED').slice(0, 3)
+
 const marketplaceStats = [
   { value: '240+', label: 'mentor đã duyệt' },
   { value: '8,500+', label: 'buổi học đã đặt' },
@@ -142,7 +144,7 @@ const Home = () => {
           </Link>
         </div>
         <div className='grid gap-6 md:grid-cols-2 xl:grid-cols-3'>
-          {mentors.slice(0, 3).map((mentor) => (
+          {featuredMentors.map((mentor) => (
             <MentorCard key={mentor.id} mentor={mentor} />
           ))}
         </div>
@@ -181,25 +183,49 @@ const Home = () => {
           </div>
         </div>
 
-        <div className='flex h-full flex-col justify-between rounded-3xl bg-slate-900 p-8 text-white'>
-          <div>
+        <div className='grid gap-4'>
+          <div className='rounded-3xl bg-slate-900 p-8 text-white'>
             <p className='text-sm font-semibold tracking-[0.18em] text-blue-200 uppercase'>
-              Dành cho mentor
+              Vì sao phụ huynh tin dùng
             </p>
-            <h3 className='mt-4 text-3xl font-semibold'>
-              Xây dựng hồ sơ giảng dạy rõ ràng và nhận lịch học phù hợp với thời gian của bạn.
-            </h3>
-            <p className='mt-4 text-sm leading-relaxed text-slate-300'>
-              Khai báo môn dạy, cấp lớp, học phí và khung giờ rảnh. Sau khi được duyệt, hồ sơ của
-              bạn có thể xuất hiện trong mục tìm mentor công khai.
-            </p>
+            <div className='mt-5 space-y-4'>
+              <div className='rounded-2xl bg-white/8 p-4'>
+                <p className='font-semibold'>Thông tin học và học phí hiển thị ngay</p>
+                <p className='mt-2 text-sm leading-relaxed text-slate-300'>
+                  Mỗi hồ sơ đều cho thấy môn dạy, cấp lớp, mức học phí, hình thức học và phản hồi
+                  từ người học trước đó.
+                </p>
+              </div>
+              <div className='rounded-2xl bg-white/8 p-4'>
+                <p className='font-semibold'>Tín hiệu tin cậy xuất hiện gần quyết định</p>
+                <p className='mt-2 text-sm leading-relaxed text-slate-300'>
+                  Trạng thái duyệt và xác minh được giữ ngay trong luồng khám phá để người học
+                  không phải tự dò tìm.
+                </p>
+              </div>
+            </div>
           </div>
-          <Link
-            to={path.mentorPanel.root}
-            className='mt-8 inline-flex w-fit items-center gap-2 rounded-2xl bg-white px-5 py-3 text-sm font-semibold text-slate-900 transition hover:bg-slate-100'
-          >
-            Bắt đầu hồ sơ mentor <ArrowRight size={16} />
-          </Link>
+
+          <div className='flex h-full flex-col justify-between rounded-3xl border border-slate-200 bg-white p-8'>
+            <div>
+              <p className='text-primary text-sm font-semibold tracking-[0.18em] uppercase'>
+                Dành cho mentor
+              </p>
+              <h3 className='text-ink mt-4 text-2xl font-semibold'>
+                Hoàn thiện hồ sơ giảng dạy rõ ràng để nhận yêu cầu học phù hợp với lịch của bạn.
+              </h3>
+              <p className='text-muted mt-4 text-sm leading-relaxed'>
+                Khai báo môn dạy, cấp lớp, học phí và khung giờ rảnh. Sau khi được duyệt, hồ sơ của
+                bạn có thể xuất hiện trong danh sách tìm mentor công khai.
+              </p>
+            </div>
+            <Link
+              to={path.mentorPanel.root}
+              className='bg-primary mt-8 inline-flex w-fit items-center gap-2 rounded-2xl px-5 py-3 text-sm font-semibold text-white transition hover:bg-blue-700'
+            >
+              Bắt đầu hồ sơ mentor <ArrowRight size={16} />
+            </Link>
+          </div>
         </div>
       </section>
 

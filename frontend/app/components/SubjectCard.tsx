@@ -26,7 +26,7 @@ const SubjectCard = ({ subject }: SubjectCardProps) => {
         <div className='space-y-2'>
           <div className='flex items-center justify-between gap-3'>
             <span className='text-ink text-base font-semibold'>{subject.name}</span>
-            <span className='text-xs font-medium text-slate-500'>
+            <span className='rounded-full border border-slate-200 bg-slate-50 px-2.5 py-1 text-xs font-medium text-slate-500'>
               {grades[0] ?? 'Nhiều cấp lớp'}
             </span>
           </div>
@@ -42,6 +42,7 @@ const SubjectCard = ({ subject }: SubjectCardProps) => {
             </span>
           ))}
         </div>
+        <p className='text-primary text-sm font-semibold'>Khám phá mentor phù hợp</p>
       </Link>
     </motion.article>
   )

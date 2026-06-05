@@ -3,6 +3,7 @@ import { motion } from 'framer-motion'
 import { Link } from 'react-router'
 
 import { StatusBadge } from '@/components/StatusBadge'
+import { path } from '@/config/path'
 import { formatPrice, getInitials } from '@/utils/format'
 
 import RatingStars from './RatingStars'
@@ -35,7 +36,7 @@ const MentorCard = ({ mentor }: MentorCardProps) => {
         </div>
         <div className='text-right'>
           <p className='text-ink text-sm font-semibold'>{formatPrice(mentor.startingPrice)}</p>
-          <p className='text-muted text-xs'>mỗi giờ</p>
+          <p className='text-muted text-xs'>từ 60 phút</p>
         </div>
       </div>
 
@@ -61,7 +62,12 @@ const MentorCard = ({ mentor }: MentorCardProps) => {
         </div>
       </div>
 
-      <p className='text-muted mt-4 text-sm leading-relaxed'>{mentor.introduction}</p>
+      <div className='mt-4 rounded-2xl border border-slate-200 bg-slate-50 p-4'>
+        <p className='text-ink text-xs font-semibold tracking-[0.18em] uppercase'>
+          Phù hợp nếu bạn đang cần
+        </p>
+        <p className='text-muted mt-2 text-sm leading-relaxed'>{mentor.expertise}</p>
+      </div>
 
       <div className='mt-4 rounded-2xl border border-slate-200 bg-slate-50 p-4'>
         <p className='text-ink text-xs font-semibold tracking-[0.18em] uppercase'>
@@ -74,6 +80,7 @@ const MentorCard = ({ mentor }: MentorCardProps) => {
                 <p className='text-ink text-sm font-semibold'>
                   {offering.subject} · {offering.grade}
                 </p>
+                <p className='text-muted mt-1 text-xs'>{offering.proficiency}</p>
                 <p className='text-muted mt-1 text-xs'>{offering.teachingNote}</p>
               </div>
               <span className='text-ink shrink-0 text-sm font-semibold'>
@@ -112,13 +119,13 @@ const MentorCard = ({ mentor }: MentorCardProps) => {
 
       <div className='mt-6 flex items-center gap-3'>
         <Link
-          to={`/mentor/${mentor.id}`}
+          to={path.mentorProfile(mentor.id)}
           className='border-primary/30 text-primary hover:bg-primary/5 hover:border-primary flex-1 shrink-0 rounded-2xl border px-4 py-2.5 text-center text-sm font-semibold transition-all'
         >
           Xem hồ sơ
         </Link>
         <Link
-          to={`/mentor/${mentor.id}`}
+          to={path.mentorProfile(mentor.id)}
           className='bg-primary hover:bg-primary-dark flex-1 rounded-2xl px-4 py-2.5 text-center text-sm font-semibold text-white transition-all'
         >
           Đặt buổi học

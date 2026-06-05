@@ -98,3 +98,21 @@
 - rationale: these three screens share the same decision journey, so aligning the shell and shared components prevents route-specific one-off UI and keeps route files focused on composition
 - alternatives considered: only rewriting route files while leaving the existing public shell and shared components mostly unchanged
 - follow-up: later data-integration milestones can attach real filter state and offering selection behavior onto these shared tutoring-domain shells without redoing their structure
+
+## Decision 12: public marketplace surfaces only show approved mentors in the static phase
+
+- date: 2026-06-06
+- context: framework and product constraints say unapproved or suspended mentors should not appear as normal public-ready profiles, while the static mentor constant still includes a pending mentor for broader state coverage
+- decision: Home, Discover, and Mentor Profile now derive their public lists from approved mentors only, while unapproved mentor records remain available for future internal and admin surfaces
+- rationale: this keeps the tutoring marketplace credible and avoids teaching later integration work the wrong public-state behavior
+- alternatives considered: rendering every mock mentor publicly and relying only on badges to communicate approval state
+- follow-up: future admin and mentor-facing milestones should continue using the full mentor dataset where approval-state review is part of the job
+
+## Decision 13: Discover uses lightweight local search and filter state before API integration
+
+- date: 2026-06-06
+- context: Milestone 2 required a practical comparison-ready discover experience, but broad API integration is intentionally deferred to a later milestone
+- decision: implement controlled keyword and context search, tutoring-domain filters, and simple client-side sorting over approved static mentor data
+- rationale: this makes the route more honest and testable now without polluting `app/types` or prematurely introducing service or query layers for provisional static UI work
+- alternatives considered: leaving discover mostly static with non-functional filter chrome, or jumping straight to backend-backed search before the public UI shape was stable
+- follow-up: Milestone 6 can replace the local filter helpers with service and query logic while preserving the same shared `SearchBar` and `FilterSidebar` surface area

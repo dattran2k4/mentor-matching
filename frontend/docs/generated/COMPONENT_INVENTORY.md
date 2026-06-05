@@ -42,19 +42,23 @@
 
 - component: `SearchBar`
   status: reusable with milestone 2 refactor
-  notes: now supports tutoring-domain placeholder copy, context-specific secondary input, and quick-tag shortcuts for home and discover surfaces
+  notes: now supports tutoring-domain helper copy, controlled keyword/context fields, submit handling, and quick-tag shortcuts for home and discover surfaces
 
 - component: `FilterSidebar`
   status: reusable with milestone 2 refactor
-  notes: now groups filters by tutoring decision criteria such as subject, grade/goal, meeting type, price, availability, and trust; mobile and desktop share the same practical structure
+  notes: now accepts reusable filter groups plus controlled selected values, and groups tutoring criteria such as subject, grade, meeting type, price, availability, and trust for both desktop and mobile discover flows
 
 - component: `MentorCard`
   status: reusable with milestone 2 refactor
-  notes: now emphasizes mentor offerings, trust state, availability hint, and comparison-friendly metadata instead of a soft marketing-card treatment
+  notes: now emphasizes mentor offerings, expertise fit, trust state, availability hint, and comparison-friendly metadata instead of a soft marketing-card treatment
 
 - component: `BookingSidebar`
   status: reusable with milestone 2 refactor
-  notes: now summarizes recommended offering, near-term availability windows, weekly schedule, trust badges, and session estimate; later milestones can layer interactive selection on top of this shell
+  notes: now summarizes the selected offering, near-term availability windows, weekly schedule, trust badges, next-step guidance, and a session estimate; later milestones can layer real booking actions on top of this shell
+
+- component: `MentorTrustBlock`
+  status: added in Milestone 2
+  notes: shared public trust summary for approval status, verification status, highlights, and mentor achievements; first used on mentor profile and intended for future admin mentor review reuse
 
 - component: `SectionTitle`
   status: reusable
@@ -145,10 +149,6 @@
 - component: `AvailabilityPicker`
   reason: mentor schedule and booking need a shared mental model for time windows
   likely consumers: mentor schedule, mentor profile booking section
-
-- component: `MentorTrustBlock`
-  reason: verification, approval, highlights, and review proof should have a reusable summary pattern
-  likely consumers: mentor profile, admin mentor review
 
 ## Components To Avoid Duplicating
 
