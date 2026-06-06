@@ -42,9 +42,10 @@ public class CatalogQueryService implements GetSubjectGradeSummaryUseCase, GetCa
                 .orElseThrow(() -> new ResourceNotFoundException("Subject grade not found"));
         Subject subject = subjectRepositoryPort.findById(subjectGrade.getSubjectId())
                 .orElseThrow(() -> new ResourceNotFoundException("Subject not found"));
-        String gradeName = subjectGrade.getGradeId() == null ? null : gradeRepositoryPort.findById(
-                subjectGrade.getGradeId()).map(grade -> grade.getName()).orElse(null);
-        return new SubjectGradeSummary(subjectGrade.getId(), subject.getName(), gradeName);
+        Long gradeId = subjectGrade.getGradeId();
+        String gradeName = gradeId == null ? null : gradeRepositoryPort.findById(gradeId)
+                .map(grade -> grade.getName()).orElse(null);
+        return new SubjectGradeSummary(subjectGrade.getId(), subject.getId(), subject.getName(), gradeId, gradeName);
     }
 
     @Override

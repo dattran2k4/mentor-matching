@@ -3,11 +3,13 @@ package com.mentormatching.modules.mentor.domain;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
+import com.mentormatching.shared.exception.InvalidDataException;
+
 public class MentorSubject {
 
     private final Long id;
     private final Long mentorId;
-    private final Long subjectGradeId;
+    private Long subjectGradeId;
     private ProficiencyLevel proficiencyLevel;
     private String teachingNote;
     private BigDecimal pricePerHour;
@@ -29,6 +31,29 @@ public class MentorSubject {
 
     public static MentorSubject restore(MentorSubjectRestoreData data) {
         return new MentorSubject(data);
+    }
+
+    public static MentorSubject create(Long mentorId, Long subjectGradeId, ProficiencyLevel proficiencyLevel,
+                                       String teachingNote, BigDecimal pricePerHour, Boolean active) {
+        validatePricePerHour(pricePerHour);
+        return new MentorSubject(new MentorSubjectRestoreData(null, mentorId, subjectGradeId, proficiencyLevel,
+                teachingNote, pricePerHour, active, null, null));
+    }
+
+    public void updateOffering(Long subjectGradeId, ProficiencyLevel proficiencyLevel, String teachingNote,
+                               BigDecimal pricePerHour, Boolean active) {
+        validatePricePerHour(pricePerHour);
+        this.subjectGradeId = subjectGradeId;
+        this.proficiencyLevel = proficiencyLevel;
+        this.teachingNote = teachingNote;
+        this.pricePerHour = pricePerHour;
+        this.active = active;
+    }
+
+    private static void validatePricePerHour(BigDecimal pricePerHour) {
+        if (pricePerHour != null && pricePerHour.signum() < 0) {
+            throw new InvalidDataException("Price per hour must be greater than or equal to 0");
+        }
     }
 
     public Long getId() {

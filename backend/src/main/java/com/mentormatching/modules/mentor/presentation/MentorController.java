@@ -36,10 +36,12 @@ import com.mentormatching.modules.mentor.application.port.in.GetMentorDetailUseC
 import com.mentormatching.modules.mentor.application.port.in.GetMentorSubjectsUseCase;
 import com.mentormatching.modules.mentor.application.port.in.GetMentorTraitsUseCase;
 import com.mentormatching.modules.mentor.application.port.in.GetMentorsUseCase;
+import com.mentormatching.modules.mentor.application.port.in.UpsertCurrentMentorSubjectUseCase;
 import com.mentormatching.modules.mentor.application.port.in.UpsertCurrentMentorVerificationUseCase;
 import com.mentormatching.modules.mentor.application.port.in.UpdateCurrentMentorUseCase;
 import com.mentormatching.modules.mentor.domain.Gender;
 import com.mentormatching.modules.mentor.domain.MeetingType;
+import com.mentormatching.modules.mentor.presentation.dto.request.UpsertCurrentMentorSubjectRequest;
 import com.mentormatching.modules.mentor.presentation.dto.request.UpsertCurrentMentorVerificationRequest;
 import com.mentormatching.modules.mentor.presentation.dto.request.UpdateCurrentMentorRequest;
 import com.mentormatching.modules.mentor.presentation.dto.response.CurrentMentorResponse;
@@ -69,6 +71,7 @@ public class MentorController {
     private final GetCurrentMentorUseCase getCurrentMentorUseCase;
     private final GetCurrentMentorSubjectsUseCase getCurrentMentorSubjectsUseCase;
     private final GetCurrentMentorVerificationUseCase getCurrentMentorVerificationUseCase;
+    private final UpsertCurrentMentorSubjectUseCase upsertCurrentMentorSubjectUseCase;
     private final UpsertCurrentMentorVerificationUseCase upsertCurrentMentorVerificationUseCase;
     private final UpdateCurrentMentorUseCase updateCurrentMentorUseCase;
     private final GetMentorsUseCase getMentorsUseCase;
@@ -124,6 +127,16 @@ public class MentorController {
                 principal.getId());
         return apiResponseFactory.success(subjects.stream().map(MentorSubjectDetailResponse::from).toList(),
                 "Get current mentor subjects successfully");
+    }
+
+    @PreAuthorize("isAuthenticated()")
+    @PutMapping("/me/subjects")
+    public ApiResponse<MentorSubjectDetailResponse> upsertCurrentMentorSubject(
+            @AuthenticationPrincipal AuthenticatedPrincipal principal,
+            @Valid @RequestBody UpsertCurrentMentorSubjectRequest request) {
+        return apiResponseFactory.success(MentorSubjectDetailResponse.from(
+                upsertCurrentMentorSubjectUseCase.upsertCurrentMentorSubject(request.toCommand(principal))),
+                "Save current mentor subject successfully");
     }
 
     @GetMapping
