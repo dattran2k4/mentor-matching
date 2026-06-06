@@ -9,6 +9,8 @@ import org.springframework.web.bind.annotation.*;
 import com.mentormatching.modules.user.application.port.in.GetCurrentLearnerProfileUseCase;
 import com.mentormatching.modules.user.application.port.in.GetCurrentUserUseCase;
 import com.mentormatching.modules.user.application.port.in.UpdateCurrentUserUseCase;
+import com.mentormatching.modules.user.application.port.in.UpsertCurrentLearnerProfileUseCase;
+import com.mentormatching.modules.user.presentation.dto.request.UpdateCurrentLearnerProfileRequest;
 import com.mentormatching.modules.user.presentation.dto.request.UpdateCurrentUserRequest;
 import com.mentormatching.modules.user.presentation.dto.response.CurrentUserResponse;
 import com.mentormatching.modules.user.presentation.dto.response.LearnerProfileResponse;
@@ -28,6 +30,7 @@ public class UserController {
     private final GetCurrentUserUseCase getCurrentUserUseCase;
     private final GetCurrentLearnerProfileUseCase getCurrentLearnerProfileUseCase;
     private final UpdateCurrentUserUseCase updateCurrentUserUseCase;
+    private final UpsertCurrentLearnerProfileUseCase upsertCurrentLearnerProfileUseCase;
 
     @GetMapping("/public-check")
     public ApiResponse<String> publicCheck() {
@@ -51,6 +54,16 @@ public class UserController {
     @GetMapping("/me/learner-profile")
     public ApiResponse<LearnerProfileResponse> getMyLearnerProfile(@AuthenticationPrincipal AuthenticatedPrincipal principal) {
         return apiResponseFactory.success(LearnerProfileResponse.from(getCurrentLearnerProfileUseCase.getCurrentLearnerProfile(principal.getId())));
+    }
+
+    @PreAuthorize("isAuthenticated()")
+    @PutMapping("/me/learner-profile")
+    public ApiResponse<LearnerProfileResponse> upsertMyLearnerProfile(
+            @AuthenticationPrincipal AuthenticatedPrincipal principal,
+            @Valid @RequestBody UpdateCurrentLearnerProfileRequest request) {
+        return apiResponseFactory.success(LearnerProfileResponse.from(
+                upsertCurrentLearnerProfileUseCase.upsertCurrentLearnerProfile(request.toCommand(principal))),
+                "Save learner profile successfully");
     }
 
     @GetMapping("/auth-check")

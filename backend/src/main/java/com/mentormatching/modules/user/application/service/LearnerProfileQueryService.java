@@ -7,7 +7,6 @@ import com.mentormatching.modules.user.application.dto.LearnerProfileDetails;
 import com.mentormatching.modules.user.application.port.in.GetCurrentLearnerProfileUseCase;
 import com.mentormatching.modules.user.application.port.out.LearnerProfileRepositoryPort;
 import com.mentormatching.modules.user.domain.LearnerProfile;
-import com.mentormatching.shared.exception.ResourceNotFoundException;
 
 @Service
 @Transactional(readOnly = true)
@@ -21,9 +20,12 @@ public class LearnerProfileQueryService implements GetCurrentLearnerProfileUseCa
 
     @Override
     public LearnerProfileDetails getCurrentLearnerProfile(Long userId) {
-        LearnerProfile learnerProfile = learnerProfileRepositoryPort.findByUserId(userId)
-                .orElseThrow(() -> new ResourceNotFoundException("Learner profile not found"));
+        return learnerProfileRepositoryPort.findByUserId(userId)
+                .map(this::toDetails)
+                .orElseGet(() -> new LearnerProfileDetails(null, userId, null, null, null, null, null, null, null));
+    }
 
+    private LearnerProfileDetails toDetails(LearnerProfile learnerProfile) {
         return new LearnerProfileDetails(learnerProfile.getId(), learnerProfile.getUserId(),
                 learnerProfile.getGender(), learnerProfile.getBirthYear(), learnerProfile.getSchoolName(),
                 learnerProfile.getGradeId(), learnerProfile.getLearningGoal(), learnerProfile.getCreatedAt(),
