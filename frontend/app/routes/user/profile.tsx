@@ -3,7 +3,7 @@ import { useMemo, useState } from 'react'
 
 import { DashboardPage } from '@/components/DashboardPage'
 import { DashboardSectionHeader } from '@/components/DashboardSectionHeader'
-import { learnerProfileDraft } from '@/constants/learner-workspace'
+import { learnerProfileDraft } from '@/mocks/learner-workspace'
 
 export function meta() {
   return [{ title: 'Hồ sơ | Học viên' }]

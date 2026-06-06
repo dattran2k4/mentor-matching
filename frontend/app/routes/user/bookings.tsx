@@ -7,7 +7,7 @@ import { DashboardSectionHeader } from '@/components/DashboardSectionHeader'
 import { EmptyState } from '@/components/EmptyState'
 import { StatusBadge } from '@/components/StatusBadge'
 import { path } from '@/config/path'
-import { learnerBookings, type LearnerBookingItem } from '@/constants/learner-workspace'
+import { learnerBookings, type LearnerBookingItem } from '@/mocks/learner-workspace'
 import { formatPrice, formatShortBookingDate, formatTimeRange } from '@/utils/format'
 
 type BookingFilter = 'ALL' | 'UPCOMING' | 'PAYMENT_DUE' | 'COMPLETED' | 'CANCELLED'

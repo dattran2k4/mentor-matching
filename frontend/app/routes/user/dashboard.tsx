@@ -13,7 +13,7 @@ import { DashboardPage } from '@/components/DashboardPage'
 import { DashboardSectionHeader } from '@/components/DashboardSectionHeader'
 import { StatusBadge } from '@/components/StatusBadge'
 import { path } from '@/config/path'
-import { learnerBookings } from '@/constants/learner-workspace'
+import { learnerBookings } from '@/mocks/learner-workspace'
 import { formatShortBookingDate, formatTimeRange } from '@/utils/format'
 
 export function meta() {

@@ -1,6 +1,10 @@
+import { ArrowDownLeft, ArrowUpRight, CircleDollarSign, ReceiptText, Wallet } from 'lucide-react'
+
 import { DashboardPage } from '@/components/DashboardPage'
-import { motion } from 'framer-motion'
-import { Wallet, ArrowDownRight, ArrowUpRight, Copy } from 'lucide-react'
+import { DashboardSectionHeader } from '@/components/DashboardSectionHeader'
+import { StatusBadge } from '@/components/StatusBadge'
+import { mentorEarningsSummary, mentorEarningsTransactions } from '@/mocks/mentor-workspace'
+import { formatPrice } from '@/utils/format'
 
 export function meta() {
   return [{ title: 'Thu nhập | Mentor' }]
@@ -8,118 +12,154 @@ export function meta() {
 
 export default function MentorEarningsPage() {
   return (
-    <DashboardPage description='Theo dõi doanh thu và lịch sử thanh toán.' title='Thu nhập'>
-      <div className='mb-8 grid gap-6 md:grid-cols-3'>
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className='from-primary to-primary-dark glass-panel shadow-lift shadow-primary/30 relative col-span-1 overflow-hidden rounded-3xl border border-slate-200/60 bg-gradient-to-br p-8 text-white md:col-span-2'
-        >
-          <div className='pointer-events-none absolute top-[-20%] right-[-10%] h-64 w-64 rounded-full bg-white/10 blur-3xl'></div>
-          <div className='mb-8 flex items-center gap-3'>
-            <Wallet size={24} className='text-white/80' />
-            <h2 className='text-lg font-medium opacity-90'>Số dư hiện tại</h2>
+    <DashboardPage
+      description='Theo dõi thu nhập gắn với booking và payment status, đồng thời giữ minh bạch về phần nào mới là ước tính tĩnh trong milestone này.'
+      title='Thu nhập'
+    >
+      <div className='grid gap-4 xl:grid-cols-3'>
+        <section className='rounded-3xl border border-slate-200 bg-white p-6 shadow-sm xl:col-span-2'>
+          <div className='flex items-start gap-4'>
+            <div className='bg-primary/10 text-primary flex h-12 w-12 items-center justify-center rounded-2xl'>
+              <Wallet aria-hidden='true' size={22} />
+            </div>
+            <div className='space-y-2'>
+              <p className='text-muted text-sm font-medium'>Số dư đã đối soát</p>
+              <p className='text-ink text-4xl font-semibold'>
+                {formatPrice(mentorEarningsSummary.availableBalance)}
+              </p>
+              <p className='text-muted text-sm'>{mentorEarningsSummary.payoutWindow}</p>
+            </div>
           </div>
-          <div>
-            <p className='text-5xl font-bold tracking-tight'>12.500.000 ₫</p>
-            <p className='mt-2 flex items-center gap-1 text-sm text-blue-100'>
-              <ArrowUpRight size={16} /> Tăng 24% so với tháng trước
+        </section>
+
+        <section className='rounded-3xl border border-slate-200 bg-white p-6 shadow-sm'>
+          <div className='space-y-2'>
+            <p className='text-muted text-sm font-medium'>Dự kiến về ví</p>
+            <p className='text-ink text-3xl font-semibold'>
+              {formatPrice(mentorEarningsSummary.pendingPayout)}
+            </p>
+            <p className='text-muted text-sm'>
+              Bao gồm các buổi đã hoàn thành nhưng chưa tới đợt chi trả.
             </p>
           </div>
-          <div className='mt-8 flex gap-4'>
-            <button className='text-primary rounded-xl bg-white px-6 py-2.5 text-sm font-bold transition-shadow hover:shadow-lg active:scale-95'>
-              Rút tiền
-            </button>
-            <button className='bg-primary-light/20 hover:bg-primary-light/40 rounded-xl border border-white/20 px-6 py-2.5 text-sm font-bold text-white transition-colors active:scale-95'>
-              Lịch sử
-            </button>
-          </div>
-        </motion.div>
-
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
-          className='glass-panel flex flex-col justify-between rounded-3xl border border-slate-200/60 bg-white/70 p-6'
-        >
-          <div>
-            <h3 className='text-muted mb-4 text-sm font-semibold tracking-wider uppercase'>
-              Dự kiến nhận (Tới)
-            </h3>
-            <p className='text-ink text-3xl font-bold'>4.200.000 ₫</p>
-            <p className='text-muted mt-1 mb-2 text-xs'>Sẽ thanh toán vào ngày 15/06/2026</p>
-          </div>
-
-          <div className='rounded-2xl border border-slate-100 bg-slate-50 p-4'>
-            <p className='text-muted mb-1 flex items-center justify-between text-xs'>
-              ID Ví <Copy size={12} className='hover:text-primary cursor-pointer' />
-            </p>
-            <p className='text-ink font-mono text-sm font-semibold'>**** 8392</p>
-          </div>
-        </motion.div>
+        </section>
       </div>
 
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.2 }}
-        className='glass-panel rounded-3xl border border-slate-200/60 bg-white/70 p-8'
-      >
-        <h3 className='text-ink mb-6 text-xl font-bold'>Giao dịch gần đây</h3>
-        <div className='space-y-4'>
-          {[
-            {
-              id: 'TRX-001',
-              type: 'Nhận từ dạy kèm',
-              amount: '+ 800.000 ₫',
-              status: 'Thành công',
-              date: '28/05/2026',
-              isPos: true
-            },
-            {
-              id: 'TRX-002',
-              type: 'Rút tiền',
-              amount: '- 5.000.000 ₫',
-              status: 'Đang xử lý',
-              date: '25/05/2026',
-              isPos: false
-            },
-            {
-              id: 'TRX-003',
-              type: 'Phí nền tảng (5%)',
-              amount: '- 40.000 ₫',
-              status: 'Thành công',
-              date: '24/05/2026',
-              isPos: false
-            }
-          ].map((tx) => (
-            <div
-              key={tx.id}
-              className='hover:border-primary/20 flex items-center justify-between rounded-2xl border border-slate-100 p-4 transition-colors'
-            >
-              <div className='flex items-center gap-4'>
-                <div
-                  className={`flex h-10 w-10 items-center justify-center rounded-xl ${tx.isPos ? 'bg-emerald-100 text-emerald-600' : 'bg-red-100 text-red-600'}`}
+      <div className='grid gap-6 xl:grid-cols-[1.2fr_1.5fr]'>
+        <section className='rounded-3xl border border-slate-200 bg-white p-6 shadow-sm'>
+          <DashboardSectionHeader
+            title='Tóm tắt tháng này'
+            description='Tách phần đã nhận, phần chờ về và chi phí nền tảng để mentor có kỳ vọng thực tế hơn.'
+          />
+          <div className='mt-6 space-y-3'>
+            {[
+              {
+                label: 'Buổi đã hoàn thành',
+                value: `${mentorEarningsSummary.completedSessionsThisMonth}`,
+                helper: 'Số buổi được dùng để ước tính dòng tiền tháng này.',
+                icon: ReceiptText
+              },
+              {
+                label: 'Doanh thu dự kiến',
+                value: formatPrice(mentorEarningsSummary.projectedThisMonth),
+                helper: 'Ước tính từ lịch dạy tĩnh hiện tại, chưa thay cho báo cáo payout thực.',
+                icon: CircleDollarSign
+              },
+              {
+                label: 'Phí nền tảng',
+                value: mentorEarningsSummary.platformFeeRate,
+                helper:
+                  'Hiển thị như một giả định minh bạch để route không hứa quá mức khi backend payout còn partial.',
+                icon: ArrowUpRight
+              }
+            ].map((item) => (
+              <div
+                className='flex items-start gap-4 rounded-2xl border border-slate-200 bg-slate-50 p-4'
+                key={item.label}
+              >
+                <div className='bg-primary/10 text-primary flex h-11 w-11 items-center justify-center rounded-2xl'>
+                  <item.icon aria-hidden='true' size={20} />
+                </div>
+                <div className='space-y-1'>
+                  <p className='text-ink font-semibold'>{item.label}</p>
+                  <p className='text-ink text-lg font-semibold'>{item.value}</p>
+                  <p className='text-muted text-sm'>{item.helper}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        <section className='rounded-3xl border border-slate-200 bg-white p-6 shadow-sm'>
+          <DashboardSectionHeader
+            title='Dòng tiền gần đây'
+            description='Các dòng này bám vào booking và payment semantics, không giả vờ là báo cáo payout hoàn chỉnh.'
+          />
+          <div className='mt-6 space-y-4'>
+            {mentorEarningsTransactions.map((transaction) => {
+              const isNegative = transaction.amount < 0
+
+              return (
+                <article
+                  className='flex flex-col gap-4 rounded-2xl border border-slate-200 p-4 md:flex-row md:items-start md:justify-between'
+                  key={transaction.id}
                 >
-                  {tx.isPos ? <ArrowDownRight size={20} /> : <ArrowUpRight size={20} />}
-                </div>
-                <div>
-                  <p className='text-ink text-sm font-semibold'>{tx.type}</p>
-                  <p className='text-muted text-xs'>
-                    {tx.date} • {tx.id}
-                  </p>
-                </div>
-              </div>
-              <div className='text-right'>
-                <p className={`font-bold ${tx.isPos ? 'text-emerald-600' : 'text-red-500'}`}>
-                  {tx.amount}
-                </p>
-                <p className='text-muted text-xs'>{tx.status}</p>
-              </div>
-            </div>
+                  <div className='flex items-start gap-4'>
+                    <div
+                      className={`flex h-11 w-11 items-center justify-center rounded-2xl ${
+                        isNegative ? 'bg-red-50 text-red-600' : 'bg-emerald-50 text-emerald-700'
+                      }`}
+                    >
+                      {isNegative ? (
+                        <ArrowUpRight aria-hidden='true' size={20} />
+                      ) : (
+                        <ArrowDownLeft aria-hidden='true' size={20} />
+                      )}
+                    </div>
+                    <div className='space-y-1'>
+                      <p className='text-ink font-semibold'>{transaction.label}</p>
+                      <p className='text-muted text-sm'>{transaction.detail}</p>
+                      <p className='text-muted text-sm'>{transaction.bookedAt}</p>
+                    </div>
+                  </div>
+
+                  <div className='flex flex-col items-start gap-2 md:items-end'>
+                    <p
+                      className={`text-lg font-semibold ${
+                        isNegative ? 'text-red-600' : 'text-emerald-700'
+                      }`}
+                    >
+                      {formatPrice(transaction.amount)}
+                    </p>
+                    <StatusBadge kind='payment' status={transaction.paymentStatus} />
+                  </div>
+                </article>
+              )
+            })}
+          </div>
+        </section>
+      </div>
+
+      <section className='rounded-3xl border border-slate-200 bg-white p-6 shadow-sm'>
+        <DashboardSectionHeader
+          title='Ghi chú trung thực về phạm vi'
+          description='Giữ route rõ ràng về phần nào đã bám domain và phần nào vẫn là giao diện tĩnh.'
+        />
+        <ul className='mt-6 grid gap-3 lg:grid-cols-3'>
+          {[
+            'Thu nhập hiện được mô tả như payout-linked teaching income, không phải ví điện tử hoàn chỉnh.',
+            'Không thêm nút rút tiền thật trước khi payout workflow và trạng thái backend được xác nhận.',
+            'Các giao dịch vẫn là dữ liệu tĩnh minh họa cho payment states: PAID, PENDING, REFUNDED và FAILED.'
+          ].map((item) => (
+            <li
+              className='rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700'
+              key={item}
+            >
+              {item}
+            </li>
           ))}
-        </div>
-      </motion.div>
+        </ul>
+      </section>
     </DashboardPage>
   )
 }

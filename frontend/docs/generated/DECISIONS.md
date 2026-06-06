@@ -121,7 +121,16 @@
 
 - date: 2026-06-06
 - context: Milestone 3 needed the learner dashboard, bookings, favorites, messages, and profile routes to feel practical and tutoring-domain correct, while favorites and messaging backend support remains partial and full profile integration is deferred
-- decision: centralize learner workspace mock data and display-only shapes in `frontend/app/constants/learner-workspace.ts`, add a shared `DashboardSectionHeader`, and allow only clearly-labeled local UI actions such as local-only favorite removal and local draft profile save
+- decision: centralize learner workspace mock data and display-only shapes in `frontend/app/mocks/learner-workspace.ts`, add a shared `DashboardSectionHeader`, and allow only clearly-labeled local UI actions such as local-only favorite removal and local draft profile save
 - rationale: this keeps route files thin, preserves the rule that `app/types` stays domain-only, and avoids implying that unsupported learner features are already fully backed by server workflows
 - alternatives considered: keeping large route-local mock arrays in each screen, or faking complete backend-connected favorites/messages/profile interactions
 - follow-up: when learner profile, bookings, and messaging APIs are introduced in Milestone 6, replace the static learner workspace module route by route while preserving the same section hierarchy and honest state language
+
+## Decision 15: mentor workspace reuses shared status and section patterns without adding a new route-specific component layer
+
+- date: 2026-06-06
+- context: Milestone 4 needed five mentor workspace routes to become practical teaching-operation screens while still staying static-first and keeping `app/types` domain-only
+- decision: centralize mentor workspace mock data in `frontend/app/mocks/mentor-workspace.ts` and build the routes from existing shared components such as `DashboardPage`, `DashboardSectionHeader`, `StatusBadge`, and `EmptyState` instead of introducing a new mentor-specific component family
+- rationale: the mentor screens share operational vocabulary more than unique chrome, so thin routes plus one shared static data module reduce duplication without prematurely freezing extra abstractions
+- alternatives considered: keeping large route-local mock arrays in each mentor screen, or adding new mentor-only cards/rows before proving broader reuse
+- follow-up: when mentor schedule, profile, students, and earnings APIs are integrated later, swap the static mentor workspace module route by route while preserving recurring-vs-specific-date availability semantics and honest earnings/status messaging

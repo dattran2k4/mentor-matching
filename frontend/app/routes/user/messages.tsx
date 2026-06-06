@@ -3,7 +3,7 @@ import { Info, Search } from 'lucide-react'
 
 import { DashboardPage } from '@/components/DashboardPage'
 import { EmptyState } from '@/components/EmptyState'
-import { learnerConversations } from '@/constants/learner-workspace'
+import { learnerConversations } from '@/mocks/learner-workspace'
 
 export function meta() {
   return [{ title: 'Tin nhắn | Học viên' }]

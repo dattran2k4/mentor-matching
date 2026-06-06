@@ -10,7 +10,7 @@
 
 - component: `StatusBadge`
   status: added in Milestone 1
-  notes: shared status vocabulary for booking, payment, mentor approval, verification, and user states; currently adopted by learner bookings, mentor cards, mentor profile, and admin mentor review surfaces
+  notes: shared status vocabulary for booking, payment, mentor approval, verification, and user states; currently adopted by learner bookings, mentor cards, mentor profile, mentor dashboard, mentor schedule, mentor students, mentor earnings, and admin mentor review surfaces
 
 - component: `EmptyState`
   status: added in Milestone 1
@@ -26,11 +26,11 @@
 
 - component: `DashboardPage`
   status: reusable foundation
-  notes: good page wrapper; default placeholder now delegates to `EmptyState` so route placeholders share the same state pattern
+  notes: good page wrapper; default placeholder now delegates to `EmptyState` so route placeholders share the same state pattern, and mentor workspace refactors keep using it as the route-level shell instead of inventing mentor-specific wrappers
 
 - component: `DashboardSectionHeader`
   status: added in Milestone 3
-  notes: lightweight shared header for learner workspace sections with optional helper copy and right-aligned actions; first used to keep learner dashboard, bookings, favorites, and profile routes focused on composition instead of repeating section chrome
+  notes: lightweight shared header for learner and mentor workspace sections with optional helper copy and right-aligned actions; used to keep dashboard, bookings, schedule, students, earnings, and profile routes focused on composition instead of repeating section chrome
 
 - component: `RoleGuard`
   status: stable reusable foundation
