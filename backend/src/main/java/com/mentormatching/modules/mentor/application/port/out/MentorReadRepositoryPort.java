@@ -9,6 +9,7 @@ import com.mentormatching.modules.mentor.application.dto.MentorAchievementDetail
 import com.mentormatching.modules.mentor.application.dto.MentorAvailabilityDetail;
 import com.mentormatching.modules.mentor.application.dto.MentorDetail;
 import com.mentormatching.modules.mentor.application.dto.MentorListItem;
+import com.mentormatching.modules.mentor.application.dto.MentorOptionDetail;
 import com.mentormatching.modules.mentor.application.dto.MentorSubjectDetail;
 import com.mentormatching.modules.mentor.application.dto.MentorTraitsDetail;
 import com.mentormatching.shared.response.PageResponse;
@@ -26,6 +27,10 @@ public interface MentorReadRepositoryPort {
     List<MentorSubjectDetail> findMentorSubjects(Long mentorId);
 
     List<MentorSubjectDetail> findAllMentorSubjects(Long mentorId);
+
+    List<MentorOptionDetail> findPersonalityOptions();
+
+    List<MentorOptionDetail> findHighlightOptions();
 
     MentorTraitsDetail findMentorTraits(Long mentorId);
 

@@ -14,6 +14,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import com.mentormatching.modules.mentor.application.dto.CurrentMentorDetails;
+import com.mentormatching.modules.mentor.application.dto.MentorOptionDetail;
 import com.mentormatching.modules.mentor.application.dto.MentorSubjectDetail;
 import com.mentormatching.modules.mentor.application.port.out.MentorCatalogLookupPort;
 import com.mentormatching.modules.mentor.application.port.out.MentorProfileRepositoryPort;
@@ -100,5 +101,31 @@ class MentorQueryServiceTest {
                 () -> mentorQueryService.getCurrentMentorSubjects(99L));
 
         assertEquals("Mentor profile not found", exception.getMessage());
+    }
+
+    @Test
+    void getPersonalityOptionsReturnsReadRepositoryResult() {
+        List<MentorOptionDetail> expected = List.of(
+                new MentorOptionDetail(1L, "Kiem nhan", "Binh tinh va dieu do"),
+                new MentorOptionDetail(2L, "Truyen cam hung", "Tao dong luc hoc tap")
+        );
+        when(mentorReadRepositoryPort.findPersonalityOptions()).thenReturn(expected);
+
+        List<MentorOptionDetail> actual = mentorQueryService.getPersonalityOptions();
+
+        assertEquals(expected, actual);
+    }
+
+    @Test
+    void getHighlightOptionsReturnsReadRepositoryResult() {
+        List<MentorOptionDetail> expected = List.of(
+                new MentorOptionDetail(1L, "Luyen thi", "Chuyen on thi"),
+                new MentorOptionDetail(2L, "1 kem 1", "Ca nhan hoa lo trinh")
+        );
+        when(mentorReadRepositoryPort.findHighlightOptions()).thenReturn(expected);
+
+        List<MentorOptionDetail> actual = mentorQueryService.getHighlightOptions();
+
+        assertEquals(expected, actual);
     }
 }

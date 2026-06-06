@@ -11,6 +11,7 @@ import com.mentormatching.modules.mentor.application.dto.MentorAchievementDetail
 import com.mentormatching.modules.mentor.application.dto.MentorAvailabilityDetail;
 import com.mentormatching.modules.mentor.application.dto.MentorDetail;
 import com.mentormatching.modules.mentor.application.dto.MentorListItem;
+import com.mentormatching.modules.mentor.application.dto.MentorOptionDetail;
 import com.mentormatching.modules.mentor.application.dto.MentorSubjectDetail;
 import com.mentormatching.modules.mentor.application.dto.MentorSubjectSummary;
 import com.mentormatching.modules.mentor.application.dto.MentorSummary;
@@ -19,6 +20,7 @@ import com.mentormatching.modules.mentor.application.port.in.GetMentorAchievemen
 import com.mentormatching.modules.mentor.application.port.in.GetMentorAvailabilitiesUseCase;
 import com.mentormatching.modules.mentor.application.port.in.GetCurrentMentorUseCase;
 import com.mentormatching.modules.mentor.application.port.in.GetCurrentMentorSubjectsUseCase;
+import com.mentormatching.modules.mentor.application.port.in.GetHighlightOptionsUseCase;
 import com.mentormatching.modules.mentor.application.port.in.GetMentorDetailUseCase;
 import com.mentormatching.modules.mentor.application.port.in.GetMentorSubjectsUseCase;
 import com.mentormatching.modules.mentor.application.port.in.GetMentorSubjectSummaryUseCase;
@@ -26,6 +28,7 @@ import com.mentormatching.modules.mentor.application.port.in.GetMentorSummaryByU
 import com.mentormatching.modules.mentor.application.port.in.GetMentorTraitsUseCase;
 import com.mentormatching.modules.mentor.application.port.in.GetMentorsUseCase;
 import com.mentormatching.modules.mentor.application.port.in.GetMentorSummaryUseCase;
+import com.mentormatching.modules.mentor.application.port.in.GetPersonalityOptionsUseCase;
 import com.mentormatching.modules.mentor.application.port.out.MentorCatalogLookupPort;
 import com.mentormatching.modules.mentor.application.port.out.MentorProfileRepositoryPort;
 import com.mentormatching.modules.mentor.application.port.out.MentorReadRepositoryPort;
@@ -39,7 +42,7 @@ import com.mentormatching.shared.response.PageResponse;
 public class MentorQueryService implements GetMentorSummaryUseCase, GetMentorSubjectSummaryUseCase, GetMentorsUseCase,
         GetMentorDetailUseCase, GetMentorSubjectsUseCase, GetMentorTraitsUseCase, GetMentorAchievementsUseCase,
         GetMentorAvailabilitiesUseCase, GetMentorSummaryByUserUseCase, GetCurrentMentorUseCase,
-        GetCurrentMentorSubjectsUseCase {
+        GetCurrentMentorSubjectsUseCase, GetPersonalityOptionsUseCase, GetHighlightOptionsUseCase {
 
     private final MentorProfileRepositoryPort mentorProfileRepositoryPort;
     private final MentorSubjectRepositoryPort mentorSubjectRepositoryPort;
@@ -97,6 +100,16 @@ public class MentorQueryService implements GetMentorSummaryUseCase, GetMentorSub
         MentorProfile mentor = mentorProfileRepositoryPort.findByUserId(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("Mentor profile not found"));
         return mentorReadRepositoryPort.findAllMentorSubjects(mentor.getId());
+    }
+
+    @Override
+    public List<MentorOptionDetail> getPersonalityOptions() {
+        return mentorReadRepositoryPort.findPersonalityOptions();
+    }
+
+    @Override
+    public List<MentorOptionDetail> getHighlightOptions() {
+        return mentorReadRepositoryPort.findHighlightOptions();
     }
 
     @Override
