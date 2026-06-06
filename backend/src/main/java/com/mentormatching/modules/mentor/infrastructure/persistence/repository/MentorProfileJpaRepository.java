@@ -90,6 +90,43 @@ public interface MentorProfileJpaRepository extends JpaRepository<MentorProfileJ
                    mentor.education as education,
                    mentor.major as major,
                    mentor.meetingType as meetingType,
+                   mentor.approvalStatus as approvalStatus,
+                   mentor.approvalNote as approvalNote,
+                   verification.verificationStatus as verificationStatus,
+                   verification.rejectionReason as verificationRejectionReason,
+                   mentor.createdAt as createdAt,
+                   mentor.updatedAt as updatedAt
+            from MentorProfileJpaEntity mentor
+            join UserJpaEntity user on user.id = mentor.userId
+            left join CityJpaEntity hometownCity on hometownCity.id = mentor.hometownCityId
+            left join DistrictJpaEntity currentDistrict on currentDistrict.id = mentor.currentDistrictId
+            left join CityJpaEntity currentCity on currentCity.id = currentDistrict.cityId
+            left join MentorVerificationJpaEntity verification on verification.mentorId = mentor.id
+            where mentor.userId = :userId
+            """)
+    Optional<CurrentMentorDetailsProjection> findCurrentMentorDetailByUserId(@Param("userId") Long userId);
+
+    @Query("""
+            select mentor.id as id,
+                   mentor.userId as userId,
+                   user.fullName as fullName,
+                   mentor.avatarUrl as avatarUrl,
+                   mentor.gender as gender,
+                   mentor.hometownCityId as hometownCityId,
+                   hometownCity.name as hometownCityName,
+                   currentCity.id as currentCityId,
+                   currentCity.name as currentCityName,
+                   mentor.currentDistrictId as currentDistrictId,
+                   currentDistrict.name as currentDistrictName,
+                   mentor.headline as headline,
+                   mentor.introduction as introduction,
+                   mentor.teachingStyle as teachingStyle,
+                   mentor.experienceYears as experienceYears,
+                   mentor.currentPosition as currentPosition,
+                   mentor.workplace as workplace,
+                   mentor.education as education,
+                   mentor.major as major,
+                   mentor.meetingType as meetingType,
                    mentor.createdAt as createdAt,
                    mentor.updatedAt as updatedAt
             from MentorProfileJpaEntity mentor

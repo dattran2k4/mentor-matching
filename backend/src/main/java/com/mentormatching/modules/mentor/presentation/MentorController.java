@@ -9,6 +9,8 @@ import java.util.List;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -23,6 +25,7 @@ import com.mentormatching.modules.mentor.application.dto.MentorDetail;
 import com.mentormatching.modules.mentor.application.dto.MentorListItem;
 import com.mentormatching.modules.mentor.application.dto.MentorSubjectDetail;
 import com.mentormatching.modules.mentor.application.dto.MentorTraitsDetail;
+import com.mentormatching.modules.mentor.application.port.in.GetCurrentMentorUseCase;
 import com.mentormatching.modules.mentor.application.port.in.GetMentorAchievementsUseCase;
 import com.mentormatching.modules.mentor.application.port.in.GetMentorAvailabilitiesUseCase;
 import com.mentormatching.modules.mentor.application.port.in.GetMentorDetailUseCase;
@@ -31,6 +34,7 @@ import com.mentormatching.modules.mentor.application.port.in.GetMentorTraitsUseC
 import com.mentormatching.modules.mentor.application.port.in.GetMentorsUseCase;
 import com.mentormatching.modules.mentor.domain.Gender;
 import com.mentormatching.modules.mentor.domain.MeetingType;
+import com.mentormatching.modules.mentor.presentation.dto.response.CurrentMentorResponse;
 import com.mentormatching.modules.mentor.presentation.dto.response.MentorAchievementDetailResponse;
 import com.mentormatching.modules.mentor.presentation.dto.response.MentorAvailabilityDetailResponse;
 import com.mentormatching.modules.mentor.presentation.dto.response.MentorDetailResponse;
@@ -40,6 +44,7 @@ import com.mentormatching.modules.mentor.presentation.dto.response.MentorTraitsD
 import com.mentormatching.shared.response.ApiResponse;
 import com.mentormatching.shared.response.ApiResponseFactory;
 import com.mentormatching.shared.response.PageResponse;
+import com.mentormatching.shared.security.model.AuthenticatedPrincipal;
 
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
@@ -51,6 +56,7 @@ import jakarta.validation.constraints.Min;
 @RequestMapping("/api/v1/mentors")
 public class MentorController {
 
+    private final GetCurrentMentorUseCase getCurrentMentorUseCase;
     private final GetMentorsUseCase getMentorsUseCase;
     private final GetMentorDetailUseCase getMentorDetailUseCase;
     private final GetMentorSubjectsUseCase getMentorSubjectsUseCase;
@@ -58,6 +64,14 @@ public class MentorController {
     private final GetMentorAchievementsUseCase getMentorAchievementsUseCase;
     private final GetMentorAvailabilitiesUseCase getMentorAvailabilitiesUseCase;
     private final ApiResponseFactory apiResponseFactory;
+
+    @PreAuthorize("isAuthenticated()")
+    @GetMapping("/me")
+    public ApiResponse<CurrentMentorResponse> getCurrentMentor(
+            @AuthenticationPrincipal AuthenticatedPrincipal principal) {
+        return apiResponseFactory.success(CurrentMentorResponse.from(getCurrentMentorUseCase.getCurrentMentor(
+                principal.getId())), "Get current mentor profile successfully");
+    }
 
     @GetMapping
     public ApiResponse<PageResponse<MentorListItemResponse>> getMentors(@RequestParam(defaultValue = DEFAULT_PAGE) @Min(1) int page,

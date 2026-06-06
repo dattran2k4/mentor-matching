@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.springframework.stereotype.Service;
 
+import com.mentormatching.modules.mentor.application.dto.CurrentMentorDetails;
 import com.mentormatching.modules.mentor.application.dto.GetMentorsQuery;
 import com.mentormatching.modules.mentor.application.dto.MentorAchievementDetail;
 import com.mentormatching.modules.mentor.application.dto.MentorAvailabilityDetail;
@@ -16,6 +17,7 @@ import com.mentormatching.modules.mentor.application.dto.MentorSummary;
 import com.mentormatching.modules.mentor.application.dto.MentorTraitsDetail;
 import com.mentormatching.modules.mentor.application.port.in.GetMentorAchievementsUseCase;
 import com.mentormatching.modules.mentor.application.port.in.GetMentorAvailabilitiesUseCase;
+import com.mentormatching.modules.mentor.application.port.in.GetCurrentMentorUseCase;
 import com.mentormatching.modules.mentor.application.port.in.GetMentorDetailUseCase;
 import com.mentormatching.modules.mentor.application.port.in.GetMentorSubjectsUseCase;
 import com.mentormatching.modules.mentor.application.port.in.GetMentorSubjectSummaryUseCase;
@@ -35,7 +37,7 @@ import com.mentormatching.shared.response.PageResponse;
 @Service
 public class MentorQueryService implements GetMentorSummaryUseCase, GetMentorSubjectSummaryUseCase, GetMentorsUseCase,
         GetMentorDetailUseCase, GetMentorSubjectsUseCase, GetMentorTraitsUseCase, GetMentorAchievementsUseCase,
-        GetMentorAvailabilitiesUseCase, GetMentorSummaryByUserUseCase {
+        GetMentorAvailabilitiesUseCase, GetMentorSummaryByUserUseCase, GetCurrentMentorUseCase {
 
     private final MentorProfileRepositoryPort mentorProfileRepositoryPort;
     private final MentorSubjectRepositoryPort mentorSubjectRepositoryPort;
@@ -73,6 +75,12 @@ public class MentorQueryService implements GetMentorSummaryUseCase, GetMentorSub
     @Override
     public MentorDetail getMentorDetail(Long mentorId) {
         return mentorReadRepositoryPort.findApprovedMentorDetailById(mentorId)
+                .orElseThrow(() -> new ResourceNotFoundException("Mentor profile not found"));
+    }
+
+    @Override
+    public CurrentMentorDetails getCurrentMentor(Long userId) {
+        return mentorReadRepositoryPort.findCurrentMentorByUserId(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("Mentor profile not found"));
     }
 

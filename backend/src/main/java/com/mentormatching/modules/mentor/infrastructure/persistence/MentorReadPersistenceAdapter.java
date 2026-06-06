@@ -9,6 +9,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
+import com.mentormatching.modules.mentor.application.dto.CurrentMentorDetails;
 import com.mentormatching.modules.mentor.application.dto.GetMentorsQuery;
 import com.mentormatching.modules.mentor.application.dto.MentorAchievementDetail;
 import com.mentormatching.modules.mentor.application.dto.MentorAvailabilityDetail;
@@ -21,6 +22,7 @@ import com.mentormatching.modules.mentor.application.port.out.MentorReadReposito
 import com.mentormatching.modules.mentor.domain.MentorApprovalStatus;
 import com.mentormatching.modules.mentor.infrastructure.persistence.entity.MentorAchievementJpaEntity;
 import com.mentormatching.modules.mentor.infrastructure.persistence.repository.MentorAchievementJpaRepository;
+import com.mentormatching.modules.mentor.infrastructure.persistence.repository.CurrentMentorDetailsProjection;
 import com.mentormatching.modules.mentor.infrastructure.persistence.repository.MentorDetailProjection;
 import com.mentormatching.modules.mentor.infrastructure.persistence.repository.MentorHighlightJpaRepository;
 import com.mentormatching.modules.mentor.infrastructure.persistence.repository.MentorListItemProjection;
@@ -76,6 +78,12 @@ public class MentorReadPersistenceAdapter implements MentorReadRepositoryPort {
                 .totalItems(mentorPage.getTotalElements())
                 .data(mentorPage.getContent().stream().map(this::toListItem).toList())
                 .build();
+    }
+
+    @Override
+    public Optional<CurrentMentorDetails> findCurrentMentorByUserId(Long userId) {
+        return mentorProfileJpaRepository.findCurrentMentorDetailByUserId(userId)
+                .map(this::toCurrentMentorDetails);
     }
 
     @Override
@@ -139,6 +147,18 @@ public class MentorReadPersistenceAdapter implements MentorReadRepositoryPort {
                 projection.getIntroduction(), projection.getTeachingStyle(), projection.getExperienceYears(),
                 projection.getCurrentPosition(), projection.getWorkplace(), projection.getEducation(),
                 projection.getMajor(), projection.getMeetingType(), projection.getCreatedAt(), projection.getUpdatedAt());
+    }
+
+    private CurrentMentorDetails toCurrentMentorDetails(CurrentMentorDetailsProjection projection) {
+        return new CurrentMentorDetails(projection.getId(), projection.getUserId(), projection.getFullName(),
+                projection.getAvatarUrl(), projection.getGender(), projection.getHometownCityId(),
+                projection.getHometownCityName(), projection.getCurrentCityId(), projection.getCurrentCityName(),
+                projection.getCurrentDistrictId(), projection.getCurrentDistrictName(), projection.getHeadline(),
+                projection.getIntroduction(), projection.getTeachingStyle(), projection.getExperienceYears(),
+                projection.getCurrentPosition(), projection.getWorkplace(), projection.getEducation(),
+                projection.getMajor(), projection.getMeetingType(), projection.getApprovalStatus(),
+                projection.getApprovalNote(), projection.getVerificationStatus(),
+                projection.getVerificationRejectionReason(), projection.getCreatedAt(), projection.getUpdatedAt());
     }
 
     private MentorSubjectDetail toSubjectDetail(MentorSubjectDetailProjection projection) {
