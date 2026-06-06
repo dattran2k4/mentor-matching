@@ -1,5 +1,6 @@
 package com.mentormatching.modules.mentor.infrastructure.persistence.repository;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 import com.mentormatching.modules.mentor.domain.Gender;
@@ -30,6 +31,8 @@ public interface MentorListItemProjection {
     String getMajor();
 
     MeetingType getMeetingType();
+
+    BigDecimal getMinPrice();
 
     LocalDateTime getCreatedAt();
 }

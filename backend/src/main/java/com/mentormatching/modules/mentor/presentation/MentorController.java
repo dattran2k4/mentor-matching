@@ -68,9 +68,11 @@ public class MentorController {
                                                                         @RequestParam(required = false) Gender gender,
                                                                         @RequestParam(required = false) MeetingType meetingType,
                                                                         @RequestParam(required = false) Long cityId,
-                                                                        @RequestParam(required = false) Long districtId) {
+                                                                        @RequestParam(required = false) Long districtId,
+                                                                        @RequestParam(required = false) Long subjectId,
+                                                                        @RequestParam(required = false) Long gradeId) {
         PageResponse<MentorListItem> mentors = getMentorsUseCase.getMentors(new GetMentorsQuery(page, size, sortBy,
-                sortDir, search, gender, meetingType, cityId, districtId));
+                sortDir, search, gender, meetingType, cityId, districtId, subjectId, gradeId));
         return apiResponseFactory.success(MentorListItemResponse.from(mentors), "Get mentors successfully");
     }
 

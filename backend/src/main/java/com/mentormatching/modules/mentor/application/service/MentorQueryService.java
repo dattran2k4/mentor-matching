@@ -1,5 +1,6 @@
 package com.mentormatching.modules.mentor.application.service;
 
+import java.util.Collections;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
@@ -22,6 +23,7 @@ import com.mentormatching.modules.mentor.application.port.in.GetMentorSummaryByU
 import com.mentormatching.modules.mentor.application.port.in.GetMentorTraitsUseCase;
 import com.mentormatching.modules.mentor.application.port.in.GetMentorsUseCase;
 import com.mentormatching.modules.mentor.application.port.in.GetMentorSummaryUseCase;
+import com.mentormatching.modules.catalog.application.port.in.GetSubjectGradeIdsUseCase;
 import com.mentormatching.modules.mentor.application.port.out.MentorProfileRepositoryPort;
 import com.mentormatching.modules.mentor.application.port.out.MentorReadRepositoryPort;
 import com.mentormatching.modules.mentor.application.port.out.MentorSubjectRepositoryPort;
@@ -38,18 +40,34 @@ public class MentorQueryService implements GetMentorSummaryUseCase, GetMentorSub
     private final MentorProfileRepositoryPort mentorProfileRepositoryPort;
     private final MentorSubjectRepositoryPort mentorSubjectRepositoryPort;
     private final MentorReadRepositoryPort mentorReadRepositoryPort;
+    private final GetSubjectGradeIdsUseCase getSubjectGradeIdsUseCase;
 
     public MentorQueryService(MentorProfileRepositoryPort mentorProfileRepositoryPort,
                               MentorSubjectRepositoryPort mentorSubjectRepositoryPort,
-                              MentorReadRepositoryPort mentorReadRepositoryPort) {
+                              MentorReadRepositoryPort mentorReadRepositoryPort,
+                              GetSubjectGradeIdsUseCase getSubjectGradeIdsUseCase) {
         this.mentorProfileRepositoryPort = mentorProfileRepositoryPort;
         this.mentorSubjectRepositoryPort = mentorSubjectRepositoryPort;
         this.mentorReadRepositoryPort = mentorReadRepositoryPort;
+        this.getSubjectGradeIdsUseCase = getSubjectGradeIdsUseCase;
     }
 
     @Override
     public PageResponse<MentorListItem> getMentors(GetMentorsQuery query) {
-        return mentorReadRepositoryPort.findApprovedMentors(query);
+        List<Long> subjectGradeIds = null;
+        if (query.subjectId() != null || query.gradeId() != null) {
+            subjectGradeIds = getSubjectGradeIdsUseCase.getSubjectGradeIds(query.subjectId(), query.gradeId());
+            if (subjectGradeIds.isEmpty()) {
+                return PageResponse.<MentorListItem>builder()
+                        .page(query.page())
+                        .pageSize(query.size())
+                        .totalItems(0)
+                        .totalPages(0)
+                        .data(Collections.emptyList())
+                        .build();
+            }
+        }
+        return mentorReadRepositoryPort.findApprovedMentors(query, subjectGradeIds);
     }
 
     @Override

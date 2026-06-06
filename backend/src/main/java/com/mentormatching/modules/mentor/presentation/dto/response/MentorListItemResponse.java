@@ -1,5 +1,6 @@
 package com.mentormatching.modules.mentor.presentation.dto.response;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -11,12 +12,13 @@ import com.mentormatching.shared.response.PageResponse;
 public record MentorListItemResponse(Long id, Long userId, String fullName, String avatarUrl, Gender gender,
                                      String headline, Integer experienceYears, String currentPosition,
                                      String workplace, String education, String major, MeetingType meetingType,
-                                     LocalDateTime createdAt) {
+                                     BigDecimal minPrice, LocalDateTime createdAt) {
 
     public static MentorListItemResponse from(MentorListItem mentor) {
         return new MentorListItemResponse(mentor.id(), mentor.userId(), mentor.fullName(), mentor.avatarUrl(),
                 mentor.gender(), mentor.headline(), mentor.experienceYears(), mentor.currentPosition(),
-                mentor.workplace(), mentor.education(), mentor.major(), mentor.meetingType(), mentor.createdAt());
+                mentor.workplace(), mentor.education(), mentor.major(), mentor.meetingType(), mentor.minPrice(),
+                mentor.createdAt());
     }
 
     public static PageResponse<MentorListItemResponse> from(PageResponse<MentorListItem> mentors) {

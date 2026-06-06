@@ -3,8 +3,8 @@ package com.mentormatching.modules.catalog.application.service;
 import org.springframework.stereotype.Service;
 
 import com.mentormatching.modules.catalog.application.dto.CatalogOptions;
-import com.mentormatching.modules.catalog.application.dto.SubjectGradeSummary;
 import com.mentormatching.modules.catalog.application.port.in.GetCatalogOptionsUseCase;
+import com.mentormatching.modules.catalog.application.port.in.GetSubjectGradeIdsUseCase;
 import com.mentormatching.modules.catalog.application.port.in.GetSubjectGradeSummaryUseCase;
 import com.mentormatching.modules.catalog.application.port.out.CategoryRepositoryPort;
 import com.mentormatching.modules.catalog.application.port.out.GradeRepositoryPort;
@@ -15,9 +15,10 @@ import com.mentormatching.modules.catalog.domain.SubjectGrade;
 import com.mentormatching.shared.exception.ResourceNotFoundException;
 
 import java.util.List;
+import java.util.stream.Stream;
 
 @Service
-public class CatalogQueryService implements GetSubjectGradeSummaryUseCase, GetCatalogOptionsUseCase {
+public class CatalogQueryService implements GetSubjectGradeSummaryUseCase, GetCatalogOptionsUseCase, GetSubjectGradeIdsUseCase {
 
     private final SubjectGradeRepositoryPort subjectGradeRepositoryPort;
     private final SubjectRepositoryPort subjectRepositoryPort;
@@ -60,5 +61,20 @@ public class CatalogQueryService implements GetSubjectGradeSummaryUseCase, GetCa
                 .toList();
 
         return new CatalogOptions(categories, subjects, grades);
+    }
+
+    @Override
+    public List<Long> getSubjectGradeIds(Long subjectId, Long gradeId) {
+        if (subjectId != null) {
+            Stream<SubjectGrade> stream = subjectGradeRepositoryPort.findBySubjectId(subjectId).stream();
+            if (gradeId != null) {
+                stream = stream.filter(sg -> gradeId.equals(sg.getGradeId()));
+            }
+            return stream.map(SubjectGrade::getId).toList();
+        } else if (gradeId != null) {
+            return subjectGradeRepositoryPort.findByGradeId(gradeId).stream()
+                    .map(SubjectGrade::getId).toList();
+        }
+        return List.of();
     }
 }
