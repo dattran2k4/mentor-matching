@@ -10,7 +10,7 @@
 
 - component: `StatusBadge`
   status: added in Milestone 1
-  notes: shared status vocabulary for booking, payment, mentor approval, verification, and user states; currently adopted by learner bookings, mentor cards, mentor profile, mentor dashboard, mentor schedule, mentor students, mentor earnings, and admin mentor review surfaces
+  notes: shared status vocabulary for booking, payment, mentor approval, verification, and user states; currently adopted by learner bookings, mentor cards, mentor profile, mentor dashboard, mentor schedule, mentor students, mentor earnings, admin dashboard queues, admin mentor review, and admin users surfaces
 
 - component: `EmptyState`
   status: added in Milestone 1
@@ -30,7 +30,7 @@
 
 - component: `DashboardSectionHeader`
   status: added in Milestone 3
-  notes: lightweight shared header for learner and mentor workspace sections with optional helper copy and right-aligned actions; used to keep dashboard, bookings, schedule, students, earnings, and profile routes focused on composition instead of repeating section chrome
+  notes: lightweight shared header for learner, mentor, and admin workspace sections with optional helper copy and right-aligned actions; used to keep dashboard, bookings, schedule, students, earnings, profile, reports, and settings routes focused on composition instead of repeating section chrome
 
 - component: `RoleGuard`
   status: stable reusable foundation

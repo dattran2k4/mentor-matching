@@ -134,3 +134,12 @@
 - rationale: the mentor screens share operational vocabulary more than unique chrome, so thin routes plus one shared static data module reduce duplication without prematurely freezing extra abstractions
 - alternatives considered: keeping large route-local mock arrays in each mentor screen, or adding new mentor-only cards/rows before proving broader reuse
 - follow-up: when mentor schedule, profile, students, and earnings APIs are integrated later, swap the static mentor workspace module route by route while preserving recurring-vs-specific-date availability semantics and honest earnings/status messaging
+
+## Decision 16: admin workspace keeps one shared static data module and honest partial surfaces
+
+- date: 2026-06-06
+- context: Milestone 5 needed the admin dashboard, mentors, users, reports, and settings routes to become operationally useful without inventing backend-complete moderation or configuration tooling
+- decision: centralize admin workspace mock data in `frontend/app/mocks/admin-workspace.ts`, reuse existing shared dashboard/state components, and keep reports/settings explicitly framed as partial operational surfaces rather than fake-complete tools
+- rationale: the admin routes share queue, status, and oversight language more than they need new custom chrome, and honest placeholder framing reduces future rework when real APIs arrive
+- alternatives considered: leaving large route-local arrays in each admin screen, or building interactive moderation/settings flows that imply unsupported backend behavior
+- follow-up: later integration work can replace the static admin workspace module route by route, especially for mentor review, user management, reports, and settings, while preserving the current action-first hierarchy
