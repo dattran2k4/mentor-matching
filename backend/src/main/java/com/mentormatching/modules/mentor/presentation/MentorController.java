@@ -28,6 +28,7 @@ import com.mentormatching.modules.mentor.application.dto.MentorListItem;
 import com.mentormatching.modules.mentor.application.dto.MentorSubjectDetail;
 import com.mentormatching.modules.mentor.application.dto.MentorTraitsDetail;
 import com.mentormatching.modules.mentor.application.port.in.GetCurrentMentorUseCase;
+import com.mentormatching.modules.mentor.application.port.in.GetCurrentMentorVerificationUseCase;
 import com.mentormatching.modules.mentor.application.port.in.GetMentorAchievementsUseCase;
 import com.mentormatching.modules.mentor.application.port.in.GetMentorAvailabilitiesUseCase;
 import com.mentormatching.modules.mentor.application.port.in.GetMentorDetailUseCase;
@@ -39,6 +40,7 @@ import com.mentormatching.modules.mentor.domain.Gender;
 import com.mentormatching.modules.mentor.domain.MeetingType;
 import com.mentormatching.modules.mentor.presentation.dto.request.UpdateCurrentMentorRequest;
 import com.mentormatching.modules.mentor.presentation.dto.response.CurrentMentorResponse;
+import com.mentormatching.modules.mentor.presentation.dto.response.CurrentMentorVerificationResponse;
 import com.mentormatching.modules.mentor.presentation.dto.response.MentorAchievementDetailResponse;
 import com.mentormatching.modules.mentor.presentation.dto.response.MentorAvailabilityDetailResponse;
 import com.mentormatching.modules.mentor.presentation.dto.response.MentorDetailResponse;
@@ -62,6 +64,7 @@ import jakarta.validation.constraints.Min;
 public class MentorController {
 
     private final GetCurrentMentorUseCase getCurrentMentorUseCase;
+    private final GetCurrentMentorVerificationUseCase getCurrentMentorVerificationUseCase;
     private final UpdateCurrentMentorUseCase updateCurrentMentorUseCase;
     private final GetMentorsUseCase getMentorsUseCase;
     private final GetMentorDetailUseCase getMentorDetailUseCase;
@@ -86,6 +89,15 @@ public class MentorController {
             @Valid @RequestBody UpdateCurrentMentorRequest request) {
         return apiResponseFactory.success(CurrentMentorResponse.from(updateCurrentMentorUseCase.updateCurrentMentor(
                 request.toCommand(principal))), "Update mentor profile successfully");
+    }
+
+    @PreAuthorize("isAuthenticated()")
+    @GetMapping("/me/verification")
+    public ApiResponse<CurrentMentorVerificationResponse> getCurrentMentorVerification(
+            @AuthenticationPrincipal AuthenticatedPrincipal principal) {
+        return apiResponseFactory.success(CurrentMentorVerificationResponse.from(
+                getCurrentMentorVerificationUseCase.getCurrentMentorVerification(principal.getId())),
+                "Get current mentor verification successfully");
     }
 
     @GetMapping
