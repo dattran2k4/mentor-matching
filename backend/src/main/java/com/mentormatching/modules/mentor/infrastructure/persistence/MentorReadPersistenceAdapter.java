@@ -38,7 +38,7 @@ import com.mentormatching.shared.response.PageResponse;
 public class MentorReadPersistenceAdapter implements MentorReadRepositoryPort {
 
     private static final Set<String> SORTABLE_FIELDS = Set.of("id", "fullName", "gender", "experienceYears",
-            "meetingType", "createdAt");
+            "meetingType", "createdAt", "minPrice");
 
     private final MentorProfileJpaRepository mentorProfileJpaRepository;
     private final MentorSubjectJpaRepository mentorSubjectJpaRepository;
@@ -62,12 +62,12 @@ public class MentorReadPersistenceAdapter implements MentorReadRepositoryPort {
     }
 
     @Override
-    public PageResponse<MentorListItem> findApprovedMentors(GetMentorsQuery query) {
+    public PageResponse<MentorListItem> findApprovedMentors(GetMentorsQuery query, List<Long> subjectGradeIds) {
         Pageable pageable = PageableUtils.buildPageable(query.page(), query.size(), query.sortBy(), query.sortDir(),
                 SORTABLE_FIELDS);
         Page<MentorListItemProjection> mentorPage = mentorProfileJpaRepository.findApprovedMentors(
                 MentorApprovalStatus.APPROVED, containsPattern(query.search()), query.gender(), query.meetingType(),
-                query.cityId(), query.districtId(), pageable);
+                query.cityId(), query.districtId(), subjectGradeIds, pageable);
 
         return PageResponse.<MentorListItem>builder()
                 .page(mentorPage.getNumber() + 1)
@@ -127,7 +127,8 @@ public class MentorReadPersistenceAdapter implements MentorReadRepositoryPort {
         return new MentorListItem(projection.getId(), projection.getUserId(), projection.getFullName(),
                 projection.getAvatarUrl(), projection.getGender(), projection.getHeadline(),
                 projection.getExperienceYears(), projection.getCurrentPosition(), projection.getWorkplace(),
-                projection.getEducation(), projection.getMajor(), projection.getMeetingType(), projection.getCreatedAt());
+                projection.getEducation(), projection.getMajor(), projection.getMeetingType(), projection.getMinPrice(),
+                projection.getCreatedAt());
     }
 
     private MentorDetail toDetail(MentorDetailProjection projection) {

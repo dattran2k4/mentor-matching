@@ -14,7 +14,7 @@ import com.mentormatching.shared.response.PageResponse;
 
 public interface MentorReadRepositoryPort {
 
-    PageResponse<MentorListItem> findApprovedMentors(GetMentorsQuery query);
+    PageResponse<MentorListItem> findApprovedMentors(GetMentorsQuery query, List<Long> subjectGradeIds);
 
     Optional<MentorDetail> findApprovedMentorDetailById(Long mentorId);
 
