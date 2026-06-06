@@ -105,6 +105,13 @@ public class MentorReadPersistenceAdapter implements MentorReadRepositoryPort {
     }
 
     @Override
+    public List<MentorSubjectDetail> findAllMentorSubjects(Long mentorId) {
+        return mentorSubjectJpaRepository.findAllDetailsByMentorId(mentorId).stream()
+                .map(this::toSubjectDetail)
+                .toList();
+    }
+
+    @Override
     public MentorTraitsDetail findMentorTraits(Long mentorId) {
         List<MentorOptionDetail> personalities = mentorPersonalityJpaRepository.findOptionsByMentorId(mentorId).stream()
                 .map(this::toOptionDetail)

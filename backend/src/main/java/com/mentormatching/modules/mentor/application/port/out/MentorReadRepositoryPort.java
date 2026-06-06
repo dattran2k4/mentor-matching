@@ -25,6 +25,8 @@ public interface MentorReadRepositoryPort {
 
     List<MentorSubjectDetail> findMentorSubjects(Long mentorId);
 
+    List<MentorSubjectDetail> findAllMentorSubjects(Long mentorId);
+
     MentorTraitsDetail findMentorTraits(Long mentorId);
 
     List<MentorAchievementDetail> findMentorAchievements(Long mentorId);

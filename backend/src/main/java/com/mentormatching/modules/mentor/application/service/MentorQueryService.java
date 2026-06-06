@@ -18,6 +18,7 @@ import com.mentormatching.modules.mentor.application.dto.MentorTraitsDetail;
 import com.mentormatching.modules.mentor.application.port.in.GetMentorAchievementsUseCase;
 import com.mentormatching.modules.mentor.application.port.in.GetMentorAvailabilitiesUseCase;
 import com.mentormatching.modules.mentor.application.port.in.GetCurrentMentorUseCase;
+import com.mentormatching.modules.mentor.application.port.in.GetCurrentMentorSubjectsUseCase;
 import com.mentormatching.modules.mentor.application.port.in.GetMentorDetailUseCase;
 import com.mentormatching.modules.mentor.application.port.in.GetMentorSubjectsUseCase;
 import com.mentormatching.modules.mentor.application.port.in.GetMentorSubjectSummaryUseCase;
@@ -37,7 +38,8 @@ import com.mentormatching.shared.response.PageResponse;
 @Service
 public class MentorQueryService implements GetMentorSummaryUseCase, GetMentorSubjectSummaryUseCase, GetMentorsUseCase,
         GetMentorDetailUseCase, GetMentorSubjectsUseCase, GetMentorTraitsUseCase, GetMentorAchievementsUseCase,
-        GetMentorAvailabilitiesUseCase, GetMentorSummaryByUserUseCase, GetCurrentMentorUseCase {
+        GetMentorAvailabilitiesUseCase, GetMentorSummaryByUserUseCase, GetCurrentMentorUseCase,
+        GetCurrentMentorSubjectsUseCase {
 
     private final MentorProfileRepositoryPort mentorProfileRepositoryPort;
     private final MentorSubjectRepositoryPort mentorSubjectRepositoryPort;
@@ -88,6 +90,13 @@ public class MentorQueryService implements GetMentorSummaryUseCase, GetMentorSub
     public List<MentorSubjectDetail> getMentorSubjects(Long mentorId) {
         ensureApprovedMentorExists(mentorId);
         return mentorReadRepositoryPort.findMentorSubjects(mentorId);
+    }
+
+    @Override
+    public List<MentorSubjectDetail> getCurrentMentorSubjects(Long userId) {
+        MentorProfile mentor = mentorProfileRepositoryPort.findByUserId(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("Mentor profile not found"));
+        return mentorReadRepositoryPort.findAllMentorSubjects(mentor.getId());
     }
 
     @Override

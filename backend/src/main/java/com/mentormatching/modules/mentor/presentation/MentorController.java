@@ -28,6 +28,7 @@ import com.mentormatching.modules.mentor.application.dto.MentorListItem;
 import com.mentormatching.modules.mentor.application.dto.MentorSubjectDetail;
 import com.mentormatching.modules.mentor.application.dto.MentorTraitsDetail;
 import com.mentormatching.modules.mentor.application.port.in.GetCurrentMentorUseCase;
+import com.mentormatching.modules.mentor.application.port.in.GetCurrentMentorSubjectsUseCase;
 import com.mentormatching.modules.mentor.application.port.in.GetCurrentMentorVerificationUseCase;
 import com.mentormatching.modules.mentor.application.port.in.GetMentorAchievementsUseCase;
 import com.mentormatching.modules.mentor.application.port.in.GetMentorAvailabilitiesUseCase;
@@ -66,6 +67,7 @@ import jakarta.validation.constraints.Min;
 public class MentorController {
 
     private final GetCurrentMentorUseCase getCurrentMentorUseCase;
+    private final GetCurrentMentorSubjectsUseCase getCurrentMentorSubjectsUseCase;
     private final GetCurrentMentorVerificationUseCase getCurrentMentorVerificationUseCase;
     private final UpsertCurrentMentorVerificationUseCase upsertCurrentMentorVerificationUseCase;
     private final UpdateCurrentMentorUseCase updateCurrentMentorUseCase;
@@ -112,6 +114,16 @@ public class MentorController {
                 upsertCurrentMentorVerificationUseCase.upsertCurrentMentorVerification(
                         request.toCommand(principal))),
                 "Save current mentor verification successfully");
+    }
+
+    @PreAuthorize("isAuthenticated()")
+    @GetMapping("/me/subjects")
+    public ApiResponse<List<MentorSubjectDetailResponse>> getCurrentMentorSubjects(
+            @AuthenticationPrincipal AuthenticatedPrincipal principal) {
+        List<MentorSubjectDetail> subjects = getCurrentMentorSubjectsUseCase.getCurrentMentorSubjects(
+                principal.getId());
+        return apiResponseFactory.success(subjects.stream().map(MentorSubjectDetailResponse::from).toList(),
+                "Get current mentor subjects successfully");
     }
 
     @GetMapping

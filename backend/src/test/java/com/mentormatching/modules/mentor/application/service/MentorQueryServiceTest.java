@@ -6,12 +6,15 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.time.LocalDateTime;
+import java.math.BigDecimal;
+import java.util.List;
 import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import com.mentormatching.modules.mentor.application.dto.CurrentMentorDetails;
+import com.mentormatching.modules.mentor.application.dto.MentorSubjectDetail;
 import com.mentormatching.modules.mentor.application.port.out.MentorCatalogLookupPort;
 import com.mentormatching.modules.mentor.application.port.out.MentorProfileRepositoryPort;
 import com.mentormatching.modules.mentor.application.port.out.MentorReadRepositoryPort;
@@ -19,17 +22,21 @@ import com.mentormatching.modules.mentor.application.port.out.MentorSubjectRepos
 import com.mentormatching.modules.mentor.domain.Gender;
 import com.mentormatching.modules.mentor.domain.MeetingType;
 import com.mentormatching.modules.mentor.domain.MentorApprovalStatus;
+import com.mentormatching.modules.mentor.domain.ProficiencyLevel;
+import com.mentormatching.modules.mentor.domain.MentorProfile;
+import com.mentormatching.modules.mentor.domain.MentorProfileRestoreData;
 import com.mentormatching.modules.mentor.domain.MentorVerificationStatus;
 import com.mentormatching.shared.exception.ResourceNotFoundException;
 
 class MentorQueryServiceTest {
 
+    private MentorProfileRepositoryPort mentorProfileRepositoryPort;
     private MentorReadRepositoryPort mentorReadRepositoryPort;
     private MentorQueryService mentorQueryService;
 
     @BeforeEach
     void setUp() {
-        MentorProfileRepositoryPort mentorProfileRepositoryPort = mock(MentorProfileRepositoryPort.class);
+        mentorProfileRepositoryPort = mock(MentorProfileRepositoryPort.class);
         MentorSubjectRepositoryPort mentorSubjectRepositoryPort = mock(MentorSubjectRepositoryPort.class);
         mentorReadRepositoryPort = mock(MentorReadRepositoryPort.class);
         MentorCatalogLookupPort mentorCatalogLookupPort = mock(MentorCatalogLookupPort.class);
@@ -59,6 +66,38 @@ class MentorQueryServiceTest {
 
         ResourceNotFoundException exception = assertThrows(ResourceNotFoundException.class,
                 () -> mentorQueryService.getCurrentMentor(99L));
+
+        assertEquals("Mentor profile not found", exception.getMessage());
+    }
+
+    @Test
+    void getCurrentMentorSubjectsReturnsAllSubjectsIncludingInactiveOnes() {
+        MentorProfile mentorProfile = MentorProfile.restore(new MentorProfileRestoreData(10L, 20L,
+                "https://example.com/avatar.jpg", Gender.FEMALE, 1L, 2L, "Headline", "Intro",
+                "Style", 6, "Teacher", "Mentor Matching", "HCMUS", "Mathematics", MeetingType.HYBRID,
+                MentorApprovalStatus.PENDING, null, null, null, LocalDateTime.parse("2026-06-01T10:15:30"),
+                LocalDateTime.parse("2026-06-05T12:00:00")));
+        List<MentorSubjectDetail> expected = List.of(
+                new MentorSubjectDetail(100L, 200L, 300L, "Toan", 400L, "Lop 9",
+                        ProficiencyLevel.EXPERT, "Dang mo", new BigDecimal("250000"), true),
+                new MentorSubjectDetail(101L, 201L, 301L, "Vat ly", 401L, "Lop 10",
+                        ProficiencyLevel.INTERMEDIATE, "Tam an", new BigDecimal("220000"), false)
+        );
+
+        when(mentorProfileRepositoryPort.findByUserId(20L)).thenReturn(Optional.of(mentorProfile));
+        when(mentorReadRepositoryPort.findAllMentorSubjects(10L)).thenReturn(expected);
+
+        List<MentorSubjectDetail> actual = mentorQueryService.getCurrentMentorSubjects(20L);
+
+        assertEquals(expected, actual);
+    }
+
+    @Test
+    void getCurrentMentorSubjectsThrowsWhenMentorProfileDoesNotExist() {
+        when(mentorProfileRepositoryPort.findByUserId(99L)).thenReturn(Optional.empty());
+
+        ResourceNotFoundException exception = assertThrows(ResourceNotFoundException.class,
+                () -> mentorQueryService.getCurrentMentorSubjects(99L));
 
         assertEquals("Mentor profile not found", exception.getMessage());
     }
