@@ -45,7 +45,12 @@ public interface MentorProfileJpaRepository extends JpaRepository<MentorProfileJ
               and (:meetingType is null or mentor.meetingType = :meetingType)
               and (:cityId is null or district.cityId = :cityId)
               and (:districtId is null or mentor.currentDistrictId = :districtId)
-              and (:subjectGradeIds is null or mentor.id IN (select ms.mentorId from MentorSubjectJpaEntity ms where ms.subjectGradeId IN :subjectGradeIds))
+              and (:subjectGradeIds is null or mentor.id IN (
+                   select ms.mentorId
+                   from MentorSubjectJpaEntity ms
+                   where ms.subjectGradeId IN :subjectGradeIds
+                     and ms.active = true
+              ))
               and (:search is null
                    or lower(user.fullName) like :search
                    or lower(mentor.headline) like :search

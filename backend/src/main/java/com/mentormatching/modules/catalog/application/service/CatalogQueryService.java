@@ -3,6 +3,7 @@ package com.mentormatching.modules.catalog.application.service;
 import org.springframework.stereotype.Service;
 
 import com.mentormatching.modules.catalog.application.dto.CatalogOptions;
+import com.mentormatching.modules.catalog.application.dto.SubjectGradeSummary;
 import com.mentormatching.modules.catalog.application.port.in.GetCatalogOptionsUseCase;
 import com.mentormatching.modules.catalog.application.port.in.GetSubjectGradeIdsUseCase;
 import com.mentormatching.modules.catalog.application.port.in.GetSubjectGradeSummaryUseCase;

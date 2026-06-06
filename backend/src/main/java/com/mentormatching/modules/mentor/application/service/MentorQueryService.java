@@ -23,7 +23,7 @@ import com.mentormatching.modules.mentor.application.port.in.GetMentorSummaryByU
 import com.mentormatching.modules.mentor.application.port.in.GetMentorTraitsUseCase;
 import com.mentormatching.modules.mentor.application.port.in.GetMentorsUseCase;
 import com.mentormatching.modules.mentor.application.port.in.GetMentorSummaryUseCase;
-import com.mentormatching.modules.catalog.application.port.in.GetSubjectGradeIdsUseCase;
+import com.mentormatching.modules.mentor.application.port.out.MentorCatalogLookupPort;
 import com.mentormatching.modules.mentor.application.port.out.MentorProfileRepositoryPort;
 import com.mentormatching.modules.mentor.application.port.out.MentorReadRepositoryPort;
 import com.mentormatching.modules.mentor.application.port.out.MentorSubjectRepositoryPort;
@@ -40,23 +40,23 @@ public class MentorQueryService implements GetMentorSummaryUseCase, GetMentorSub
     private final MentorProfileRepositoryPort mentorProfileRepositoryPort;
     private final MentorSubjectRepositoryPort mentorSubjectRepositoryPort;
     private final MentorReadRepositoryPort mentorReadRepositoryPort;
-    private final GetSubjectGradeIdsUseCase getSubjectGradeIdsUseCase;
+    private final MentorCatalogLookupPort mentorCatalogLookupPort;
 
     public MentorQueryService(MentorProfileRepositoryPort mentorProfileRepositoryPort,
                               MentorSubjectRepositoryPort mentorSubjectRepositoryPort,
                               MentorReadRepositoryPort mentorReadRepositoryPort,
-                              GetSubjectGradeIdsUseCase getSubjectGradeIdsUseCase) {
+                              MentorCatalogLookupPort mentorCatalogLookupPort) {
         this.mentorProfileRepositoryPort = mentorProfileRepositoryPort;
         this.mentorSubjectRepositoryPort = mentorSubjectRepositoryPort;
         this.mentorReadRepositoryPort = mentorReadRepositoryPort;
-        this.getSubjectGradeIdsUseCase = getSubjectGradeIdsUseCase;
+        this.mentorCatalogLookupPort = mentorCatalogLookupPort;
     }
 
     @Override
     public PageResponse<MentorListItem> getMentors(GetMentorsQuery query) {
         List<Long> subjectGradeIds = null;
         if (query.subjectId() != null || query.gradeId() != null) {
-            subjectGradeIds = getSubjectGradeIdsUseCase.getSubjectGradeIds(query.subjectId(), query.gradeId());
+            subjectGradeIds = mentorCatalogLookupPort.getSubjectGradeIds(query.subjectId(), query.gradeId());
             if (subjectGradeIds.isEmpty()) {
                 return PageResponse.<MentorListItem>builder()
                         .page(query.page())
