@@ -14,6 +14,8 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -32,8 +34,10 @@ import com.mentormatching.modules.mentor.application.port.in.GetMentorDetailUseC
 import com.mentormatching.modules.mentor.application.port.in.GetMentorSubjectsUseCase;
 import com.mentormatching.modules.mentor.application.port.in.GetMentorTraitsUseCase;
 import com.mentormatching.modules.mentor.application.port.in.GetMentorsUseCase;
+import com.mentormatching.modules.mentor.application.port.in.UpdateCurrentMentorUseCase;
 import com.mentormatching.modules.mentor.domain.Gender;
 import com.mentormatching.modules.mentor.domain.MeetingType;
+import com.mentormatching.modules.mentor.presentation.dto.request.UpdateCurrentMentorRequest;
 import com.mentormatching.modules.mentor.presentation.dto.response.CurrentMentorResponse;
 import com.mentormatching.modules.mentor.presentation.dto.response.MentorAchievementDetailResponse;
 import com.mentormatching.modules.mentor.presentation.dto.response.MentorAvailabilityDetailResponse;
@@ -46,6 +50,7 @@ import com.mentormatching.shared.response.ApiResponseFactory;
 import com.mentormatching.shared.response.PageResponse;
 import com.mentormatching.shared.security.model.AuthenticatedPrincipal;
 
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 
@@ -57,6 +62,7 @@ import jakarta.validation.constraints.Min;
 public class MentorController {
 
     private final GetCurrentMentorUseCase getCurrentMentorUseCase;
+    private final UpdateCurrentMentorUseCase updateCurrentMentorUseCase;
     private final GetMentorsUseCase getMentorsUseCase;
     private final GetMentorDetailUseCase getMentorDetailUseCase;
     private final GetMentorSubjectsUseCase getMentorSubjectsUseCase;
@@ -71,6 +77,15 @@ public class MentorController {
             @AuthenticationPrincipal AuthenticatedPrincipal principal) {
         return apiResponseFactory.success(CurrentMentorResponse.from(getCurrentMentorUseCase.getCurrentMentor(
                 principal.getId())), "Get current mentor profile successfully");
+    }
+
+    @PreAuthorize("isAuthenticated()")
+    @PutMapping("/me")
+    public ApiResponse<CurrentMentorResponse> updateCurrentMentor(
+            @AuthenticationPrincipal AuthenticatedPrincipal principal,
+            @Valid @RequestBody UpdateCurrentMentorRequest request) {
+        return apiResponseFactory.success(CurrentMentorResponse.from(updateCurrentMentorUseCase.updateCurrentMentor(
+                request.toCommand(principal))), "Update mentor profile successfully");
     }
 
     @GetMapping
