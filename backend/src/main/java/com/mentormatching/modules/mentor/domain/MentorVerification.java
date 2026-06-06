@@ -38,6 +38,27 @@ public class MentorVerification {
         return new MentorVerification(data);
     }
 
+    public static MentorVerification submit(Long mentorId, String fullName, String idCardNumber,
+                                            String idCardFrontUrl, String idCardBackUrl,
+                                            String selfieWithIdUrl) {
+        return new MentorVerification(new MentorVerificationRestoreData(null, mentorId, fullName, idCardNumber,
+                idCardFrontUrl, idCardBackUrl, selfieWithIdUrl, MentorVerificationStatus.PENDING, null, null, null,
+                null, null));
+    }
+
+    public void resubmit(String fullName, String idCardNumber, String idCardFrontUrl, String idCardBackUrl,
+                         String selfieWithIdUrl) {
+        this.fullName = fullName;
+        this.idCardNumber = idCardNumber;
+        this.idCardFrontUrl = idCardFrontUrl;
+        this.idCardBackUrl = idCardBackUrl;
+        this.selfieWithIdUrl = selfieWithIdUrl;
+        this.verificationStatus = MentorVerificationStatus.PENDING;
+        this.verifiedBy = null;
+        this.verifiedAt = null;
+        this.rejectionReason = null;
+    }
+
     public Long getId() {
         return id;
     }

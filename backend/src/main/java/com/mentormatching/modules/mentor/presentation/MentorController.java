@@ -35,9 +35,11 @@ import com.mentormatching.modules.mentor.application.port.in.GetMentorDetailUseC
 import com.mentormatching.modules.mentor.application.port.in.GetMentorSubjectsUseCase;
 import com.mentormatching.modules.mentor.application.port.in.GetMentorTraitsUseCase;
 import com.mentormatching.modules.mentor.application.port.in.GetMentorsUseCase;
+import com.mentormatching.modules.mentor.application.port.in.UpsertCurrentMentorVerificationUseCase;
 import com.mentormatching.modules.mentor.application.port.in.UpdateCurrentMentorUseCase;
 import com.mentormatching.modules.mentor.domain.Gender;
 import com.mentormatching.modules.mentor.domain.MeetingType;
+import com.mentormatching.modules.mentor.presentation.dto.request.UpsertCurrentMentorVerificationRequest;
 import com.mentormatching.modules.mentor.presentation.dto.request.UpdateCurrentMentorRequest;
 import com.mentormatching.modules.mentor.presentation.dto.response.CurrentMentorResponse;
 import com.mentormatching.modules.mentor.presentation.dto.response.CurrentMentorVerificationResponse;
@@ -65,6 +67,7 @@ public class MentorController {
 
     private final GetCurrentMentorUseCase getCurrentMentorUseCase;
     private final GetCurrentMentorVerificationUseCase getCurrentMentorVerificationUseCase;
+    private final UpsertCurrentMentorVerificationUseCase upsertCurrentMentorVerificationUseCase;
     private final UpdateCurrentMentorUseCase updateCurrentMentorUseCase;
     private final GetMentorsUseCase getMentorsUseCase;
     private final GetMentorDetailUseCase getMentorDetailUseCase;
@@ -98,6 +101,17 @@ public class MentorController {
         return apiResponseFactory.success(CurrentMentorVerificationResponse.from(
                 getCurrentMentorVerificationUseCase.getCurrentMentorVerification(principal.getId())),
                 "Get current mentor verification successfully");
+    }
+
+    @PreAuthorize("isAuthenticated()")
+    @PutMapping("/me/verification")
+    public ApiResponse<CurrentMentorVerificationResponse> upsertCurrentMentorVerification(
+            @AuthenticationPrincipal AuthenticatedPrincipal principal,
+            @Valid @RequestBody UpsertCurrentMentorVerificationRequest request) {
+        return apiResponseFactory.success(CurrentMentorVerificationResponse.from(
+                upsertCurrentMentorVerificationUseCase.upsertCurrentMentorVerification(
+                        request.toCommand(principal))),
+                "Save current mentor verification successfully");
     }
 
     @GetMapping
