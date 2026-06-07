@@ -88,7 +88,7 @@ const Navbar = () => {
       className={`sticky top-0 z-50 transition-all duration-300 ${scrolled ? 'glass-panel border-b border-white/20' : 'bg-transparent'}`}
     >
       <nav
-        className={`mx-auto flex max-w-6xl items-center justify-between px-4 transition-all duration-300 ${scrolled ? 'py-3' : 'py-5'} md:px-6`}
+        className={`page-container flex items-center justify-between transition-all duration-300 ${scrolled ? 'py-3' : 'py-5'}`}
       >
         <div className='flex items-center gap-8'>
           <Link className='group flex items-center gap-2' to='/'>
@@ -164,35 +164,37 @@ const Navbar = () => {
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
-            className='border-t border-slate-200/50 bg-white/95 px-4 py-4 backdrop-blur-xl md:hidden'
+            className='border-t border-slate-200/50 bg-white/95 py-4 backdrop-blur-xl md:hidden'
           >
-            <div className='flex flex-col gap-2'>{navLinks}</div>
-            <div className='mt-5 flex flex-col gap-3 border-t border-slate-200/50 pt-5'>
-              <Link
-                className='border-primary/20 bg-primary/5 text-primary hover:bg-primary rounded-xl border-2 px-4 py-3 text-center text-sm font-semibold transition-colors hover:text-white'
-                to={path.mentorPanel.root}
-                onClick={() => setMobileOpen(false)}
-              >
-                Trở thành Mentor
-              </Link>
-              {accessToken ? (
-                <button
-                  className='flex items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-600 transition-colors hover:border-red-200 hover:bg-red-50 hover:text-red-600'
-                  type='button'
-                  onClick={handleLogout}
-                >
-                  <LogOut size={18} />
-                  Đăng xuất
-                </button>
-              ) : (
+            <div className='page-container'>
+              <div className='flex flex-col gap-2'>{navLinks}</div>
+              <div className='mt-5 flex flex-col gap-3 border-t border-slate-200/50 pt-5'>
                 <Link
-                  className='bg-primary from-primary to-primary-light shadow-soft rounded-xl bg-gradient-to-r px-4 py-3 text-center text-sm font-semibold text-white hover:opacity-90'
-                  to={path.login}
+                  className='border-primary/20 bg-primary/5 text-primary hover:bg-primary rounded-xl border-2 px-4 py-3 text-center text-sm font-semibold transition-colors hover:text-white'
+                  to={path.mentorPanel.root}
                   onClick={() => setMobileOpen(false)}
                 >
-                  Đăng nhập
+                  Trở thành Mentor
                 </Link>
-              )}
+                {accessToken ? (
+                  <button
+                    className='flex items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-600 transition-colors hover:border-red-200 hover:bg-red-50 hover:text-red-600'
+                    type='button'
+                    onClick={handleLogout}
+                  >
+                    <LogOut size={18} />
+                    Đăng xuất
+                  </button>
+                ) : (
+                  <Link
+                    className='bg-primary from-primary to-primary-light shadow-soft rounded-xl bg-gradient-to-r px-4 py-3 text-center text-sm font-semibold text-white hover:opacity-90'
+                    to={path.login}
+                    onClick={() => setMobileOpen(false)}
+                  >
+                    Đăng nhập
+                  </Link>
+                )}
+              </div>
             </div>
           </motion.div>
         )}

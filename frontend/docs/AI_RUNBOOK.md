@@ -46,7 +46,9 @@ When a generated file conflicts with framework guidance, framework wins unless `
 ## Non-Negotiables
 
 - Follow `frontend/RULES.md` for engineering conventions.
+- Use `app/components/ui` as the default low-level UI foundation for frontend work.
 - Reuse existing `app/components/ui` and app components before creating new ones.
+- When building or refactoring screens, prefer composing domain components from shadcn primitives already present in `app/components/ui`.
 - Keep route files thin when logic belongs in hooks, services, or reusable components.
 - Prefer consistency across screens over isolated visual experiments.
 - Update docs when a design or architecture decision affects future work.

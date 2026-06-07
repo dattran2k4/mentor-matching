@@ -81,6 +81,7 @@ Always read:
 - Use `@` alias for internal imports from `app`.
 - Keep route modules focused on screen composition.
 - Put reusable UI in `app/components`.
+- Treat `app/components/ui` as the default low-level UI system for frontend implementation.
 - Put low-level primitives in `app/components/ui` only when extending that system.
 - Put API functions in `app/services/*.api.ts`.
 - Put React Query hooks in `app/hooks/queries/**`.
@@ -92,8 +93,10 @@ Always read:
 
 ## Component Constraints
 
-- Reuse existing primitives before creating new controls.
+- Reuse existing shadcn primitives before creating new controls.
 - Reuse app components before creating new shared components.
+- Prefer building domain-specific components by composing `Button`, `Card`, `Badge`, `Tabs`, `Sheet`, `Dialog`, `Input`, `Select`, `Table`, `Skeleton`, and related primitives from `app/components/ui`.
+- Do not create custom presentation components that duplicate available shadcn primitives unless the domain UI needs a real abstraction on top.
 - Use lucide-react for icons.
 - Use `DashboardShell` for role dashboard layout.
 - Use `DashboardPage` for dashboard route content unless a specific route has a stronger established pattern.

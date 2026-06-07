@@ -5,7 +5,7 @@ import { path } from '@/config/path'
 const Footer = () => {
   return (
     <footer className='mt-16 border-t border-slate-200 bg-slate-50'>
-      <div className='mx-auto grid max-w-6xl gap-10 px-4 py-12 md:grid-cols-[1.3fr_1fr_1fr_1.1fr] md:px-6'>
+      <div className='page-container grid gap-10 py-12 md:grid-cols-[1.3fr_1fr_1fr_1.1fr]'>
         <div>
           <Link className='text-primary text-lg font-semibold' to={path.home}>
             Mentor Matching

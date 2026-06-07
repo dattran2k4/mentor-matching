@@ -212,6 +212,7 @@ Use clear progressive structure:
 
 - Reuse `app/components/ui` primitives before creating custom low-level UI.
 - Reuse app components under `app/components` before creating new shared components.
+- Build modern screens by composing shadcn primitives first, then layering domain meaning on top.
 - Use lucide icons for recognizable actions and states.
 - Keep repeated cards visually consistent.
 - Prefer badges for statuses and tags.
@@ -219,6 +220,7 @@ Use clear progressive structure:
 - Avoid creating multiple nearly identical card variants.
 - Prefer panels with distinct roles over grids of decorative summary cards.
 - Do not let every component compete equally for attention.
+- If an older custom component can be simplified into shadcn-based composition, prefer that direction during refactors.
 
 ## Status Design Rules
 

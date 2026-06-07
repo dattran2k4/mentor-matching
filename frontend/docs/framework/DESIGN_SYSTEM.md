@@ -44,6 +44,17 @@ Product rules:
 - React Query
 - Zustand
 
+## UI Foundation Rule
+
+For this project, `frontend/app/components/ui` is the primary low-level UI foundation.
+
+That means:
+
+- new screens should default to shadcn-based composition
+- new domain components should usually be wrappers or compositions around these primitives
+- custom visual components should exist for domain meaning, not because the primitive layer was ignored
+- when a route looks outdated, first ask whether it should be rebuilt from `Card`, `Button`, `Badge`, `Tabs`, `Sheet`, `Dialog`, `Input`, `Select`, `Table`, `Skeleton`, and related primitives
+
 ## Existing Global Tokens
 
 The app currently defines Tailwind theme tokens in `app.css`.
@@ -356,6 +367,7 @@ Guidance:
 - Prefer these primitives for new forms, filters, dialogs, status badges, tables, and sheets.
 - Import from `@/components/ui/...` according to existing patterns.
 - Do not create custom form controls when an existing primitive fits.
+- When modernizing old routes, prefer replacing ad hoc panels and controls with these primitives before inventing new visual shells.
 
 ## Recommended Shared Patterns To Build
 
