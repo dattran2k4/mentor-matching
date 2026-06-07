@@ -9,6 +9,8 @@ import org.springframework.transaction.annotation.Transactional;
 import com.mentormatching.modules.location.application.dto.CitySummary;
 import com.mentormatching.modules.location.application.dto.DistrictSummary;
 import com.mentormatching.modules.location.application.port.in.GetCitiesUseCase;
+import com.mentormatching.modules.location.application.port.in.GetCitySummaryUseCase;
+import com.mentormatching.modules.location.application.port.in.GetDistrictSummaryUseCase;
 import com.mentormatching.modules.location.application.port.in.GetDistrictsByCityUseCase;
 import com.mentormatching.modules.location.application.port.out.CityRepositoryPort;
 import com.mentormatching.modules.location.application.port.out.DistrictRepositoryPort;
@@ -19,7 +21,8 @@ import com.mentormatching.shared.text.SearchTextUtils;
 
 @Service
 @Transactional(readOnly = true)
-public class LocationQueryService implements GetCitiesUseCase, GetDistrictsByCityUseCase {
+public class LocationQueryService implements GetCitiesUseCase, GetDistrictsByCityUseCase, GetCitySummaryUseCase,
+        GetDistrictSummaryUseCase {
 
     private final CityRepositoryPort cityRepositoryPort;
     private final DistrictRepositoryPort districtRepositoryPort;
@@ -50,6 +53,20 @@ public class LocationQueryService implements GetCitiesUseCase, GetDistrictsByCit
                 .map(district -> new DistrictSummary(district.getId(), district.getCityId(), district.getCode(),
                         district.getName()))
                 .toList();
+    }
+
+    @Override
+    public CitySummary getCity(Long cityId) {
+        City city = cityRepositoryPort.findById(cityId)
+                .orElseThrow(() -> new ResourceNotFoundException("City not found"));
+        return new CitySummary(city.getId(), city.getCode(), city.getName());
+    }
+
+    @Override
+    public DistrictSummary getDistrict(Long districtId) {
+        District district = districtRepositoryPort.findById(districtId)
+                .orElseThrow(() -> new ResourceNotFoundException("District not found"));
+        return new DistrictSummary(district.getId(), district.getCityId(), district.getCode(), district.getName());
     }
 
     private boolean matches(City city, String normalizedSearch) {

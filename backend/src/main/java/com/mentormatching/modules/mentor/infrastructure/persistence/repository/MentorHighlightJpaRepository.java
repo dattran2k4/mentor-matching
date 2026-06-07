@@ -12,6 +12,8 @@ public interface MentorHighlightJpaRepository extends JpaRepository<MentorHighli
 
     List<MentorHighlightJpaEntity> findByMentorId(Long mentorId);
 
+    void deleteByMentorId(Long mentorId);
+
     @Query("""
             select highlightOption.id as id,
                    highlightOption.name as name,

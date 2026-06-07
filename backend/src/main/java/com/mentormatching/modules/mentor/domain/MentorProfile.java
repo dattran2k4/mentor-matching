@@ -2,6 +2,8 @@ package com.mentormatching.modules.mentor.domain;
 
 import java.time.LocalDateTime;
 
+import com.mentormatching.shared.exception.InvalidDataException;
+
 public class MentorProfile {
 
     private final Long id;
@@ -52,6 +54,32 @@ public class MentorProfile {
 
     public static MentorProfile restore(MentorProfileRestoreData data) {
         return new MentorProfile(data);
+    }
+
+    public void updateProfile(String avatarUrl, Gender gender, Long hometownCityId, Long currentDistrictId,
+                              String headline, String introduction, String teachingStyle,
+                              Integer experienceYears, String currentPosition, String workplace,
+                              String education, String major, MeetingType meetingType) {
+        validateExperienceYears(experienceYears);
+        this.avatarUrl = avatarUrl;
+        this.gender = gender;
+        this.hometownCityId = hometownCityId;
+        this.currentDistrictId = currentDistrictId;
+        this.headline = headline;
+        this.introduction = introduction;
+        this.teachingStyle = teachingStyle;
+        this.experienceYears = experienceYears;
+        this.currentPosition = currentPosition;
+        this.workplace = workplace;
+        this.education = education;
+        this.major = major;
+        this.meetingType = meetingType;
+    }
+
+    private void validateExperienceYears(Integer experienceYears) {
+        if (experienceYears != null && experienceYears < 0) {
+            throw new InvalidDataException("Experience years must be greater than or equal to 0");
+        }
     }
 
     public Long getId() {

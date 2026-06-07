@@ -1,5 +1,6 @@
 package com.mentormatching.modules.mentor.infrastructure.persistence;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -9,6 +10,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
+import com.mentormatching.modules.mentor.application.dto.CurrentMentorDetails;
 import com.mentormatching.modules.mentor.application.dto.GetMentorsQuery;
 import com.mentormatching.modules.mentor.application.dto.MentorAchievementDetail;
 import com.mentormatching.modules.mentor.application.dto.MentorAvailabilityDetail;
@@ -21,8 +23,10 @@ import com.mentormatching.modules.mentor.application.port.out.MentorReadReposito
 import com.mentormatching.modules.mentor.domain.MentorApprovalStatus;
 import com.mentormatching.modules.mentor.infrastructure.persistence.entity.MentorAchievementJpaEntity;
 import com.mentormatching.modules.mentor.infrastructure.persistence.repository.MentorAchievementJpaRepository;
+import com.mentormatching.modules.mentor.infrastructure.persistence.repository.CurrentMentorDetailsProjection;
 import com.mentormatching.modules.mentor.infrastructure.persistence.repository.MentorDetailProjection;
 import com.mentormatching.modules.mentor.infrastructure.persistence.repository.MentorHighlightJpaRepository;
+import com.mentormatching.modules.mentor.infrastructure.persistence.repository.MentorHighlightOptionJpaRepository;
 import com.mentormatching.modules.mentor.infrastructure.persistence.repository.MentorListItemProjection;
 import com.mentormatching.modules.mentor.infrastructure.persistence.repository.MentorOptionProjection;
 import com.mentormatching.modules.mentor.infrastructure.persistence.repository.MentorPersonalityJpaRepository;
@@ -31,6 +35,7 @@ import com.mentormatching.modules.mentor.infrastructure.persistence.repository.M
 import com.mentormatching.modules.mentor.infrastructure.persistence.repository.MentorSubjectJpaRepository;
 import com.mentormatching.modules.scheduling.infrastructure.persistence.entity.MentorAvailabilityJpaEntity;
 import com.mentormatching.modules.scheduling.infrastructure.persistence.repository.MentorAvailabilityJpaRepository;
+import com.mentormatching.modules.mentor.infrastructure.persistence.repository.PersonalityOptionJpaRepository;
 import com.mentormatching.shared.pagination.PageableUtils;
 import com.mentormatching.shared.response.PageResponse;
 
@@ -44,6 +49,8 @@ public class MentorReadPersistenceAdapter implements MentorReadRepositoryPort {
     private final MentorSubjectJpaRepository mentorSubjectJpaRepository;
     private final MentorPersonalityJpaRepository mentorPersonalityJpaRepository;
     private final MentorHighlightJpaRepository mentorHighlightJpaRepository;
+    private final PersonalityOptionJpaRepository personalityOptionJpaRepository;
+    private final MentorHighlightOptionJpaRepository mentorHighlightOptionJpaRepository;
     private final MentorAchievementJpaRepository mentorAchievementJpaRepository;
     private final MentorAvailabilityJpaRepository mentorAvailabilityJpaRepository;
 
@@ -51,12 +58,16 @@ public class MentorReadPersistenceAdapter implements MentorReadRepositoryPort {
                                         MentorSubjectJpaRepository mentorSubjectJpaRepository,
                                         MentorPersonalityJpaRepository mentorPersonalityJpaRepository,
                                         MentorHighlightJpaRepository mentorHighlightJpaRepository,
+                                        PersonalityOptionJpaRepository personalityOptionJpaRepository,
+                                        MentorHighlightOptionJpaRepository mentorHighlightOptionJpaRepository,
                                         MentorAchievementJpaRepository mentorAchievementJpaRepository,
                                         MentorAvailabilityJpaRepository mentorAvailabilityJpaRepository) {
         this.mentorProfileJpaRepository = mentorProfileJpaRepository;
         this.mentorSubjectJpaRepository = mentorSubjectJpaRepository;
         this.mentorPersonalityJpaRepository = mentorPersonalityJpaRepository;
         this.mentorHighlightJpaRepository = mentorHighlightJpaRepository;
+        this.personalityOptionJpaRepository = personalityOptionJpaRepository;
+        this.mentorHighlightOptionJpaRepository = mentorHighlightOptionJpaRepository;
         this.mentorAchievementJpaRepository = mentorAchievementJpaRepository;
         this.mentorAvailabilityJpaRepository = mentorAvailabilityJpaRepository;
     }
@@ -79,6 +90,12 @@ public class MentorReadPersistenceAdapter implements MentorReadRepositoryPort {
     }
 
     @Override
+    public Optional<CurrentMentorDetails> findCurrentMentorByUserId(Long userId) {
+        return mentorProfileJpaRepository.findCurrentMentorDetailByUserId(userId)
+                .map(this::toCurrentMentorDetails);
+    }
+
+    @Override
     public Optional<MentorDetail> findApprovedMentorDetailById(Long mentorId) {
         return mentorProfileJpaRepository.findApprovedMentorDetail(mentorId, MentorApprovalStatus.APPROVED)
                 .map(this::toDetail);
@@ -93,6 +110,29 @@ public class MentorReadPersistenceAdapter implements MentorReadRepositoryPort {
     public List<MentorSubjectDetail> findMentorSubjects(Long mentorId) {
         return mentorSubjectJpaRepository.findActiveDetailsByMentorId(mentorId).stream()
                 .map(this::toSubjectDetail)
+                .toList();
+    }
+
+    @Override
+    public List<MentorSubjectDetail> findAllMentorSubjects(Long mentorId) {
+        return mentorSubjectJpaRepository.findAllDetailsByMentorId(mentorId).stream()
+                .map(this::toSubjectDetail)
+                .toList();
+    }
+
+    @Override
+    public List<MentorOptionDetail> findPersonalityOptions() {
+        return personalityOptionJpaRepository.findAll().stream()
+                .sorted(Comparator.comparing(option -> option.getName().toLowerCase()))
+                .map(option -> new MentorOptionDetail(option.getId(), option.getName(), option.getDescription()))
+                .toList();
+    }
+
+    @Override
+    public List<MentorOptionDetail> findHighlightOptions() {
+        return mentorHighlightOptionJpaRepository.findAll().stream()
+                .sorted(Comparator.comparing(option -> option.getName().toLowerCase()))
+                .map(option -> new MentorOptionDetail(option.getId(), option.getName(), option.getDescription()))
                 .toList();
     }
 
@@ -139,6 +179,18 @@ public class MentorReadPersistenceAdapter implements MentorReadRepositoryPort {
                 projection.getIntroduction(), projection.getTeachingStyle(), projection.getExperienceYears(),
                 projection.getCurrentPosition(), projection.getWorkplace(), projection.getEducation(),
                 projection.getMajor(), projection.getMeetingType(), projection.getCreatedAt(), projection.getUpdatedAt());
+    }
+
+    private CurrentMentorDetails toCurrentMentorDetails(CurrentMentorDetailsProjection projection) {
+        return new CurrentMentorDetails(projection.getId(), projection.getUserId(), projection.getFullName(),
+                projection.getAvatarUrl(), projection.getGender(), projection.getHometownCityId(),
+                projection.getHometownCityName(), projection.getCurrentCityId(), projection.getCurrentCityName(),
+                projection.getCurrentDistrictId(), projection.getCurrentDistrictName(), projection.getHeadline(),
+                projection.getIntroduction(), projection.getTeachingStyle(), projection.getExperienceYears(),
+                projection.getCurrentPosition(), projection.getWorkplace(), projection.getEducation(),
+                projection.getMajor(), projection.getMeetingType(), projection.getApprovalStatus(),
+                projection.getApprovalNote(), projection.getVerificationStatus(),
+                projection.getVerificationRejectionReason(), projection.getCreatedAt(), projection.getUpdatedAt());
     }
 
     private MentorSubjectDetail toSubjectDetail(MentorSubjectDetailProjection projection) {

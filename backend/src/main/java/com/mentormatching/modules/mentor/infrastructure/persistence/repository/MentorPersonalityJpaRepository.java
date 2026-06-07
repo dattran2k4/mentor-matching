@@ -12,6 +12,8 @@ public interface MentorPersonalityJpaRepository extends JpaRepository<MentorPers
 
     List<MentorPersonalityJpaEntity> findByMentorId(Long mentorId);
 
+    void deleteByMentorId(Long mentorId);
+
     @Query("""
             select personalityOption.id as id,
                    personalityOption.name as name,

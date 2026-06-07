@@ -19,10 +19,11 @@ Always read these first before making frontend changes:
 2. `frontend/RULES.md`
 3. `frontend/docs/framework/PROJECT_CONTEXT.md`
 4. `frontend/docs/framework/UI_WORKFLOW.md`
-5. `frontend/docs/framework/DESIGN_RULES.md`
-6. `frontend/docs/framework/DESIGN_SYSTEM.md`
-7. `frontend/docs/framework/SCREEN_SPECS.md`
-8. Relevant files under `frontend/docs/generated/`
+5. `frontend/docs/framework/ROUTER_DATA_STRATEGY.md`
+6. `frontend/docs/framework/DESIGN_RULES.md`
+7. `frontend/docs/framework/DESIGN_SYSTEM.md`
+8. `frontend/docs/framework/SCREEN_SPECS.md`
+9. Relevant files under `frontend/docs/generated/`
 
 ## Operating Model
 
