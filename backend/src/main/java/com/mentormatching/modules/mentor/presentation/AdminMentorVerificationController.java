@@ -8,9 +8,12 @@ import static com.mentormatching.shared.response.PageQueryDefaults.DEFAULT_SORT_
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -20,13 +23,17 @@ import com.mentormatching.modules.mentor.application.dto.AdminMentorVerification
 import com.mentormatching.modules.mentor.application.dto.GetAdminMentorVerificationsQuery;
 import com.mentormatching.modules.mentor.application.port.in.GetAdminMentorVerificationDetailUseCase;
 import com.mentormatching.modules.mentor.application.port.in.GetAdminMentorVerificationsUseCase;
+import com.mentormatching.modules.mentor.application.port.in.ReviewMentorVerificationUseCase;
 import com.mentormatching.modules.mentor.domain.MentorVerificationStatus;
+import com.mentormatching.modules.mentor.presentation.dto.request.ReviewMentorVerificationRequest;
 import com.mentormatching.modules.mentor.presentation.dto.response.AdminMentorVerificationDetailResponse;
 import com.mentormatching.modules.mentor.presentation.dto.response.AdminMentorVerificationListItemResponse;
 import com.mentormatching.shared.response.ApiResponse;
 import com.mentormatching.shared.response.ApiResponseFactory;
 import com.mentormatching.shared.response.PageResponse;
+import com.mentormatching.shared.security.model.AuthenticatedPrincipal;
 
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 
@@ -40,6 +47,7 @@ public class AdminMentorVerificationController {
 
     private final GetAdminMentorVerificationsUseCase getAdminMentorVerificationsUseCase;
     private final GetAdminMentorVerificationDetailUseCase getAdminMentorVerificationDetailUseCase;
+    private final ReviewMentorVerificationUseCase reviewMentorVerificationUseCase;
     private final ApiResponseFactory apiResponseFactory;
 
     @GetMapping
@@ -63,5 +71,17 @@ public class AdminMentorVerificationController {
                 .getAdminMentorVerificationDetail(verificationId);
         return apiResponseFactory.success(AdminMentorVerificationDetailResponse.from(verification),
                 "Get mentor verification detail successfully");
+    }
+
+    @PatchMapping("/{verificationId}")
+    public ApiResponse<AdminMentorVerificationDetailResponse> reviewMentorVerification(
+            @AuthenticationPrincipal AuthenticatedPrincipal principal,
+            @PathVariable Long verificationId,
+            @Valid @RequestBody ReviewMentorVerificationRequest request) {
+        AdminMentorVerificationDetail verification =
+                reviewMentorVerificationUseCase.reviewMentorVerification(request.toCommand(principal, verificationId));
+
+        return apiResponseFactory.success(AdminMentorVerificationDetailResponse.from(verification),
+                "Review mentor verification successfully");
     }
 }
