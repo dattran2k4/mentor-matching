@@ -21,38 +21,18 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.mentormatching.modules.mentor.application.dto.GetMentorsQuery;
-import com.mentormatching.modules.mentor.application.dto.MentorAvailabilityDetail;
 import com.mentormatching.modules.mentor.application.dto.MentorDetail;
 import com.mentormatching.modules.mentor.application.dto.MentorListItem;
-import com.mentormatching.modules.mentor.application.dto.MentorSubjectDetail;
-import com.mentormatching.modules.mentor.application.dto.MentorTraitsDetail;
-import com.mentormatching.modules.mentor.application.port.in.GetCurrentMentorTraitsUseCase;
 import com.mentormatching.modules.mentor.application.port.in.GetCurrentMentorUseCase;
-import com.mentormatching.modules.mentor.application.port.in.GetCurrentMentorSubjectsUseCase;
-import com.mentormatching.modules.mentor.application.port.in.GetCurrentMentorVerificationUseCase;
-import com.mentormatching.modules.mentor.application.port.in.GetMentorAvailabilitiesUseCase;
 import com.mentormatching.modules.mentor.application.port.in.GetMentorDetailUseCase;
-import com.mentormatching.modules.mentor.application.port.in.GetMentorSubjectsUseCase;
-import com.mentormatching.modules.mentor.application.port.in.GetMentorTraitsUseCase;
 import com.mentormatching.modules.mentor.application.port.in.GetMentorsUseCase;
-import com.mentormatching.modules.mentor.application.port.in.UpdateCurrentMentorTraitsUseCase;
-import com.mentormatching.modules.mentor.application.port.in.UpsertCurrentMentorSubjectUseCase;
-import com.mentormatching.modules.mentor.application.port.in.UpsertCurrentMentorVerificationUseCase;
 import com.mentormatching.modules.mentor.application.port.in.UpdateCurrentMentorUseCase;
 import com.mentormatching.modules.mentor.domain.Gender;
 import com.mentormatching.modules.mentor.domain.MeetingType;
-import com.mentormatching.modules.mentor.presentation.dto.request.UpdateCurrentMentorTraitsRequest;
-import com.mentormatching.modules.mentor.presentation.dto.request.UpsertCurrentMentorSubjectRequest;
-import com.mentormatching.modules.mentor.presentation.dto.request.UpsertCurrentMentorVerificationRequest;
 import com.mentormatching.modules.mentor.presentation.dto.request.UpdateCurrentMentorRequest;
 import com.mentormatching.modules.mentor.presentation.dto.response.CurrentMentorResponse;
-import com.mentormatching.modules.mentor.presentation.dto.response.CurrentMentorTraitsResponse;
-import com.mentormatching.modules.mentor.presentation.dto.response.CurrentMentorVerificationResponse;
-import com.mentormatching.modules.mentor.presentation.dto.response.MentorAvailabilityDetailResponse;
 import com.mentormatching.modules.mentor.presentation.dto.response.MentorDetailResponse;
 import com.mentormatching.modules.mentor.presentation.dto.response.MentorListItemResponse;
-import com.mentormatching.modules.mentor.presentation.dto.response.MentorSubjectDetailResponse;
-import com.mentormatching.modules.mentor.presentation.dto.response.MentorTraitsDetailResponse;
 import com.mentormatching.shared.response.ApiResponse;
 import com.mentormatching.shared.response.ApiResponseFactory;
 import com.mentormatching.shared.response.PageResponse;
@@ -69,19 +49,10 @@ import jakarta.validation.constraints.Min;
 @RequestMapping("/api/v1/mentors")
 public class MentorController {
 
-    private final GetCurrentMentorTraitsUseCase getCurrentMentorTraitsUseCase;
     private final GetCurrentMentorUseCase getCurrentMentorUseCase;
-    private final GetCurrentMentorSubjectsUseCase getCurrentMentorSubjectsUseCase;
-    private final GetCurrentMentorVerificationUseCase getCurrentMentorVerificationUseCase;
-    private final UpdateCurrentMentorTraitsUseCase updateCurrentMentorTraitsUseCase;
-    private final UpsertCurrentMentorSubjectUseCase upsertCurrentMentorSubjectUseCase;
-    private final UpsertCurrentMentorVerificationUseCase upsertCurrentMentorVerificationUseCase;
     private final UpdateCurrentMentorUseCase updateCurrentMentorUseCase;
     private final GetMentorsUseCase getMentorsUseCase;
     private final GetMentorDetailUseCase getMentorDetailUseCase;
-    private final GetMentorSubjectsUseCase getMentorSubjectsUseCase;
-    private final GetMentorTraitsUseCase getMentorTraitsUseCase;
-    private final GetMentorAvailabilitiesUseCase getMentorAvailabilitiesUseCase;
     private final ApiResponseFactory apiResponseFactory;
 
     @PreAuthorize("isAuthenticated()")
@@ -99,65 +70,6 @@ public class MentorController {
             @Valid @RequestBody UpdateCurrentMentorRequest request) {
         return apiResponseFactory.success(CurrentMentorResponse.from(updateCurrentMentorUseCase.updateCurrentMentor(
                 request.toCommand(principal))), "Update mentor profile successfully");
-    }
-
-    @PreAuthorize("isAuthenticated()")
-    @GetMapping("/me/verification")
-    public ApiResponse<CurrentMentorVerificationResponse> getCurrentMentorVerification(
-            @AuthenticationPrincipal AuthenticatedPrincipal principal) {
-        return apiResponseFactory.success(CurrentMentorVerificationResponse.from(
-                getCurrentMentorVerificationUseCase.getCurrentMentorVerification(principal.getId())),
-                "Get current mentor verification successfully");
-    }
-
-    @PreAuthorize("isAuthenticated()")
-    @PutMapping("/me/verification")
-    public ApiResponse<CurrentMentorVerificationResponse> upsertCurrentMentorVerification(
-            @AuthenticationPrincipal AuthenticatedPrincipal principal,
-            @Valid @RequestBody UpsertCurrentMentorVerificationRequest request) {
-        return apiResponseFactory.success(CurrentMentorVerificationResponse.from(
-                upsertCurrentMentorVerificationUseCase.upsertCurrentMentorVerification(
-                        request.toCommand(principal))),
-                "Save current mentor verification successfully");
-    }
-
-    @PreAuthorize("isAuthenticated()")
-    @GetMapping("/me/traits")
-    public ApiResponse<CurrentMentorTraitsResponse> getCurrentMentorTraits(
-            @AuthenticationPrincipal AuthenticatedPrincipal principal) {
-        return apiResponseFactory.success(CurrentMentorTraitsResponse.from(
-                getCurrentMentorTraitsUseCase.getCurrentMentorTraits(principal.getId())),
-                "Get current mentor traits successfully");
-    }
-
-    @PreAuthorize("isAuthenticated()")
-    @PutMapping("/me/traits")
-    public ApiResponse<CurrentMentorTraitsResponse> updateCurrentMentorTraits(
-            @AuthenticationPrincipal AuthenticatedPrincipal principal,
-            @Valid @RequestBody UpdateCurrentMentorTraitsRequest request) {
-        return apiResponseFactory.success(CurrentMentorTraitsResponse.from(
-                updateCurrentMentorTraitsUseCase.updateCurrentMentorTraits(request.toCommand(principal))),
-                "Update current mentor traits successfully");
-    }
-
-    @PreAuthorize("isAuthenticated()")
-    @GetMapping("/me/subjects")
-    public ApiResponse<List<MentorSubjectDetailResponse>> getCurrentMentorSubjects(
-            @AuthenticationPrincipal AuthenticatedPrincipal principal) {
-        List<MentorSubjectDetail> subjects = getCurrentMentorSubjectsUseCase.getCurrentMentorSubjects(
-                principal.getId());
-        return apiResponseFactory.success(subjects.stream().map(MentorSubjectDetailResponse::from).toList(),
-                "Get current mentor subjects successfully");
-    }
-
-    @PreAuthorize("isAuthenticated()")
-    @PutMapping("/me/subjects")
-    public ApiResponse<MentorSubjectDetailResponse> upsertCurrentMentorSubject(
-            @AuthenticationPrincipal AuthenticatedPrincipal principal,
-            @Valid @RequestBody UpsertCurrentMentorSubjectRequest request) {
-        return apiResponseFactory.success(MentorSubjectDetailResponse.from(
-                upsertCurrentMentorSubjectUseCase.upsertCurrentMentorSubject(request.toCommand(principal))),
-                "Save current mentor subject successfully");
     }
 
     @GetMapping
@@ -181,25 +93,5 @@ public class MentorController {
     public ApiResponse<MentorDetailResponse> getMentorDetail(@PathVariable Long id) {
         MentorDetail mentor = getMentorDetailUseCase.getMentorDetail(id);
         return apiResponseFactory.success(MentorDetailResponse.from(mentor), "Get mentor detail successfully");
-    }
-
-    @GetMapping("/{id}/subjects")
-    public ApiResponse<List<MentorSubjectDetailResponse>> getMentorSubjects(@PathVariable Long id) {
-        List<MentorSubjectDetail> subjects = getMentorSubjectsUseCase.getMentorSubjects(id);
-        return apiResponseFactory.success(subjects.stream().map(MentorSubjectDetailResponse::from).toList(),
-                "Get mentor subjects successfully");
-    }
-
-    @GetMapping("/{id}/traits")
-    public ApiResponse<MentorTraitsDetailResponse> getMentorTraits(@PathVariable Long id) {
-        MentorTraitsDetail traits = getMentorTraitsUseCase.getMentorTraits(id);
-        return apiResponseFactory.success(MentorTraitsDetailResponse.from(traits), "Get mentor traits successfully");
-    }
-
-    @GetMapping("/{id}/availabilities")
-    public ApiResponse<List<MentorAvailabilityDetailResponse>> getMentorAvailabilities(@PathVariable Long id) {
-        List<MentorAvailabilityDetail> availabilities = getMentorAvailabilitiesUseCase.getMentorAvailabilities(id);
-        return apiResponseFactory.success(availabilities.stream().map(MentorAvailabilityDetailResponse::from).toList(),
-                "Get mentor availabilities successfully");
     }
 }
