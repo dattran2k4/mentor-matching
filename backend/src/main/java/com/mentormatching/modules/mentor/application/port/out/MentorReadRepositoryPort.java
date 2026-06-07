@@ -3,7 +3,10 @@ package com.mentormatching.modules.mentor.application.port.out;
 import java.util.List;
 import java.util.Optional;
 
+import com.mentormatching.modules.mentor.application.dto.AdminMentorVerificationDetail;
+import com.mentormatching.modules.mentor.application.dto.AdminMentorVerificationListItem;
 import com.mentormatching.modules.mentor.application.dto.CurrentMentorDetails;
+import com.mentormatching.modules.mentor.application.dto.GetAdminMentorVerificationsQuery;
 import com.mentormatching.modules.mentor.application.dto.GetMentorsQuery;
 import com.mentormatching.modules.mentor.application.dto.MentorAchievementDetail;
 import com.mentormatching.modules.mentor.application.dto.MentorAvailabilityDetail;
@@ -15,6 +18,10 @@ import com.mentormatching.modules.mentor.application.dto.MentorTraitsDetail;
 import com.mentormatching.shared.response.PageResponse;
 
 public interface MentorReadRepositoryPort {
+
+    PageResponse<AdminMentorVerificationListItem> findAdminMentorVerifications(GetAdminMentorVerificationsQuery query);
+
+    Optional<AdminMentorVerificationDetail> findAdminMentorVerificationDetailById(Long verificationId);
 
     PageResponse<MentorListItem> findApprovedMentors(GetMentorsQuery query, List<Long> subjectGradeIds);
 

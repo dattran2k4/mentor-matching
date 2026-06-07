@@ -10,7 +10,10 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
+import com.mentormatching.modules.mentor.application.dto.AdminMentorVerificationDetail;
+import com.mentormatching.modules.mentor.application.dto.AdminMentorVerificationListItem;
 import com.mentormatching.modules.mentor.application.dto.CurrentMentorDetails;
+import com.mentormatching.modules.mentor.application.dto.GetAdminMentorVerificationsQuery;
 import com.mentormatching.modules.mentor.application.dto.GetMentorsQuery;
 import com.mentormatching.modules.mentor.application.dto.MentorAchievementDetail;
 import com.mentormatching.modules.mentor.application.dto.MentorAvailabilityDetail;
@@ -22,6 +25,8 @@ import com.mentormatching.modules.mentor.application.dto.MentorTraitsDetail;
 import com.mentormatching.modules.mentor.application.port.out.MentorReadRepositoryPort;
 import com.mentormatching.modules.mentor.domain.MentorApprovalStatus;
 import com.mentormatching.modules.mentor.infrastructure.persistence.entity.MentorAchievementJpaEntity;
+import com.mentormatching.modules.mentor.infrastructure.persistence.repository.AdminMentorVerificationDetailProjection;
+import com.mentormatching.modules.mentor.infrastructure.persistence.repository.AdminMentorVerificationListProjection;
 import com.mentormatching.modules.mentor.infrastructure.persistence.repository.MentorAchievementJpaRepository;
 import com.mentormatching.modules.mentor.infrastructure.persistence.repository.CurrentMentorDetailsProjection;
 import com.mentormatching.modules.mentor.infrastructure.persistence.repository.MentorDetailProjection;
@@ -33,6 +38,7 @@ import com.mentormatching.modules.mentor.infrastructure.persistence.repository.M
 import com.mentormatching.modules.mentor.infrastructure.persistence.repository.MentorProfileJpaRepository;
 import com.mentormatching.modules.mentor.infrastructure.persistence.repository.MentorSubjectDetailProjection;
 import com.mentormatching.modules.mentor.infrastructure.persistence.repository.MentorSubjectJpaRepository;
+import com.mentormatching.modules.mentor.infrastructure.persistence.repository.MentorVerificationJpaRepository;
 import com.mentormatching.modules.scheduling.infrastructure.persistence.entity.MentorAvailabilityJpaEntity;
 import com.mentormatching.modules.scheduling.infrastructure.persistence.repository.MentorAvailabilityJpaRepository;
 import com.mentormatching.modules.mentor.infrastructure.persistence.repository.PersonalityOptionJpaRepository;
@@ -44,6 +50,8 @@ public class MentorReadPersistenceAdapter implements MentorReadRepositoryPort {
 
     private static final Set<String> SORTABLE_FIELDS = Set.of("id", "fullName", "gender", "experienceYears",
             "meetingType", "createdAt", "minPrice");
+    private static final Set<String> ADMIN_VERIFICATION_SORTABLE_FIELDS = Set.of("id", "createdAt", "updatedAt",
+            "verificationStatus");
 
     private final MentorProfileJpaRepository mentorProfileJpaRepository;
     private final MentorSubjectJpaRepository mentorSubjectJpaRepository;
@@ -53,6 +61,7 @@ public class MentorReadPersistenceAdapter implements MentorReadRepositoryPort {
     private final MentorHighlightOptionJpaRepository mentorHighlightOptionJpaRepository;
     private final MentorAchievementJpaRepository mentorAchievementJpaRepository;
     private final MentorAvailabilityJpaRepository mentorAvailabilityJpaRepository;
+    private final MentorVerificationJpaRepository mentorVerificationJpaRepository;
 
     public MentorReadPersistenceAdapter(MentorProfileJpaRepository mentorProfileJpaRepository,
                                         MentorSubjectJpaRepository mentorSubjectJpaRepository,
@@ -61,7 +70,8 @@ public class MentorReadPersistenceAdapter implements MentorReadRepositoryPort {
                                         PersonalityOptionJpaRepository personalityOptionJpaRepository,
                                         MentorHighlightOptionJpaRepository mentorHighlightOptionJpaRepository,
                                         MentorAchievementJpaRepository mentorAchievementJpaRepository,
-                                        MentorAvailabilityJpaRepository mentorAvailabilityJpaRepository) {
+                                        MentorAvailabilityJpaRepository mentorAvailabilityJpaRepository,
+                                        MentorVerificationJpaRepository mentorVerificationJpaRepository) {
         this.mentorProfileJpaRepository = mentorProfileJpaRepository;
         this.mentorSubjectJpaRepository = mentorSubjectJpaRepository;
         this.mentorPersonalityJpaRepository = mentorPersonalityJpaRepository;
@@ -70,6 +80,23 @@ public class MentorReadPersistenceAdapter implements MentorReadRepositoryPort {
         this.mentorHighlightOptionJpaRepository = mentorHighlightOptionJpaRepository;
         this.mentorAchievementJpaRepository = mentorAchievementJpaRepository;
         this.mentorAvailabilityJpaRepository = mentorAvailabilityJpaRepository;
+        this.mentorVerificationJpaRepository = mentorVerificationJpaRepository;
+    }
+
+    @Override
+    public PageResponse<AdminMentorVerificationListItem> findAdminMentorVerifications(
+            GetAdminMentorVerificationsQuery query) {
+        Pageable pageable = PageableUtils.buildPageable(query.page(), query.size(), query.sortBy(), query.sortDir(),
+                ADMIN_VERIFICATION_SORTABLE_FIELDS);
+        Page<AdminMentorVerificationListProjection> verificationPage = mentorVerificationJpaRepository
+                .findAdminMentorVerifications(query.status(), pageable);
+        return PageableUtils.toPageResponse(verificationPage, this::toAdminVerificationListItem);
+    }
+
+    @Override
+    public Optional<AdminMentorVerificationDetail> findAdminMentorVerificationDetailById(Long verificationId) {
+        return mentorVerificationJpaRepository.findAdminMentorVerificationDetailById(verificationId)
+                .map(this::toAdminVerificationDetail);
     }
 
     @Override
@@ -79,14 +106,7 @@ public class MentorReadPersistenceAdapter implements MentorReadRepositoryPort {
         Page<MentorListItemProjection> mentorPage = mentorProfileJpaRepository.findApprovedMentors(
                 MentorApprovalStatus.APPROVED, containsPattern(query.search()), query.gender(), query.meetingType(),
                 query.cityId(), query.districtId(), subjectGradeIds, pageable);
-
-        return PageResponse.<MentorListItem>builder()
-                .page(mentorPage.getNumber() + 1)
-                .pageSize(mentorPage.getSize())
-                .totalPages(mentorPage.getTotalPages())
-                .totalItems(mentorPage.getTotalElements())
-                .data(mentorPage.getContent().stream().map(this::toListItem).toList())
-                .build();
+        return PageableUtils.toPageResponse(mentorPage, this::toListItem);
     }
 
     @Override
@@ -169,6 +189,22 @@ public class MentorReadPersistenceAdapter implements MentorReadRepositoryPort {
                 projection.getExperienceYears(), projection.getCurrentPosition(), projection.getWorkplace(),
                 projection.getEducation(), projection.getMajor(), projection.getMeetingType(), projection.getMinPrice(),
                 projection.getCreatedAt());
+    }
+
+    private AdminMentorVerificationListItem toAdminVerificationListItem(AdminMentorVerificationListProjection projection) {
+        return new AdminMentorVerificationListItem(projection.getId(), projection.getMentorId(),
+                projection.getUserId(), projection.getAccountFullName(), projection.getAccountEmail(),
+                projection.getVerificationStatus(), projection.getCreatedAt(), projection.getUpdatedAt());
+    }
+
+    private AdminMentorVerificationDetail toAdminVerificationDetail(AdminMentorVerificationDetailProjection projection) {
+        return new AdminMentorVerificationDetail(projection.getId(), projection.getMentorId(),
+                projection.getUserId(), projection.getAccountFullName(), projection.getAccountEmail(),
+                projection.getAccountPhone(), projection.getApprovalStatus(), projection.getApprovalNote(),
+                projection.getFullName(), projection.getIdCardNumber(), projection.getIdCardFrontUrl(),
+                projection.getIdCardBackUrl(), projection.getSelfieWithIdUrl(),
+                projection.getVerificationStatus(), projection.getVerifiedBy(), projection.getVerifiedAt(),
+                projection.getRejectionReason(), projection.getCreatedAt(), projection.getUpdatedAt());
     }
 
     private MentorDetail toDetail(MentorDetailProjection projection) {
