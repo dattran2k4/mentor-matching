@@ -4,10 +4,14 @@ import static com.mentormatching.shared.response.PageQueryDefaults.DEFAULT_SORT_
 import static com.mentormatching.shared.response.PageQueryDefaults.DEFAULT_SORT_DIR;
 
 import java.util.Set;
+import java.util.function.Function;
 
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+
+import com.mentormatching.shared.response.PageResponse;
 
 public final class PageableUtils {
 
@@ -17,6 +21,16 @@ public final class PageableUtils {
     public static Pageable buildPageable(int page, int size, String sortBy, String sortDir, Set<String> sortableFields) {
         int pageNumber = page > 0 ? page - 1 : 0;
         return PageRequest.of(pageNumber, size, buildSort(sortBy, sortDir, sortableFields));
+    }
+
+    public static <T, R> PageResponse<R> toPageResponse(Page<T> page, Function<T, R> mapper) {
+        return PageResponse.<R>builder()
+                .page(page.getNumber() + 1)
+                .pageSize(page.getSize())
+                .totalPages(page.getTotalPages())
+                .totalItems(page.getTotalElements())
+                .data(page.getContent().stream().map(mapper).toList())
+                .build();
     }
 
     private static Sort buildSort(String sortBy, String sortDir, Set<String> sortableFields) {

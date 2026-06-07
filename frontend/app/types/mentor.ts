@@ -2,6 +2,7 @@ export interface Review {
   name: string
   rating: number
   text: string
+  tags?: string[]
 }
 
 export interface Experience {
@@ -15,23 +16,60 @@ export interface Education {
   school: string
 }
 
+export type MentorApprovalStatus = 'PENDING' | 'APPROVED' | 'REJECTED' | 'SUSPENDED'
+export type MentorVerificationStatus = 'UNVERIFIED' | 'PENDING' | 'VERIFIED' | 'REJECTED'
+export type MeetingType = 'ONLINE' | 'OFFLINE' | 'HYBRID'
+export type MentorOfferingProficiency = 'BASIC' | 'INTERMEDIATE' | 'ADVANCED' | 'EXPERT'
+
+export interface WeeklyAvailabilityWindow {
+  dayLabel: string
+  startTime: string
+  endTime: string
+  meetingTypes: MeetingType[]
+}
+
+export interface SpecificDateAvailabilityWindow {
+  dateLabel: string
+  startTime: string
+  endTime: string
+  meetingTypes: MeetingType[]
+  note?: string
+}
+
+export interface MentorOffering {
+  id: string
+  subject: string
+  grade: string
+  proficiency: MentorOfferingProficiency
+  pricePerHour: number
+  active: boolean
+  teachingNote: string
+}
+
 export interface Mentor {
   id: string
   name: string
-  role: string
-  verified: boolean
+  headline: string
+  approvalStatus: MentorApprovalStatus
+  verificationStatus: MentorVerificationStatus
   rating: number
   reviewsCount: number
   responseTime: string
-  students: number
-  price: number
+  activeStudentsCount: number
+  startingPrice: number
   expertise: string
-  tags: string[]
-  bio: string
+  highlights: string[]
+  introduction: string
   subjects: string[]
+  grades: string[]
+  meetingTypes: MeetingType[]
+  availabilitySummary: string
+  teachingStyle: string
+  achievements: string[]
+  offerings: MentorOffering[]
+  recurringAvailability: WeeklyAvailabilityWindow[]
+  specificDateAvailability: SpecificDateAvailabilityWindow[]
   experience: Experience[]
   education: Education[]
   reviews: Review[]
-  initials: string
-  accent: string
 }

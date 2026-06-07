@@ -46,6 +46,7 @@ Reviewers should check:
 
 - Domain does not depend on framework annotations.
 - Application depends on ports, not infrastructure.
+- Application services use explicit constructors, not Lombok `@RequiredArgsConstructor`.
 - Controllers are thin.
 - DTO mapping is in request/response classes when practical.
 - Persistence adapters map JPA entities to domain objects.

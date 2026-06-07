@@ -6,7 +6,7 @@ const MainLayout = () => {
   return (
     <div className='bg-base text-ink min-h-screen'>
       <Navbar />
-      <main className='mx-auto min-h-[70vh] max-w-6xl px-4 py-10 md:px-6'>
+      <main className='page-container min-h-[70vh] py-10 lg:py-12'>
         <Outlet />
       </main>
       <Footer />

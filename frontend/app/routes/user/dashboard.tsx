@@ -1,172 +1,219 @@
 import { Link } from 'react-router'
-import { motion } from 'framer-motion'
-import { BookOpen, Calendar, Clock, Star, ArrowRight, PlayCircle } from 'lucide-react'
+import {
+  ArrowRight,
+  BookMarked,
+  Calendar,
+  CheckCircle2,
+  Clock3,
+  MessageSquare,
+  UserRound
+} from 'lucide-react'
 
 import { DashboardPage } from '@/components/DashboardPage'
+import { EmptyState } from '@/components/EmptyState'
+import { StatusBadge } from '@/components/StatusBadge'
+import { WorkspaceActionCard } from '@/components/WorkspaceActionCard'
+import { WorkspaceMetricCard } from '@/components/WorkspaceMetricCard'
+import { WorkspaceNotice } from '@/components/WorkspaceNotice'
+import { WorkspacePanel } from '@/components/WorkspacePanel'
+import { Button, buttonVariants } from '@/components/ui/button'
+import { Card, CardContent } from '@/components/ui/card'
 import { path } from '@/config/path'
+import { learnerBookings } from '@/mocks/learner-workspace'
+import { cn } from '@/utils/cn'
+import { formatShortBookingDate, formatTimeRange } from '@/utils/format'
 
 export function meta() {
   return [{ title: 'Tổng quan | Học viên' }]
 }
 
+const quickActions = [
+  {
+    title: 'Tìm mentor phù hợp',
+    description: 'Khám phá thêm môn học, lớp và lịch phù hợp với mục tiêu hiện tại.',
+    href: path.discover,
+    icon: BookMarked
+  },
+  {
+    title: 'Xem lịch học',
+    description: 'Theo dõi các buổi đã đặt, thanh toán còn chờ và lịch sử học gần đây.',
+    href: path.user.bookings,
+    icon: Calendar
+  },
+  {
+    title: 'Cập nhật hồ sơ',
+    description: 'Bổ sung lớp học, trường và mục tiêu để mentor hiểu rõ nhu cầu của bạn.',
+    href: path.user.profile,
+    icon: UserRound
+  }
+] as const
+
 export default function UserDashboardPage() {
-  const stats = [
+  const upcomingBookings = learnerBookings.filter(
+    (booking) => booking.bookingStatus === 'CONFIRMED' || booking.bookingStatus === 'PENDING'
+  )
+  const nextBooking = upcomingBookings[0]
+  const recentBookings = learnerBookings.slice(0, 3)
+
+  const summaryItems = [
     {
       label: 'Buổi học sắp tới',
-      value: '2',
-      icon: Calendar,
-      color: 'text-primary',
-      bg: 'bg-primary/10'
+      value: `${upcomingBookings.length}`,
+      helper: upcomingBookings.length > 0 ? 'Đã có lịch trong tuần này' : 'Chưa có lịch mới',
+      icon: Calendar
     },
     {
-      label: 'Mentor đã học',
-      value: '5',
-      icon: BookOpen,
-      color: 'text-indigo-600',
-      bg: 'bg-indigo-50'
+      label: 'Khoản cần thanh toán',
+      value: `${learnerBookings.filter((booking) => booking.paymentStatus === 'PENDING').length}`,
+      helper: 'Theo dõi để giữ chỗ với mentor',
+      icon: Clock3
     },
     {
-      label: 'Giờ học tháng này',
-      value: '12h',
-      icon: Clock,
-      color: 'text-emerald-600',
-      bg: 'bg-emerald-50'
+      label: 'Buổi đã hoàn thành',
+      value: `${learnerBookings.filter((booking) => booking.bookingStatus === 'COMPLETED').length}`,
+      helper: 'Sẵn sàng để lại đánh giá sau buổi học',
+      icon: CheckCircle2
     }
-  ]
+  ] as const
 
   return (
     <DashboardPage
-      description='Theo dõi buổi học sắp tới, mentor yêu thích và tiến độ học tập của bạn.'
+      description='Theo dõi buổi học sắp tới, việc cần làm và các đầu việc học tập quan trọng trong tuần.'
       title='Tổng quan'
     >
-      <div className='grid gap-6 sm:grid-cols-2 lg:grid-cols-3'>
-        {stats.map((stat, i) => (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: i * 0.1 }}
-            className='glass-panel card-hover group rounded-3xl border border-slate-200/60 bg-white/70 p-6'
-            key={stat.label}
-          >
-            <div className='flex items-center justify-between'>
-              <div>
-                <p className='text-muted text-sm font-medium tracking-wider uppercase'>
-                  {stat.label}
-                </p>
-                <p className='text-ink mt-2 text-3xl font-bold'>{stat.value}</p>
-              </div>
-              <div
-                className={`rounded-2xl p-3 ${stat.bg} ${stat.color} transition-transform group-hover:scale-110`}
-              >
-                <stat.icon size={24} />
-              </div>
-            </div>
-          </motion.div>
-        ))}
-      </div>
-
-      <div className='mt-10 grid gap-8 lg:grid-cols-[1.5fr_1fr]'>
-        <div className='space-y-6'>
-          <div className='flex items-center justify-between'>
-            <h2 className='text-ink text-xl font-bold'>Buổi học sắp tới</h2>
+      <div className='grid gap-6 xl:grid-cols-[1.7fr_1fr]'>
+        <WorkspacePanel
+          title='Buổi học sắp tới'
+          description='Ưu tiên xem buổi gần nhất để chuẩn bị trước tài liệu và thời gian vào lớp.'
+          action={
             <Link
+              className={cn(buttonVariants({ size: 'sm', variant: 'link' }), 'h-auto px-0')}
               to={path.user.bookings}
-              className='text-primary flex items-center gap-1 text-sm font-semibold hover:underline'
             >
-              Xem tất cả <ArrowRight size={14} />
+              Xem tất cả
+              <ArrowRight aria-hidden='true' size={14} />
             </Link>
-          </div>
+          }
+        >
+          {nextBooking ? (
+            <Card className='border-slate-200 bg-slate-50 shadow-none'>
+              <CardContent className='flex flex-col gap-4 p-5 lg:flex-row lg:items-start lg:justify-between'>
+                <div className='space-y-3'>
+                  <div className='flex flex-wrap items-center gap-2'>
+                    <p className='text-ink text-lg font-semibold'>
+                      {nextBooking.snapshot.subjectName} · {nextBooking.snapshot.gradeName}
+                    </p>
+                    <StatusBadge kind='booking' status={nextBooking.bookingStatus} />
+                    {nextBooking.paymentStatus ? (
+                      <StatusBadge kind='payment' status={nextBooking.paymentStatus} />
+                    ) : null}
+                  </div>
+                  <p className='text-muted text-sm'>
+                    Mentor{' '}
+                    <span className='text-ink font-medium'>{nextBooking.snapshot.mentorName}</span>
+                  </p>
+                  <p className='text-muted text-sm'>{nextBooking.summary}</p>
+                  <div className='grid gap-2 text-sm text-slate-700 sm:grid-cols-2'>
+                    <p className='flex items-center gap-2'>
+                      <Calendar aria-hidden='true' className='text-primary' size={15} />
+                      {formatShortBookingDate(nextBooking.bookingDate)}
+                    </p>
+                    <p className='flex items-center gap-2'>
+                      <Clock3 aria-hidden='true' className='text-primary' size={15} />
+                      {formatTimeRange(nextBooking.startTime, nextBooking.endTime)}
+                    </p>
+                  </div>
+                </div>
 
-          <div className='space-y-4'>
-            {[1, 2].map((i) => (
-              <div
-                key={i}
-                className='hover:border-primary/30 group flex cursor-pointer flex-col gap-4 rounded-3xl border border-slate-100 bg-white/50 p-5 transition-all sm:flex-row sm:items-center'
-              >
-                <div className='flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-slate-100 to-slate-200'>
-                  <PlayCircle
-                    size={32}
-                    className='group-hover:text-primary text-slate-400 transition-colors'
-                  />
+                <div className='flex min-w-[180px] flex-col gap-3'>
+                  <Button>{nextBooking.primaryAction.label}</Button>
+                  <Button variant='outline'>{nextBooking.secondaryAction.label}</Button>
                 </div>
-                <div className='flex-1'>
-                  <p className='text-primary mb-1 text-xs font-bold tracking-wider uppercase'>
-                    Cơ bản - {i === 1 ? 'ReactJS' : 'NodeJS'}
-                  </p>
-                  <p className='text-ink text-lg leading-tight font-bold'>
-                    Xây dựng ứng dụng {i === 1 ? 'E-commerce' : 'Realtime Chat'}
-                  </p>
-                  <p className='text-muted mt-1 text-sm'>
-                    Mentor: {i === 1 ? 'Alex Johanson' : 'Sarah Chen'}
-                  </p>
-                </div>
-                <div className='border-t border-slate-100 pt-3 sm:border-t-0 sm:pt-0 sm:text-right'>
-                  <p className='text-ink font-bold'>14:00 - 15:30</p>
-                  <p className='text-muted text-xs'>Thứ Năm, 28 Th5</p>
-                  <button className='bg-primary mt-2 w-full rounded-xl px-4 py-2 text-xs font-bold text-white transition-shadow hover:shadow-lg sm:w-auto'>
-                    Vào học
-                  </button>
-                </div>
-              </div>
+              </CardContent>
+            </Card>
+          ) : (
+            <EmptyState
+              actionHref={path.discover}
+              actionLabel='Tìm mentor'
+              description='Bắt đầu từ trang khám phá để đặt buổi học đầu tiên và theo dõi lịch học ngay trên màn hình này.'
+              title='Bạn chưa có buổi học sắp tới'
+            />
+          )}
+        </WorkspacePanel>
+
+        <WorkspacePanel
+          title='Tóm tắt tuần này'
+          description='Các chỉ dấu ngắn giúp bạn biết cần ưu tiên việc gì tiếp theo.'
+        >
+          <div className='grid gap-3'>
+            {summaryItems.map((item) => (
+              <WorkspaceMetricCard
+                helper={item.helper}
+                icon={item.icon}
+                key={item.label}
+                label={item.label}
+                value={item.value}
+              />
             ))}
           </div>
-        </div>
+        </WorkspacePanel>
+      </div>
+
+      <div className='grid gap-6 xl:grid-cols-[1.2fr_1fr]'>
+        <WorkspacePanel
+          title='Gần đây'
+          description='Xem nhanh các buổi vừa hoàn thành, đang chờ thanh toán hoặc cần theo dõi.'
+        >
+          <div className='space-y-4'>
+            {recentBookings.map((booking) => (
+              <Card className='rounded-2xl shadow-none' key={booking.id}>
+                <CardContent className='flex flex-col gap-4 p-4 md:flex-row md:items-center md:justify-between'>
+                  <div className='space-y-2'>
+                    <div className='flex flex-wrap items-center gap-2'>
+                      <p className='text-ink font-semibold'>
+                        {booking.snapshot.subjectName} · {booking.snapshot.gradeName}
+                      </p>
+                      <StatusBadge kind='booking' status={booking.bookingStatus} />
+                    </div>
+                    <p className='text-muted text-sm'>
+                      {booking.snapshot.mentorName} · {formatShortBookingDate(booking.bookingDate)}{' '}
+                      · {formatTimeRange(booking.startTime, booking.endTime)}
+                    </p>
+                    <p className='text-muted text-sm'>{booking.summary}</p>
+                  </div>
+                  {booking.paymentStatus ? (
+                    <StatusBadge kind='payment' status={booking.paymentStatus} />
+                  ) : null}
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </WorkspacePanel>
 
         <div className='space-y-6'>
-          <h2 className='text-ink text-xl font-bold'>Phần thưởng & Tiến độ</h2>
-          <div className='relative overflow-hidden rounded-3xl border border-slate-200/60 bg-gradient-to-br from-indigo-600 to-violet-700 p-8 text-white shadow-xl'>
-            <div className='absolute top-[-10%] right-[-10%] h-32 w-32 rounded-full bg-white/10 blur-2xl'></div>
-            <p className='text-sm font-medium tracking-widest uppercase opacity-80'>
-              Level 4: Explorer
-            </p>
-            <h3 className='mt-2 text-2xl font-bold'>850 XP</h3>
-            <div className='mt-6 h-2 w-full overflow-hidden rounded-full bg-white/20'>
-              <motion.div
-                initial={{ width: 0 }}
-                animate={{ width: '75%' }}
-                className='h-full bg-white'
-              ></motion.div>
-            </div>
-            <p className='mt-3 text-xs opacity-80'>Cần thêm 150 XP để đạt Level 5</p>
-
-            <div className='mt-8 grid grid-cols-3 gap-2'>
-              {[1, 2, 3].map((i) => (
-                <div
-                  key={i}
-                  className='flex aspect-square items-center justify-center rounded-xl border border-white/20 bg-white/10'
-                >
-                  <Star
-                    size={20}
-                    className={i < 3 ? 'fill-amber-300 text-amber-300' : 'text-white/30'}
-                  />
-                </div>
+          <WorkspacePanel
+            title='Hành động nhanh'
+            description='Đi tới đúng bước tiếp theo mà không phải tìm lại trong menu.'
+          >
+            <div className='grid gap-3'>
+              {quickActions.map((action) => (
+                <WorkspaceActionCard
+                  description={action.description}
+                  icon={action.icon}
+                  key={action.title}
+                  title={action.title}
+                  to={action.href}
+                />
               ))}
             </div>
-          </div>
+          </WorkspacePanel>
 
-          <div className='glass-panel rounded-3xl border border-slate-200/60 bg-white p-6'>
-            <h3 className='text-ink mb-4 font-bold'>Hành động nhanh</h3>
-            <div className='grid grid-cols-2 gap-3'>
-              <Link
-                to={path.discover}
-                className='hover:bg-primary/5 hover:text-primary group flex flex-col items-center gap-2 rounded-2xl bg-slate-50 p-4 text-center transition-all'
-              >
-                <div className='rounded-xl bg-white p-2 shadow-sm transition-transform group-hover:scale-110'>
-                  <BookOpen size={20} />
-                </div>
-                <span className='text-xs font-bold'>Tìm Mentor</span>
-              </Link>
-              <Link
-                to={path.user.messages}
-                className='hover:bg-primary/5 hover:text-primary group flex flex-col items-center gap-2 rounded-2xl bg-slate-50 p-4 text-center transition-all'
-              >
-                <div className='rounded-xl bg-white p-2 shadow-sm transition-transform group-hover:scale-110'>
-                  <Clock size={20} />
-                </div>
-                <span className='text-xs font-bold'>Tin nhắn</span>
-              </Link>
-            </div>
-          </div>
+          <WorkspaceNotice
+            description='Bạn đang có 1 buổi chờ thanh toán và 1 buổi đã hoàn thành có thể để lại đánh giá.'
+            icon={MessageSquare}
+            title='Nhắc việc học tập'
+            tone='info'
+          />
         </div>
       </div>
     </DashboardPage>

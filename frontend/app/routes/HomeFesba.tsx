@@ -1,212 +1,306 @@
-import { ArrowUpRight } from 'lucide-react'
+import {
+  ArrowRight,
+  ArrowUpRight,
+  CalendarDays,
+  CheckCircle2,
+  ShieldCheck,
+  Star,
+  Users
+} from 'lucide-react'
 import { motion } from 'framer-motion'
 import { Link } from 'react-router'
 
+import MentorCard from '@/components/MentorCard'
+import SearchBar from '@/components/SearchBar'
+import SectionTitle from '@/components/SectionTitle'
+import SubjectCard from '@/components/SubjectCard'
+import TestimonialCard from '@/components/TestimonialCard'
+import { Badge } from '@/components/ui/badge'
+import { buttonVariants } from '@/components/ui/button'
+import { Card, CardContent } from '@/components/ui/card'
+import { Separator } from '@/components/ui/separator'
 import { path } from '@/config/path'
-import SearchBar from '../components/SearchBar'
-import SectionTitle from '../components/SectionTitle'
-import MentorCard from '../components/MentorCard'
-import SubjectCard from '../components/SubjectCard'
-import TestimonialCard from '../components/TestimonialCard'
-import { mentors } from '../constants/mentors'
-import { subjects } from '../constants/subjects'
-import { testimonials } from '../constants/testimonials'
+import { mentors } from '@/constants/mentors'
+import { subjects } from '@/constants/subjects'
+import { testimonials } from '@/constants/testimonials'
+import { cn } from '@/utils/cn'
 
-const HeroIllustration = () => (
-  <svg viewBox='0 0 420 320' className='h-full w-full'>
-    <defs>
-      <linearGradient id='card' x1='0' y1='0' x2='1' y2='1'>
-        <stop offset='0%' stopColor='#ffffff' />
-        <stop offset='100%' stopColor='#e0ecff' />
-      </linearGradient>
-      <linearGradient id='accent' x1='0' y1='0' x2='1' y2='1'>
-        <stop offset='0%' stopColor='#2563eb' />
-        <stop offset='100%' stopColor='#60a5fa' />
-      </linearGradient>
-    </defs>
-    <rect x='10' y='18' width='400' height='284' rx='22' fill='url(#card)' />
-    <rect x='44' y='56' width='210' height='24' rx='12' fill='#e2e8f0' />
-    <rect x='44' y='96' width='260' height='16' rx='8' fill='#dbeafe' />
-    <rect x='44' y='124' width='180' height='16' rx='8' fill='#e2e8f0' />
-    <rect x='44' y='162' width='332' height='90' rx='18' fill='#ffffff' />
-    <rect x='68' y='184' width='90' height='14' rx='7' fill='#e2e8f0' />
-    <rect x='68' y='208' width='140' height='14' rx='7' fill='#dbeafe' />
-    <circle cx='320' cy='206' r='42' fill='url(#accent)' />
-    <path
-      d='M308 206c0-9.5 7.5-17 17-17s17 7.5 17 17-7.5 17-17 17-17-7.5-17-17z'
-      fill='#ffffff'
-      opacity='0.8'
-    />
-    <path d='M329 197l10 9-10 9' fill='none' stroke='#2563eb' strokeWidth='4' />
-  </svg>
-)
+const featuredMentors = mentors.filter((mentor) => mentor.approvalStatus === 'APPROVED').slice(0, 3)
+
+const marketplaceStats = [
+  { value: '240+', label: 'mentor đã duyệt' },
+  { value: '8,500+', label: 'buổi học đã đặt' },
+  { value: '40+', label: 'môn học và cấp lớp' }
+] as const
+
+const trustSteps = [
+  {
+    title: 'Tìm đúng nhu cầu học',
+    description: 'Bắt đầu từ môn học, lớp, mục tiêu và hình thức học phù hợp với học viên.'
+  },
+  {
+    title: 'So sánh mentor rõ ràng',
+    description: 'Xem học phí, trạng thái duyệt, đánh giá, cách dạy và lịch rảnh ngay trên hồ sơ.'
+  },
+  {
+    title: 'Đặt buổi học thực tế',
+    description: 'Chọn môn học cụ thể, khung giờ phù hợp rồi gửi yêu cầu đặt lịch tới mentor.'
+  }
+] as const
+
+const decisionSignals = [
+  {
+    icon: <CheckCircle2 className='h-4 w-4 text-emerald-600' />,
+    title: 'Offering theo môn và cấp lớp',
+    description: 'Mỗi hồ sơ cho thấy rõ mentor dạy môn nào, cho cấp lớp nào và học phí tương ứng.'
+  },
+  {
+    icon: <Star className='h-4 w-4 text-amber-500' />,
+    title: 'Đánh giá bám sát buổi học thật',
+    description: 'Phản hồi từ học viên và phụ huynh giúp so sánh độ phù hợp trước khi gửi yêu cầu.'
+  },
+  {
+    icon: <CalendarDays className='h-4 w-4 text-blue-600' />,
+    title: 'Khung giờ dễ đối chiếu',
+    description: 'Lịch gần nhất và khung giờ lặp lại được giữ gần hành động đặt buổi để giảm mơ hồ.'
+  }
+] as const
+
+const marketplaceTracks = [
+  {
+    title: 'Bắt đầu như học viên',
+    description:
+      'Tìm mentor theo môn học, cấp lớp, mục tiêu và học phí rồi tiếp tục tới hồ sơ chi tiết.',
+    href: path.discover,
+    action: 'Tìm mentor phù hợp'
+  },
+  {
+    title: 'Bắt đầu như mentor',
+    description:
+      'Hoàn thiện hồ sơ giảng dạy, khai báo offering và khung giờ để nhận yêu cầu học phù hợp.',
+    href: path.mentorPanel.root,
+    action: 'Chuẩn bị hồ sơ mentor'
+  }
+] as const
 
 const Home = () => {
   return (
-    <div className='relative flex flex-col gap-20 py-8'>
-      {/* Decorative background blurs */}
-      <div className='bg-primary/10 pointer-events-none absolute top-0 right-0 -z-10 h-[500px] w-[500px] rounded-full blur-[100px]' />
-      <div className='bg-secondary/10 pointer-events-none absolute top-[40%] left-[-10%] -z-10 h-[400px] w-[400px] rounded-full blur-[100px]' />
-
-      <section className='grid items-center gap-12 lg:grid-cols-[1.1fr_0.9fr]'>
+    <div className='flex flex-col gap-16 py-8'>
+      <section className='grid gap-8 lg:grid-cols-[1.08fr_0.92fr] lg:items-start'>
         <motion.div
-          initial={{ opacity: 0, y: 30 }}
+          initial={{ opacity: 0, y: 24 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, ease: 'easeOut' }}
-          className='flex flex-col gap-8'
+          transition={{ duration: 0.45, ease: 'easeOut' }}
+          className='space-y-6'
         >
-          <div className='border-primary/20 bg-primary/5 text-primary shadow-soft inline-flex w-fit items-center gap-2 rounded-full border px-4 py-2 text-xs font-semibold'>
-            <span className='relative flex h-2 w-2'>
-              <span className='bg-primary absolute inline-flex h-full w-full animate-ping rounded-full opacity-75'></span>
-              <span className='bg-primary relative inline-flex h-2 w-2 rounded-full'></span>
-            </span>
-            Curated mentors for ambitious learners
+          <Badge className='gap-2 rounded-full px-4 py-2' variant='info'>
+            <ShieldCheck size={14} />
+            Mentor đã duyệt cho từng mục tiêu học tập
+          </Badge>
+          <div className='space-y-4'>
+            <h1 className='text-ink max-w-3xl text-4xl leading-tight font-semibold tracking-tight md:text-5xl'>
+              Tìm mentor phù hợp để học đúng thứ, đúng nhịp và đúng mục tiêu.
+            </h1>
+            <p className='text-muted max-w-2xl text-base leading-relaxed md:text-lg'>
+              Mentor Matching giúp học viên và phụ huynh tìm mentor theo môn học, lớp, hình thức học
+              và ngân sách. Mỗi hồ sơ đều thể hiện học phí, đánh giá, cách dạy và trạng thái duyệt
+              rõ ràng.
+            </p>
           </div>
-          <h1 className='text-ink text-4xl leading-[1.1] font-semibold tracking-tight md:text-5xl lg:text-6xl'>
-            Find the perfect mentor to{' '}
-            <span className='text-gradient'>accelerate your future.</span>
-          </h1>
-          <p className='text-muted max-w-lg text-base leading-relaxed md:text-lg'>
-            Expert-led personalized sessions, built for developers, designers, and ambitious
-            professionals.
-          </p>
-          <div className='glass-panel rounded-2xl p-2'>
-            <SearchBar />
+
+          <SearchBar
+            buttonLabel='Tìm mentor'
+            contextPlaceholder='Lớp, khu vực hoặc online/offline'
+            quickTags={['Toán lớp 9', 'IELTS Foundation', 'Ôn thi lớp 10', 'Học cuối tuần']}
+          />
+
+          <div className='flex flex-wrap gap-3'>
+            <Link className={cn(buttonVariants({ className: 'rounded-2xl' }))} to={path.discover}>
+              Khám phá mentor <ArrowRight size={16} />
+            </Link>
+            <Link
+              className={cn(buttonVariants({ className: 'rounded-2xl', variant: 'outline' }))}
+              to={path.mentorPanel.root}
+            >
+              Trở thành mentor
+            </Link>
+          </div>
+
+          <div className='grid gap-3 sm:grid-cols-3'>
+            {marketplaceStats.map((stat) => (
+              <Card key={stat.label} className='rounded-2xl border-slate-200/80 shadow-none'>
+                <CardContent className='p-4'>
+                  <p className='text-ink text-2xl font-semibold'>{stat.value}</p>
+                  <p className='text-muted mt-1 text-sm capitalize'>{stat.label}</p>
+                </CardContent>
+              </Card>
+            ))}
           </div>
         </motion.div>
+
         <motion.div
-          initial={{ opacity: 0, scale: 0.95, rotate: -2 }}
-          animate={{ opacity: 1, scale: 1, rotate: 0 }}
-          transition={{ duration: 0.8, delay: 0.1, type: 'spring' }}
-          className='relative overflow-hidden rounded-3xl border border-slate-200/60 bg-gradient-to-br from-white to-slate-50 p-6 shadow-xl'
+          initial={{ opacity: 0, y: 28 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.55, ease: 'easeOut', delay: 0.05 }}
+          className='space-y-4'
         >
-          <div className='bg-grid-slate-100 absolute inset-0 -z-10 [mask-image:linear-gradient(0deg,white,rgba(255,255,255,0.6))]' />
-          <HeroIllustration />
+          <Card className='rounded-[28px] border-slate-200/80 bg-white'>
+            <CardContent className='p-6'>
+              <div className='flex flex-wrap items-start justify-between gap-3'>
+                <div>
+                  <p className='text-ink text-xl font-semibold'>Cách người học ra quyết định</p>
+                  <p className='text-muted mt-1 text-sm leading-relaxed'>
+                    Marketplace này ưu tiên thông tin đủ dùng để phụ huynh và học viên so sánh nhanh
+                    mà không phải đoán phần quan trọng nhất.
+                  </p>
+                </div>
+                <Badge variant='outline'>Tập trung vào so sánh thực tế</Badge>
+              </div>
+
+              <div className='mt-5 space-y-3'>
+                {decisionSignals.map((signal) => (
+                  <div
+                    key={signal.title}
+                    className='rounded-2xl border border-slate-200 bg-slate-50 p-4'
+                  >
+                    <div className='flex items-center gap-2'>
+                      {signal.icon}
+                      <p className='text-ink font-semibold'>{signal.title}</p>
+                    </div>
+                    <p className='text-muted mt-2 text-sm leading-relaxed'>{signal.description}</p>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className='rounded-[28px] border-slate-200/80 bg-slate-50'>
+            <CardContent className='p-5'>
+              <p className='text-ink text-sm font-semibold tracking-[0.16em] uppercase'>
+                Hành trình đặt buổi học
+              </p>
+              <div className='mt-4 space-y-4'>
+                {trustSteps.map((step, index) => (
+                  <div key={step.title} className='flex gap-4'>
+                    <div className='bg-primary text-primary-foreground flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-sm font-semibold text-white'>
+                      {index + 1}
+                    </div>
+                    <div>
+                      <p className='text-ink font-semibold'>{step.title}</p>
+                      <p className='text-muted mt-1 text-sm'>{step.description}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
         </motion.div>
       </section>
 
-      <motion.section
-        initial={{ opacity: 0, y: 20 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true }}
-        transition={{ duration: 0.6 }}
-        className='from-primary-dark via-primary to-primary-light shadow-lift relative grid gap-6 overflow-hidden rounded-3xl bg-gradient-to-r px-6 py-10 text-white md:grid-cols-3'
-      >
-        <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10 mix-blend-overlay"></div>
-        {[
-          { value: '12,000+', label: 'Active mentors' },
-          { value: '500K+', label: 'Sessions booked' },
-          { value: '150+', label: 'Subjects covered' }
-        ].map((stat, i) => (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.5, delay: i * 0.1 }}
-            key={stat.label}
-            className='relative z-10 text-center'
-          >
-            <p className='text-4xl font-semibold tracking-tight'>{stat.value}</p>
-            <p className='mt-2 text-sm font-medium tracking-widest text-blue-100 uppercase'>
-              {stat.label}
-            </p>
-          </motion.div>
-        ))}
-      </motion.section>
-
-      <section className='flex flex-col gap-8'>
+      <section className='space-y-8'>
         <div className='flex items-end justify-between gap-4'>
           <SectionTitle
-            eyebrow='Top Rated'
-            title='Top-rated mentors'
-            subtitle='Learn from industry experts with high student ratings.'
+            eyebrow='Mentor nổi bật'
+            size='md'
+            subtitle='So sánh học phí, môn học, trạng thái duyệt và lịch trống từ những hồ sơ được chọn lọc.'
+            title='Mentor đang được phụ huynh và học viên quan tâm'
           />
           <Link
+            className={cn(
+              buttonVariants({ className: 'hidden rounded-2xl md:inline-flex', variant: 'outline' })
+            )}
             to={path.discover}
-            className='text-primary hidden items-center gap-2 text-sm font-semibold md:flex'
           >
-            View all <ArrowUpRight size={16} />
+            Xem tất cả <ArrowUpRight size={16} />
           </Link>
         </div>
         <div className='grid gap-6 md:grid-cols-2 xl:grid-cols-3'>
-          {mentors.slice(0, 3).map((mentor) => (
+          {featuredMentors.map((mentor) => (
             <MentorCard key={mentor.id} mentor={mentor} />
           ))}
         </div>
       </section>
 
-      <section className='flex flex-col gap-8'>
+      <section className='space-y-8'>
         <SectionTitle
-          eyebrow='Explore'
-          title='Popular subjects'
-          subtitle='Choose a track and start building your next skill.'
+          eyebrow='Môn học'
+          size='md'
+          subtitle='Bắt đầu từ nhu cầu học tập thực tế để lọc ra mentor phù hợp nhanh hơn.'
+          title='Khám phá theo môn học, cấp lớp và mục tiêu'
         />
-        <div className='grid gap-4 sm:grid-cols-2 lg:grid-cols-4'>
-          {subjects.map((subject) => (
+        <div className='grid gap-4 sm:grid-cols-2 xl:grid-cols-4'>
+          {subjects.slice(0, 8).map((subject) => (
             <SubjectCard key={subject.id} subject={subject} />
           ))}
         </div>
       </section>
 
-      <section className='grid gap-8 lg:grid-cols-[1fr_1.1fr]'>
-        <motion.div
-          whileHover={{ scale: 1.02 }}
-          transition={{ duration: 0.3 }}
-          className='from-primary to-primary-dark shadow-lift relative flex flex-col justify-between overflow-hidden rounded-3xl bg-gradient-to-br p-10 text-white'
-        >
-          <div className='pointer-events-none absolute -top-20 -right-20 h-64 w-64 rounded-full bg-white/10 blur-3xl'></div>
-          <div>
-            <p className='text-sm font-semibold tracking-[0.2em] text-blue-200 uppercase'>
-              Ready to start?
-            </p>
-            <h3 className='mt-4 max-w-sm text-4xl leading-tight font-semibold'>
-              Join thousands of students and fast-track your learning.
-            </h3>
-          </div>
-          <Link
-            to={path.discover}
-            className='text-primary mt-8 inline-flex w-fit rounded-full bg-white px-8 py-4 text-sm font-semibold transition-transform hover:scale-105 hover:shadow-lg active:scale-95'
-          >
-            Start learning now
-          </Link>
-        </motion.div>
-
-        <motion.div
-          whileHover={{ scale: 1.02 }}
-          transition={{ duration: 0.3 }}
-          className='shadow-soft glass-panel card-hover relative flex flex-col justify-between overflow-hidden rounded-3xl border border-slate-200 bg-white p-10'
-        >
-          <div className='bg-secondary/5 pointer-events-none absolute -right-10 -bottom-10 h-40 w-40 rounded-full blur-2xl'></div>
-          <div>
-            <p className='text-secondary text-sm font-semibold tracking-[0.2em] uppercase'>
-              Become a mentor
-            </p>
-            <h3 className='text-ink mt-4 max-w-sm text-4xl leading-tight font-semibold'>
-              Teach learners and earn on your schedule.
-            </h3>
-            <p className='text-muted mt-4 max-w-md text-base leading-relaxed'>
-              Share expertise, grow your network, and help others reach their goals while earning a
-              steady income.
-            </p>
-          </div>
-          <Link
-            to={path.mentorPanel.root}
-            className='bg-ink shadow-lift group mt-8 inline-flex w-fit rounded-full px-8 py-4 text-sm font-semibold text-white transition-transform hover:scale-105 active:scale-95'
-          >
-            Apply to become a Mentor{' '}
-            <ArrowUpRight
-              size={18}
-              className='ml-2 transition-transform group-hover:translate-x-1 group-hover:-translate-y-1'
+      <section className='grid gap-6 lg:grid-cols-[1.1fr_0.9fr]'>
+        <Card className='rounded-[32px] border-slate-200/80 bg-slate-50'>
+          <CardContent className='p-8'>
+            <SectionTitle
+              eyebrow='Quy trình'
+              size='md'
+              subtitle='Từng bước được thiết kế để giúp phụ huynh và học viên ra quyết định nhanh nhưng vẫn đủ căn cứ.'
+              title='Cách Mentor Matching giữ trải nghiệm đặt lịch thực tế'
             />
-          </Link>
-        </motion.div>
+            <div className='mt-6 grid gap-4 md:grid-cols-3'>
+              {trustSteps.map((step, index) => (
+                <Card key={step.title} className='rounded-2xl border-slate-200/80 shadow-none'>
+                  <CardContent className='p-5'>
+                    <p className='text-primary text-sm font-semibold'>Bước {index + 1}</p>
+                    <p className='text-ink mt-2 font-semibold'>{step.title}</p>
+                    <p className='text-muted mt-2 text-sm leading-relaxed'>{step.description}</p>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+
+        <div className='grid gap-4'>
+          {marketplaceTracks.map((track, index) => (
+            <Card key={track.title} className='rounded-[28px] border-slate-200/80 bg-white'>
+              <CardContent className='flex h-full flex-col p-6'>
+                <Badge className='w-fit' variant={index === 0 ? 'info' : 'outline'}>
+                  {index === 0 ? 'Dành cho học viên và phụ huynh' : 'Dành cho mentor'}
+                </Badge>
+                <h3 className='text-ink mt-4 text-2xl font-semibold'>{track.title}</h3>
+                <p className='text-muted mt-3 text-sm leading-relaxed'>{track.description}</p>
+                <Separator className='my-5' />
+                <div className='flex items-center gap-2 text-sm text-slate-600'>
+                  {index === 0 ? (
+                    <Users size={16} className='text-primary' />
+                  ) : (
+                    <ShieldCheck size={16} className='text-primary' />
+                  )}
+                  {index === 0
+                    ? 'So sánh nhanh học phí, đánh giá và khung giờ.'
+                    : 'Chỉ mentor đã duyệt mới hiển thị ở khu vực công khai.'}
+                </div>
+                <Link
+                  className={cn(
+                    buttonVariants({
+                      className: 'mt-6 w-fit rounded-2xl',
+                      variant: index === 0 ? 'default' : 'outline'
+                    })
+                  )}
+                  to={track.href}
+                >
+                  {track.action} <ArrowRight size={16} />
+                </Link>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
       </section>
 
-      <section className='flex flex-col gap-8'>
+      <section className='space-y-8'>
         <SectionTitle
-          eyebrow='Success stories'
-          title='What students are saying'
-          subtitle='Real feedback from learners across the platform.'
+          eyebrow='Phản hồi'
+          size='md'
+          subtitle='Những nhận xét ngắn nhưng sát với điều người học cần biết trước khi đặt buổi đầu tiên.'
+          title='Học viên và phụ huynh đánh giá điều gì'
         />
         <div className='grid gap-6 md:grid-cols-3'>
           {testimonials.map((testimonial) => (

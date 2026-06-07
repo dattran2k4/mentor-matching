@@ -1,96 +1,177 @@
-import { DashboardPage } from '@/components/DashboardPage'
-import { motion } from 'framer-motion'
-import { Heart, Search, Star, Trash2, ArrowRight } from 'lucide-react'
+import { useMemo, useState } from 'react'
 import { Link } from 'react-router'
-import { mentors } from '../../constants/mentors'
+import { Heart, Search, Trash2 } from 'lucide-react'
+
+import { DashboardPage } from '@/components/DashboardPage'
+import { EmptyState } from '@/components/EmptyState'
+import { StatusBadge } from '@/components/StatusBadge'
+import { WorkspaceNotice } from '@/components/WorkspaceNotice'
+import { WorkspacePanel } from '@/components/WorkspacePanel'
+import { Badge } from '@/components/ui/badge'
+import { Button, buttonVariants } from '@/components/ui/button'
+import { Card, CardContent } from '@/components/ui/card'
+import { Input } from '@/components/ui/input'
+import { path } from '@/config/path'
+import { mentors } from '@/constants/mentors'
+import { cn } from '@/utils/cn'
+import { formatPrice } from '@/utils/format'
 
 export function meta() {
   return [{ title: 'Yêu thích | Học viên' }]
 }
 
 export default function UserFavoritesPage() {
-  // Use first 3 mentors as featured favorites
-  const favoriteMentors = mentors.slice(0, 3)
+  const [searchQuery, setSearchQuery] = useState('')
+  const [hiddenMentorIds, setHiddenMentorIds] = useState<string[]>([])
+
+  const favoriteMentors = useMemo(
+    () =>
+      mentors
+        .filter((mentor) => mentor.approvalStatus === 'APPROVED')
+        .slice(0, 4)
+        .filter((mentor) => !hiddenMentorIds.includes(mentor.id)),
+    [hiddenMentorIds]
+  )
+
+  const filteredMentors = useMemo(() => {
+    const normalizedQuery = searchQuery.trim().toLowerCase()
+
+    if (normalizedQuery.length === 0) {
+      return favoriteMentors
+    }
+
+    return favoriteMentors.filter((mentor) =>
+      [mentor.name, mentor.headline, mentor.subjects.join(' '), mentor.grades.join(' ')]
+        .join(' ')
+        .toLowerCase()
+        .includes(normalizedQuery)
+    )
+  }, [favoriteMentors, searchQuery])
 
   return (
     <DashboardPage
-      description='Quản lý danh sách các mentor bạn đã lưu để theo dõi.'
+      description='Lưu lại các mentor phù hợp để quay lại so sánh, xem lịch phù hợp và tiếp tục đặt buổi học.'
       title='Mentor yêu thích'
     >
-      <div className='flex flex-col gap-8'>
-        <div className='flex flex-wrap items-center justify-between gap-4'>
-          <div className='relative max-w-md flex-1'>
-            <Search size={18} className='text-muted absolute top-1/2 left-4 -translate-y-1/2' />
-            <input
-              type='text'
-              placeholder='Tìm trong danh sách yêu thích...'
-              className='focus:ring-primary/20 w-full rounded-2xl border border-slate-200 bg-white py-3 pr-4 pl-12 text-sm shadow-sm focus:ring-2 focus:outline-none'
-            />
-          </div>
-          <p className='text-muted text-sm font-medium'>
-            Đang hiển thị {favoriteMentors.length} mentor
-          </p>
-        </div>
-
-        <div className='grid gap-6 sm:grid-cols-2 xl:grid-cols-3'>
-          {favoriteMentors.map((mentor, i) => (
-            <motion.div
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: i * 0.1 }}
-              key={mentor.id}
-              className='group glass-panel card-hover relative rounded-3xl border border-slate-200/60 bg-white/70 p-6'
-            >
-              <button className='absolute top-4 right-4 z-10 rounded-full bg-red-50 p-2 text-red-500 opacity-0 shadow-sm transition-opacity group-hover:opacity-100 hover:bg-red-500 hover:text-white'>
-                <Trash2 size={16} />
-              </button>
-
-              <div className='flex flex-col items-center text-center'>
-                <div
-                  className={`h-20 w-20 rounded-2xl bg-gradient-to-br ${mentor.accent} mb-4 flex items-center justify-center text-2xl font-bold text-white shadow-lg`}
-                >
-                  {mentor.initials}
-                </div>
-                <h3 className='text-ink text-lg font-bold'>{mentor.name}</h3>
-                <p className='text-muted mb-3 text-sm'>{mentor.role}</p>
-                <div className='mb-6 flex items-center gap-1'>
-                  <Star size={14} className='fill-amber-400 text-amber-400' />
-                  <span className='text-ink text-sm font-bold'>{mentor.rating}</span>
-                  <span className='text-muted text-xs'>({mentor.reviewsCount})</span>
-                </div>
-
-                <div className='grid w-full grid-cols-2 gap-2'>
-                  <Link
-                    to={`/mentor/${mentor.id}`}
-                    className='text-ink rounded-xl border border-slate-200 px-4 py-2.5 text-xs font-bold transition-colors hover:bg-slate-50'
-                  >
-                    Hồ sơ
-                  </Link>
-                  <Link
-                    to={`/mentor/${mentor.id}`}
-                    className='bg-primary shadow-soft hover:shadow-glow rounded-xl px-4 py-2.5 text-xs font-bold text-white transition-all'
-                  >
-                    Đặt lịch
-                  </Link>
-                </div>
-              </div>
-            </motion.div>
-          ))}
-
-          <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: 0.4 }}
-            className='group hover:border-primary/40 flex cursor-pointer flex-col items-center justify-center rounded-3xl border-2 border-dashed border-slate-200 bg-slate-50/50 p-8 text-center transition-colors'
-          >
-            <div className='group-hover:text-primary mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-white text-slate-400 shadow-sm transition-colors'>
-              <Heart size={24} />
+      <div className='space-y-6'>
+        <WorkspacePanel
+          title='Danh sách đã lưu'
+          description='Bản Milestone 3 dùng dữ liệu tĩnh để chốt cấu trúc; thao tác bỏ lưu hiện chỉ áp dụng trên giao diện.'
+        >
+          <div className='flex flex-wrap items-center justify-between gap-4'>
+            <div className='relative max-w-md flex-1'>
+              <Search
+                aria-hidden='true'
+                className='text-muted absolute top-1/2 left-4 -translate-y-1/2'
+                size={18}
+              />
+              <Input
+                className='pl-12'
+                id='favorite-search'
+                onChange={(event) => setSearchQuery(event.target.value)}
+                placeholder='Tìm theo tên mentor, môn học hoặc lớp'
+                type='search'
+                value={searchQuery}
+              />
             </div>
-            <p className='text-ink hover:text-primary flex items-center gap-1 text-sm font-bold transition-colors'>
-              Khám phá thêm <ArrowRight size={14} />
-            </p>
-          </motion.div>
-        </div>
+            <Badge variant='info'>Đang hiển thị {filteredMentors.length} mentor</Badge>
+          </div>
+        </WorkspacePanel>
+
+        <WorkspaceNotice
+          description='Danh sách này ưu tiên mentor đã duyệt để việc so sánh tiếp tục bám sát marketplace công khai. Bỏ lưu hiện chỉ là thao tác cục bộ.'
+          icon={Heart}
+          title='Danh sách lưu tạm thời'
+          tone='neutral'
+        />
+
+        {filteredMentors.length === 0 ? (
+          <EmptyState
+            actionHref={path.discover}
+            actionLabel='Khám phá mentor'
+            description='Hãy thử tìm theo môn học khác hoặc quay lại trang khám phá để lưu thêm mentor phù hợp.'
+            icon={<Heart aria-hidden='true' size={24} />}
+            title='Chưa có mentor phù hợp trong danh sách lưu'
+          />
+        ) : (
+          <div className='grid gap-5 lg:grid-cols-2'>
+            {filteredMentors.map((mentor) => {
+              const firstOffering = mentor.offerings[0]
+
+              return (
+                <Card className='rounded-3xl' key={mentor.id}>
+                  <CardContent className='space-y-5 p-5'>
+                    <div className='flex items-start justify-between gap-4'>
+                      <div className='space-y-3'>
+                        <div className='flex flex-wrap items-center gap-2'>
+                          <h2 className='text-ink text-lg font-semibold'>{mentor.name}</h2>
+                          <StatusBadge kind='approval' status={mentor.approvalStatus} />
+                          <StatusBadge kind='verification' status={mentor.verificationStatus} />
+                        </div>
+                        <p className='text-muted text-sm'>{mentor.headline}</p>
+                      </div>
+                      <Button
+                        onClick={() =>
+                          setHiddenMentorIds((currentIds) => [...currentIds, mentor.id])
+                        }
+                        size='icon'
+                        variant='outline'
+                      >
+                        <Trash2 aria-hidden='true' size={16} />
+                        <span className='sr-only'>Bỏ lưu mentor {mentor.name}</span>
+                      </Button>
+                    </div>
+
+                    <div className='grid gap-3 text-sm text-slate-700 sm:grid-cols-2'>
+                      <Card className='rounded-2xl border-slate-200 bg-slate-50 shadow-none'>
+                        <CardContent className='p-4'>
+                          <p className='text-muted text-xs font-semibold tracking-wide uppercase'>
+                            Môn học phù hợp
+                          </p>
+                          <p className='mt-2 font-semibold'>
+                            {firstOffering.subject} · {firstOffering.grade}
+                          </p>
+                          <p className='text-muted mt-1'>{firstOffering.teachingNote}</p>
+                        </CardContent>
+                      </Card>
+                      <Card className='rounded-2xl border-slate-200 bg-slate-50 shadow-none'>
+                        <CardContent className='p-4'>
+                          <p className='text-muted text-xs font-semibold tracking-wide uppercase'>
+                            Học phí từ
+                          </p>
+                          <p className='text-ink mt-2 font-semibold'>
+                            {formatPrice(mentor.startingPrice)} / giờ
+                          </p>
+                          <p className='text-muted mt-1'>{mentor.availabilitySummary}</p>
+                        </CardContent>
+                      </Card>
+                    </div>
+
+                    <div className='flex flex-wrap gap-2'>
+                      {mentor.highlights.slice(0, 3).map((highlight) => (
+                        <Badge key={highlight} variant='muted'>
+                          {highlight}
+                        </Badge>
+                      ))}
+                    </div>
+
+                    <div className='flex flex-wrap gap-3'>
+                      <Link
+                        className={buttonVariants({ variant: 'outline' })}
+                        to={path.mentorProfile(mentor.id)}
+                      >
+                        Xem hồ sơ
+                      </Link>
+                      <Link className={cn(buttonVariants())} to={path.mentorProfile(mentor.id)}>
+                        Tiếp tục đặt lịch
+                      </Link>
+                    </div>
+                  </CardContent>
+                </Card>
+              )
+            })}
+          </div>
+        )}
       </div>
     </DashboardPage>
   )

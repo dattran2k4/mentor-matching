@@ -1,78 +1,102 @@
 import { Link } from 'react-router'
+
+import { Badge } from '@/components/ui/badge'
+import { buttonVariants } from '@/components/ui/button'
+import { Separator } from '@/components/ui/separator'
 import { path } from '@/config/path'
+import { cn } from '@/utils/cn'
 
 const Footer = () => {
   return (
-    <footer className='mt-16 bg-slate-100'>
-      <div className='mx-auto grid max-w-6xl gap-10 px-4 py-12 md:grid-cols-[1.4fr_1fr_1fr_1fr] md:px-6'>
-        <div>
-          <Link className='text-primary text-lg font-semibold' to='/'>
-            EduMarket
-          </Link>
-          <p className='text-muted mt-3 text-sm'>
-            Connecting learners with trusted mentors across the world for personalized education.
-          </p>
-        </div>
-        <div>
-          <p className='text-ink text-sm font-semibold'>Khám phá</p>
-          <ul className='text-muted mt-3 space-y-2 text-sm'>
-            <li>
-              <Link className='hover:text-primary transition' to={path.discover}>
-                Tìm mentor
+    <footer className='mt-20 border-t border-slate-200 bg-slate-50'>
+      <div className='page-container py-12'>
+        <div className='grid gap-10 md:grid-cols-[1.35fr_0.8fr_0.8fr_1fr]'>
+          <div>
+            <Link className='text-primary text-lg font-semibold' to={path.home}>
+              Mentor Matching
+            </Link>
+            <p className='text-muted mt-3 max-w-md text-sm leading-relaxed'>
+              Kết nối học viên và phụ huynh với mentor đã được duyệt theo môn học, cấp lớp, hình
+              thức học và mục tiêu tiến bộ cụ thể.
+            </p>
+            <div className='mt-4 flex flex-wrap gap-2 text-xs'>
+              <Badge variant='outline'>Mentor đã duyệt</Badge>
+              <Badge variant='outline'>Offering theo môn và cấp lớp</Badge>
+              <Badge variant='outline'>Đặt buổi học theo khung giờ thật</Badge>
+            </div>
+          </div>
+          <div>
+            <p className='text-ink text-sm font-semibold'>Khám phá</p>
+            <ul className='text-muted mt-3 space-y-2 text-sm'>
+              <li>
+                <Link className='hover:text-primary transition' to={path.discover}>
+                  Tìm mentor
+                </Link>
+              </li>
+              <li>
+                <Link className='hover:text-primary transition' to={path.home}>
+                  Trang chủ
+                </Link>
+              </li>
+              <li>
+                <Link className='hover:text-primary transition' to={path.mentorPanel.root}>
+                  Khu vực Mentor
+                </Link>
+              </li>
+            </ul>
+          </div>
+          <div>
+            <p className='text-ink text-sm font-semibold'>Tài khoản</p>
+            <ul className='text-muted mt-3 space-y-2 text-sm'>
+              <li>
+                <Link className='hover:text-primary transition' to={path.login}>
+                  Đăng nhập
+                </Link>
+              </li>
+              <li>
+                <Link className='hover:text-primary transition' to={path.user.root}>
+                  Học viên
+                </Link>
+              </li>
+              <li>
+                <Link className='hover:text-primary transition' to={path.admin.root}>
+                  Admin
+                </Link>
+              </li>
+            </ul>
+          </div>
+          <div>
+            <p className='text-ink text-sm font-semibold'>Bắt đầu</p>
+            <p className='text-muted mt-3 text-sm leading-relaxed'>
+              Bắt đầu với môn học và cấp lớp cụ thể, so sánh học phí cùng độ tin cậy rồi gửi yêu cầu
+              đặt buổi đầu tiên.
+            </p>
+            <div className='mt-4 space-y-3'>
+              <Link
+                className={cn(buttonVariants({ className: 'block rounded-2xl text-center' }))}
+                to={path.discover}
+              >
+                Tìm mentor ngay
               </Link>
-            </li>
-            <li>
-              <Link className='hover:text-primary transition' to='/'>
-                Trang chủ
+              <Link
+                className={cn(
+                  buttonVariants({
+                    className: 'block rounded-2xl text-center',
+                    variant: 'outline'
+                  })
+                )}
+                to={path.login}
+              >
+                Đăng nhập để quản lý lịch học
               </Link>
-            </li>
-            <li>
-              <Link className='hover:text-primary transition' to={path.mentorPanel.root}>
-                Khu vực Mentor
-              </Link>
-            </li>
-          </ul>
-        </div>
-        <div>
-          <p className='text-ink text-sm font-semibold'>Tài khoản</p>
-          <ul className='text-muted mt-3 space-y-2 text-sm'>
-            <li>
-              <Link className='hover:text-primary transition' to={path.login}>
-                Đăng nhập
-              </Link>
-            </li>
-            <li>
-              <Link className='hover:text-primary transition' to={path.user.root}>
-                Học viên
-              </Link>
-            </li>
-            <li>
-              <Link className='hover:text-primary transition' to={path.admin.root}>
-                Admin
-              </Link>
-            </li>
-          </ul>
-        </div>
-        <div>
-          <p className='text-ink text-sm font-semibold'>Newsletter</p>
-          <p className='text-muted mt-3 text-sm'>Get updates on new mentors and upcoming events.</p>
-          <div className='mt-4 flex items-center gap-2'>
-            <input
-              className='w-full rounded-full border border-slate-200 bg-white px-4 py-2 text-sm outline-none'
-              placeholder='Email address'
-              type='email'
-            />
-            <button
-              className='bg-primary rounded-full px-4 py-2 text-sm font-semibold text-white'
-              type='button'
-            >
-              Join
-            </button>
+            </div>
           </div>
         </div>
-      </div>
-      <div className='text-muted border-t border-slate-200 py-6 text-center text-xs'>
-        2026 EduMarket. All rights reserved.
+        <Separator className='my-8' />
+        <div className='flex flex-col gap-2 text-xs text-slate-500 md:flex-row md:items-center md:justify-between'>
+          <p>2026 Mentor Matching. All rights reserved.</p>
+          <p>Ưu tiên trải nghiệm tìm mentor rõ ràng, đáng tin và bám sát nhu cầu học tập.</p>
+        </div>
       </div>
     </footer>
   )

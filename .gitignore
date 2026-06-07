@@ -31,3 +31,6 @@ logs/
 build/
 dist/
 /out/
+
+# Private Codex skills
+codex-skills/

@@ -61,6 +61,36 @@ a {
 }
 
 @layer utilities {
+  .page-container {
+    width: min(calc(100% - 2rem), 90rem);
+    margin-inline: auto;
+  }
+
+  .dashboard-container {
+    width: min(calc(100% - 2rem), 100rem);
+    margin-inline: auto;
+  }
+
+  @media (min-width: 768px) {
+    .page-container {
+      width: min(calc(100% - 3rem), 90rem);
+    }
+
+    .dashboard-container {
+      width: min(calc(100% - 3rem), 100rem);
+    }
+  }
+
+  @media (min-width: 1280px) {
+    .page-container {
+      width: min(calc(100% - 5rem), 90rem);
+    }
+
+    .dashboard-container {
+      width: min(calc(100% - 5rem), 100rem);
+    }
+  }
+
   .glass-panel {
     @apply shadow-soft border border-white/40 bg-white/70 backdrop-blur-md;
   }

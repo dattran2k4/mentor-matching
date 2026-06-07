@@ -17,6 +17,7 @@ import com.mentormatching.modules.auth.application.port.out.AuthenticationPort;
 import com.mentormatching.modules.auth.application.port.out.PasswordEncoderPort;
 import com.mentormatching.modules.auth.application.port.out.RefreshTokenRepositoryPort;
 import com.mentormatching.modules.auth.application.port.out.TokenProviderPort;
+import com.mentormatching.modules.user.application.port.out.UserReadPort;
 import com.mentormatching.modules.auth.domain.RefreshToken;
 import com.mentormatching.modules.user.application.port.out.UserRepositoryPort;
 import com.mentormatching.modules.user.domain.User;
@@ -31,15 +32,17 @@ public class AuthService implements LoginUseCase, RegisterUseCase, RefreshTokenU
     private final RefreshTokenRepositoryPort refreshTokenRepositoryPort;
     private final PasswordEncoderPort passwordEncoderPort;
     private final UserRepositoryPort userRepositoryPort;
+    private final UserReadPort userReadPort;
 
     public AuthService(AuthenticationPort authenticationPort, TokenProviderPort tokenProviderPort,
                        RefreshTokenRepositoryPort refreshTokenRepositoryPort, PasswordEncoderPort passwordEncoderPort,
-                       UserRepositoryPort userRepositoryPort) {
+                       UserRepositoryPort userRepositoryPort, UserReadPort userReadPort) {
         this.authenticationPort = authenticationPort;
         this.tokenProviderPort = tokenProviderPort;
         this.refreshTokenRepositoryPort = refreshTokenRepositoryPort;
         this.passwordEncoderPort = passwordEncoderPort;
         this.userRepositoryPort = userRepositoryPort;
+        this.userReadPort = userReadPort;
     }
 
     @Override
@@ -87,7 +90,7 @@ public class AuthService implements LoginUseCase, RegisterUseCase, RefreshTokenU
             throw new AuthenticationFailedException("Refresh token is invalid");
         }
 
-        User user = userRepositoryPort.findById(currentRefreshToken.getUserId())
+        User user = userReadPort.findById(currentRefreshToken.getUserId())
                 .orElseThrow(() -> new AuthenticationFailedException("Refresh token user does not exist"));
 
         if (!user.canLogin()) {

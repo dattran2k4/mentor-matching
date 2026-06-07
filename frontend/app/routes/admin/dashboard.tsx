@@ -1,165 +1,229 @@
 import { Link } from 'react-router'
-import { motion } from 'framer-motion'
 import {
-  Users,
-  GraduationCap,
-  DollarSign,
-  AlertCircle,
-  ArrowUpRight,
-  CheckCircle2,
-  ChevronRight
+  AlertTriangle,
+  ArrowRight,
+  BookOpenCheck,
+  FileWarning,
+  Settings2,
+  ShieldCheck,
+  Users
 } from 'lucide-react'
 
 import { DashboardPage } from '@/components/DashboardPage'
+import { EmptyState } from '@/components/EmptyState'
+import { StatusBadge } from '@/components/StatusBadge'
+import { WorkspaceActionCard } from '@/components/WorkspaceActionCard'
+import { WorkspaceMetricCard } from '@/components/WorkspaceMetricCard'
+import { WorkspaceNotice } from '@/components/WorkspaceNotice'
+import { WorkspacePanel } from '@/components/WorkspacePanel'
+import { Badge } from '@/components/ui/badge'
+import { buttonVariants } from '@/components/ui/button'
+import { Card, CardContent } from '@/components/ui/card'
 import { path } from '@/config/path'
+import { adminDashboardSummary, adminQueueItems, adminReports } from '@/mocks/admin-workspace'
+import { cn } from '@/utils/cn'
+
+const quickLinks = [
+  {
+    title: 'Mở hàng duyệt mentor',
+    description: 'Đi thẳng đến các hồ sơ cần chốt duyệt hoặc từ chối.',
+    href: path.admin.mentors,
+    icon: BookOpenCheck
+  },
+  {
+    title: 'Rà soát người dùng',
+    description: 'Kiểm tra tài khoản mentor, học viên và phụ huynh cần theo dõi.',
+    href: path.admin.users,
+    icon: Users
+  },
+  {
+    title: 'Kiểm tra cài đặt vận hành',
+    description: 'Xem các nhóm cấu hình đang có quy ước và phần nào còn chờ backend.',
+    href: path.admin.settings,
+    icon: Settings2
+  }
+] as const
+
+const systemHealth = [
+  {
+    label: 'Hàng đợi duyệt mentor',
+    value: 'Ổn định',
+    helper: 'Đang còn 6 hồ sơ, trong đó 2 hồ sơ cần xử lý ngay trong hôm nay.'
+  },
+  {
+    label: 'Báo cáo người dùng',
+    value: 'Cần chú ý',
+    helper: 'Có một báo cáo mức cao mới gửi, nên ưu tiên kiểm tra trước các việc theo dõi khác.'
+  },
+  {
+    label: 'Thiết lập vận hành',
+    value: 'Một phần thủ công',
+    helper: 'Reports và payment operations vẫn cần backend rõ hơn trước khi mở cấu hình trực tiếp.'
+  }
+] as const
 
 export function meta() {
   return [{ title: 'Tổng quan | Admin' }]
 }
 
 export default function AdminDashboardPage() {
-  const stats = [
-    {
-      label: 'Tổng người dùng',
-      value: '1,248',
-      icon: Users,
-      color: 'text-blue-600',
-      bg: 'bg-blue-50'
-    },
-    {
-      label: 'Mentor hoạt động',
-      value: '312',
-      icon: GraduationCap,
-      color: 'text-indigo-600',
-      bg: 'bg-indigo-50'
-    },
-    {
-      label: 'Doanh thu tháng',
-      value: '45.2M',
-      icon: DollarSign,
-      color: 'text-emerald-600',
-      bg: 'bg-emerald-50'
-    },
-    {
-      label: 'Yêu cầu chờ duyệt',
-      value: '18',
-      icon: AlertCircle,
-      color: 'text-amber-600',
-      bg: 'bg-amber-50'
-    }
-  ]
+  const highlightedReports = adminReports.filter((report) => report.status !== 'CLOSED').slice(0, 2)
 
   return (
     <DashboardPage
-      description='Quản lý hệ thống, theo dõi tăng trưởng và xử lý các yêu cầu phê duyệt.'
-      title='Bảng điều khiển Admin'
+      description='Ưu tiên hàng chờ duyệt, báo cáo mở và các tín hiệu vận hành ảnh hưởng trực tiếp đến marketplace.'
+      title='Tổng quan Admin'
     >
-      <div className='grid gap-6 sm:grid-cols-2 lg:grid-cols-4'>
-        {stats.map((stat, i) => (
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: i * 0.1 }}
-            className='glass-panel card-hover group rounded-3xl border border-slate-200/60 bg-white/70 p-6'
-            key={stat.label}
+      <WorkspacePanel
+        title='Cần xử lý hôm nay'
+        description='Đưa các đầu việc cần quyết định lên trước metric để admin biết nên mở màn hình nào ngay.'
+        action={
+          <Link
+            className={cn(buttonVariants({ size: 'sm', variant: 'link' }), 'h-auto px-0')}
+            to={path.admin.mentors}
           >
-            <div className='mb-4 flex items-center justify-between'>
-              <div className={`rounded-2xl p-3 ${stat.bg} ${stat.color}`}>
-                <stat.icon size={22} />
-              </div>
-              <div className='flex items-center text-xs font-bold text-emerald-600'>
-                +12% <ArrowUpRight size={14} />
-              </div>
-            </div>
-            <p className='text-muted text-sm font-medium'>{stat.label}</p>
-            <p className='text-ink mt-1 text-2xl font-bold'>{stat.value}</p>
-          </motion.div>
-        ))}
-      </div>
-
-      <div className='mt-10 grid gap-8 lg:grid-cols-[1.6fr_1fr]'>
-        <div className='glass-panel rounded-3xl border border-slate-200/60 bg-white/70 p-8'>
-          <div className='mb-8 flex items-center justify-between'>
-            <h2 className='text-ink text-xl font-bold'>Yêu cầu duyệt Mentor mới</h2>
-            <Link
-              to={path.admin.mentors}
-              className='text-primary text-sm font-semibold hover:underline'
-            >
-              Xem tất cả
-            </Link>
-          </div>
-
-          <div className='space-y-4'>
-            {[
-              { name: 'Nguyễn Văn Nam', skill: 'Senior Frontend Dev', date: '2 giờ trước' },
-              { name: 'Trần Thị Thu', skill: 'UI/UX Designer', date: '5 giờ trước' },
-              { name: 'Lê Minh Hoàng', skill: 'Data Scientist', date: 'Hôm qua' }
-            ].map((req, i) => (
-              <div
-                key={i}
-                className='hover:border-primary/20 group flex items-center justify-between rounded-2xl border border-slate-100 bg-white p-4 transition-all'
-              >
-                <div className='flex items-center gap-4'>
-                  <div className='flex h-12 w-12 items-center justify-center rounded-xl bg-slate-100 font-bold text-slate-500'>
-                    {req.name.charAt(0)}
+            Mở duyệt mentor
+            <ArrowRight aria-hidden='true' size={14} />
+          </Link>
+        }
+      >
+        {adminQueueItems.length === 0 ? (
+          <EmptyState
+            description='Khi không còn hồ sơ mentor nào chờ xử lý, phần tổng quan sẽ chuyển sang tập trung vào báo cáo và theo dõi hệ thống.'
+            title='Không có mục cần xử lý gấp'
+          />
+        ) : (
+          <div className='grid gap-4'>
+            {adminQueueItems.map((item) => (
+              <Card className='rounded-2xl shadow-none' key={item.id}>
+                <CardContent className='flex flex-col gap-4 p-4 lg:flex-row lg:items-start lg:justify-between'>
+                  <div className='space-y-3'>
+                    <div className='flex flex-wrap items-center gap-2'>
+                      <h2 className='text-ink text-lg font-semibold'>{item.mentorName}</h2>
+                      <StatusBadge kind='approval' status={item.approvalStatus} />
+                      <StatusBadge kind='verification' status={item.verificationStatus} />
+                    </div>
+                    <p className='text-muted text-sm'>{item.headline}</p>
+                    <div className='text-muted grid gap-2 text-sm md:grid-cols-2'>
+                      <p>{item.offeringsSummary}</p>
+                      <p>Gửi hồ sơ {item.submittedAtLabel}</p>
+                    </div>
+                    <Card className='rounded-2xl border-slate-200 bg-slate-50 shadow-none'>
+                      <CardContent className='p-4 text-sm text-slate-600'>{item.note}</CardContent>
+                    </Card>
                   </div>
-                  <div>
-                    <p className='text-ink text-sm font-bold'>{req.name}</p>
-                    <p className='text-muted text-xs'>{req.skill}</p>
+
+                  <div className='flex flex-wrap items-center gap-3 border-t border-slate-100 pt-4 lg:border-t-0 lg:pt-0'>
+                    <Badge variant={item.priority === 'high' ? 'destructive' : 'warning'}>
+                      {item.priority === 'high' ? 'Ưu tiên cao' : 'Theo dõi'}
+                    </Badge>
+                    <Link className={buttonVariants()} to={path.admin.mentors}>
+                      Rà soát hồ sơ
+                    </Link>
                   </div>
-                </div>
-                <div className='flex items-center gap-2'>
-                  <span className='text-muted mr-2 text-[10px]'>{req.date}</span>
-                  <button className='rounded-lg bg-emerald-50 p-2 text-emerald-600 transition-colors hover:bg-emerald-600 hover:text-white'>
-                    <CheckCircle2 size={18} />
-                  </button>
-                  <button className='text-muted rounded-lg bg-slate-50 p-2 transition-colors hover:bg-slate-200'>
-                    <ChevronRight size={18} />
-                  </button>
-                </div>
-              </div>
+                </CardContent>
+              </Card>
             ))}
           </div>
-        </div>
+        )}
+      </WorkspacePanel>
 
-        <div className='flex flex-col gap-8'>
-          <div className='glass-panel shadow-soft rounded-3xl border border-slate-200/60 bg-white p-8'>
-            <h2 className='text-ink mb-6 text-xl font-bold'>Trạng thái hệ thống</h2>
-            <div className='space-y-4'>
-              {[
-                { label: 'Server API', status: 'Online', color: 'bg-emerald-500' },
-                { label: 'Database', status: 'Online', color: 'bg-emerald-500' },
-                { label: 'File Storage', status: '92% Full', color: 'bg-amber-500' }
-              ].map((sys) => (
-                <div
-                  key={sys.label}
-                  className='flex items-center justify-between border-b border-slate-50 py-2 last:border-0'
-                >
-                  <span className='text-muted text-sm font-medium'>{sys.label}</span>
-                  <div className='flex items-center gap-2'>
-                    <span className={`h-2 w-2 rounded-full ${sys.color}`}></span>
-                    <span className='text-ink text-sm font-bold'>{sys.status}</span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
+      <div className='grid gap-4 xl:grid-cols-4'>
+        {adminDashboardSummary.map((item, index) => {
+          const icons = [BookOpenCheck, ShieldCheck, FileWarning, AlertTriangle] as const
 
-          <div className='shadow-lift relative overflow-hidden rounded-3xl border border-slate-200/60 bg-gradient-to-br from-slate-900 to-slate-800 p-8 text-white shadow-slate-900/30'>
-            <div className='bg-primary/20 absolute right-[-10%] bottom-[-10%] h-32 w-32 rounded-full blur-3xl'></div>
-            <h3 className='text-lg font-bold'>Báo cáo mới nhất</h3>
-            <p className='mt-2 text-sm opacity-70'>
-              Hệ thống ghi nhận 12 báo cáo mới từ người dùng trong hôm nay.
-            </p>
-            <Link
-              to={path.admin.reports}
-              className='text-ink mt-6 inline-flex items-center gap-2 rounded-xl bg-white px-6 py-3 text-xs font-bold transition-all hover:shadow-lg'
-            >
-              Xem báo cáo ngay
-            </Link>
-          </div>
-        </div>
+          return (
+            <WorkspaceMetricCard
+              helper={item.helper}
+              icon={icons[index]}
+              key={item.label}
+              label={item.label}
+              value={item.value}
+            />
+          )
+        })}
       </div>
+
+      <div className='grid gap-6 xl:grid-cols-[1.3fr_1fr]'>
+        <WorkspacePanel
+          title='Báo cáo và cờ vận hành'
+          description='Giữ màn hình này trung thực: chỉ hiển thị hàng đợi và bối cảnh xử lý, chưa giả lập moderation workflow đầy đủ.'
+          action={
+            <Link
+              className={cn(buttonVariants({ size: 'sm', variant: 'link' }), 'h-auto px-0')}
+              to={path.admin.reports}
+            >
+              Xem tất cả báo cáo
+              <ArrowRight aria-hidden='true' size={14} />
+            </Link>
+          }
+        >
+          <div className='space-y-4'>
+            {highlightedReports.map((report) => (
+              <Card className='rounded-2xl shadow-none' key={report.id}>
+                <CardContent className='flex items-start gap-4 p-4'>
+                  <div className='flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-red-50 text-red-700'>
+                    <FileWarning aria-hidden='true' size={20} />
+                  </div>
+                  <div className='min-w-0 flex-1 space-y-2'>
+                    <div className='flex flex-wrap items-center gap-2'>
+                      <p className='text-ink font-semibold'>{report.title}</p>
+                      <Badge variant={report.severity === 'HIGH' ? 'destructive' : 'warning'}>
+                        {report.severity === 'HIGH' ? 'Mức cao' : 'Mức trung bình'}
+                      </Badge>
+                    </div>
+                    <p className='text-muted text-sm'>
+                      {report.reportType} · {report.relatedEntity} · {report.submittedAtLabel}
+                    </p>
+                    <p className='text-muted text-sm'>{report.summary}</p>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </WorkspacePanel>
+
+        <WorkspacePanel
+          title='Tình trạng vận hành'
+          description='Các tín hiệu ngắn giúp admin biết phần nào đang ổn, phần nào còn cần thao tác thủ công.'
+        >
+          <div className='grid gap-3'>
+            {systemHealth.map((item) => (
+              <WorkspaceMetricCard
+                helper={item.helper}
+                icon={ShieldCheck}
+                key={item.label}
+                label={item.label}
+                value={item.value}
+              />
+            ))}
+          </div>
+        </WorkspacePanel>
+      </div>
+
+      <WorkspacePanel
+        title='Đi nhanh tới màn hình cần dùng'
+        description='Giữ điều hướng admin thực dụng: mentor, users, reports và settings đều có entry point rõ ràng.'
+      >
+        <div className='grid gap-3 lg:grid-cols-3'>
+          {quickLinks.map((item) => (
+            <WorkspaceActionCard
+              description={item.description}
+              icon={item.icon}
+              key={item.title}
+              title={item.title}
+              to={item.href}
+            />
+          ))}
+        </div>
+      </WorkspacePanel>
+
+      <WorkspaceNotice
+        description='Reports và settings mới mô tả hàng đợi, quy ước vận hành và phạm vi backend hiện có. Chúng chưa đại diện cho workflow moderation hoặc cấu hình hệ thống hoàn chỉnh.'
+        icon={AlertTriangle}
+        title='Lưu ý ở giai đoạn UI tĩnh'
+        tone='warning'
+      />
     </DashboardPage>
   )
 }

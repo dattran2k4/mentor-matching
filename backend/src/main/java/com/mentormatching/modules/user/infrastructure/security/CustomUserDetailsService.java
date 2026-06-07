@@ -5,20 +5,20 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
-import com.mentormatching.modules.user.application.port.out.UserRepositoryPort;
+import com.mentormatching.modules.user.application.port.out.UserReadPort;
 
 @Service
 public class CustomUserDetailsService implements UserDetailsService {
 
-    private final UserRepositoryPort userRepositoryPort;
+    private final UserReadPort userReadPort;
 
-    public CustomUserDetailsService(UserRepositoryPort userRepositoryPort) {
-        this.userRepositoryPort = userRepositoryPort;
+    public CustomUserDetailsService(UserReadPort userReadPort) {
+        this.userReadPort = userReadPort;
     }
 
     @Override
     public UserDetails loadUserByUsername(String username) {
-        return userRepositoryPort.findByEmail(username)
+        return userReadPort.findByEmail(username)
                 .map(CustomUserDetails::from)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + username));
     }

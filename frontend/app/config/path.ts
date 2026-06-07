@@ -1,8 +1,10 @@
 export const path = {
+  home: '/',
   forbidden: '/forbidden',
   login: '/login',
 
   discover: '/discover',
+  mentorProfile: (id: string) => `/mentor/${id}`,
 
   user: {
     root: '/user',

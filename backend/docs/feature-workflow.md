@@ -70,6 +70,7 @@ Application service should:
 - Create or update domain objects.
 - Save via repository ports.
 - Return result DTO or domain object depending on existing module convention.
+- Use an explicit constructor for dependency injection; do not use Lombok `@RequiredArgsConstructor` in application services.
 
 ## 6. Implement Infrastructure
 
@@ -79,6 +80,7 @@ For persistence:
 - Add/update Spring Data `JpaRepository`.
 - Add/update mapper.
 - Implement output port in adapter.
+- `@RequiredArgsConstructor` may be used in infrastructure adapters.
 
 For external providers:
 

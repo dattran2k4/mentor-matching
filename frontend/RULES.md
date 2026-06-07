@@ -51,6 +51,12 @@ Examples:
 
 Barrel usage is allowed for `components` only.
 
+### 4.1 UI foundation
+
+- `app/components/ui` is the default low-level UI system for this project.
+- Prefer composing screens and domain components from the primitives in `app/components/ui` before creating new custom low-level controls.
+- New custom UI components should add domain meaning or shared workflow value, not duplicate available shadcn primitives.
+
 Required pattern for each reusable component:
 
 - One component per folder
@@ -143,6 +149,7 @@ Use fixed separation:
 
 Every PR must pass:
 
+- `npm run format:write`
 - `npm run lint`
 - `npm run typecheck`
 - `npm run test` (when tests exist)

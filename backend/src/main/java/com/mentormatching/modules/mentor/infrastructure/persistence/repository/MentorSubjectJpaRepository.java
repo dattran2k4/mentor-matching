@@ -34,4 +34,24 @@ public interface MentorSubjectJpaRepository extends JpaRepository<MentorSubjectJ
             order by subject.name, grade.name, mentorSubject.id
             """)
     List<MentorSubjectDetailProjection> findActiveDetailsByMentorId(@Param("mentorId") Long mentorId);
+
+    @Query("""
+            select mentorSubject.id as id,
+                   mentorSubject.subjectGradeId as subjectGradeId,
+                   subject.id as subjectId,
+                   subject.name as subjectName,
+                   grade.id as gradeId,
+                   grade.name as gradeName,
+                   mentorSubject.proficiencyLevel as proficiencyLevel,
+                   mentorSubject.teachingNote as teachingNote,
+                   mentorSubject.pricePerHour as pricePerHour,
+                   mentorSubject.active as active
+            from MentorSubjectJpaEntity mentorSubject
+            join SubjectGradeJpaEntity subjectGrade on subjectGrade.id = mentorSubject.subjectGradeId
+            join SubjectJpaEntity subject on subject.id = subjectGrade.subjectId
+            left join GradeJpaEntity grade on grade.id = subjectGrade.gradeId
+            where mentorSubject.mentorId = :mentorId
+            order by subject.name, grade.name, mentorSubject.id
+            """)
+    List<MentorSubjectDetailProjection> findAllDetailsByMentorId(@Param("mentorId") Long mentorId);
 }

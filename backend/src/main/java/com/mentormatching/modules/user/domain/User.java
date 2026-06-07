@@ -2,6 +2,8 @@ package com.mentormatching.modules.user.domain;
 
 import java.time.LocalDateTime;
 
+import com.mentormatching.shared.exception.InvalidDataException;
+
 public class User {
 
     private final Long id;
@@ -67,6 +69,17 @@ public class User {
         this.fullName = fullName;
         this.phone = phone;
         this.userType = userType;
+        touch();
+    }
+
+    public void promoteToMentor() {
+        if (role == UserRole.MENTOR) {
+            return;
+        }
+        if (role != UserRole.LEARNER) {
+            throw new InvalidDataException("User role cannot be promoted to mentor");
+        }
+        this.role = UserRole.MENTOR;
         touch();
     }
 

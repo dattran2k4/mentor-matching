@@ -2,6 +2,8 @@ package com.mentormatching.modules.mentor.domain;
 
 import java.time.LocalDateTime;
 
+import com.mentormatching.shared.exception.InvalidDataException;
+
 public class MentorVerification {
 
     private final Long id;
@@ -36,6 +38,55 @@ public class MentorVerification {
 
     public static MentorVerification restore(MentorVerificationRestoreData data) {
         return new MentorVerification(data);
+    }
+
+    public static MentorVerification submit(Long mentorId, String fullName, String idCardNumber,
+                                            String idCardFrontUrl, String idCardBackUrl,
+                                            String selfieWithIdUrl) {
+        return new MentorVerification(new MentorVerificationRestoreData(null, mentorId, fullName, idCardNumber,
+                idCardFrontUrl, idCardBackUrl, selfieWithIdUrl, MentorVerificationStatus.PENDING, null, null, null,
+                null, null));
+    }
+
+    public void resubmit(String fullName, String idCardNumber, String idCardFrontUrl, String idCardBackUrl,
+                         String selfieWithIdUrl) {
+        this.fullName = fullName;
+        this.idCardNumber = idCardNumber;
+        this.idCardFrontUrl = idCardFrontUrl;
+        this.idCardBackUrl = idCardBackUrl;
+        this.selfieWithIdUrl = selfieWithIdUrl;
+        this.verificationStatus = MentorVerificationStatus.PENDING;
+        this.verifiedBy = null;
+        this.verifiedAt = null;
+        this.rejectionReason = null;
+    }
+
+    public void verify(Long adminUserId) {
+        validatePendingForReview();
+        if (adminUserId == null) {
+            throw new InvalidDataException("Admin user id is required when verifying verification");
+        }
+        this.verificationStatus = MentorVerificationStatus.VERIFIED;
+        this.verifiedBy = adminUserId;
+        this.verifiedAt = LocalDateTime.now();
+        this.rejectionReason = null;
+    }
+
+    public void reject(String rejectionReason) {
+        validatePendingForReview();
+        if (rejectionReason == null || rejectionReason.isBlank()) {
+            throw new InvalidDataException("Rejection reason is required when rejecting verification");
+        }
+        this.verificationStatus = MentorVerificationStatus.REJECTED;
+        this.verifiedBy = null;
+        this.verifiedAt = null;
+        this.rejectionReason = rejectionReason.trim();
+    }
+
+    private void validatePendingForReview() {
+        if (verificationStatus != MentorVerificationStatus.PENDING) {
+            throw new InvalidDataException("Only pending verification can be reviewed");
+        }
     }
 
     public Long getId() {

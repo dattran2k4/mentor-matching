@@ -20,6 +20,10 @@ public class MentorHighlight {
         return new MentorHighlight(data);
     }
 
+    public static MentorHighlight create(Long mentorId, Long highlightOptionId) {
+        return new MentorHighlight(new MentorHighlightRestoreData(null, mentorId, highlightOptionId, null));
+    }
+
     public Long getId() {
         return id;
     }
