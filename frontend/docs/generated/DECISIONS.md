@@ -152,3 +152,21 @@
 - rationale: this aligns implementation with repo rules, reduces duplicated presentation code, and gives future route work a stable low-level system without forcing a broad route rewrite in the same milestone
 - alternatives considered: continuing to add one-off class-based shared components, or rewriting all route screens immediately to prove adoption
 - follow-up: future screen work should default to `ui/button`, `ui/badge`, `ui/card`, `ui/input`, `ui/checkbox`, `ui/textarea`, and related primitives before introducing new low-level wrappers
+
+## Decision 18: public marketplace surfaces now share one calmer composition language
+
+- date: 2026-06-07
+- context: Home, Discover, and Mentor Profile already used tutoring-domain data, but they still mixed route-local styling patterns, oversized soft sections, and inconsistent action/filter hierarchy
+- decision: standardize the public marketplace around one card, badge, button, and separator language built from `app/components/ui`, while keeping booking, trust, offering, and comparison signals close to the top of each screen
+- rationale: the three public routes represent one continuous learner decision flow, so consistent low-level composition improves readability, keeps route files more compositional, and avoids the “AI-template landing page” feel called out by the framework docs
+- alternatives considered: leaving each route to refine its own styling independently, or postponing visual consistency until later API integration
+- follow-up: later data integration should preserve the current Home hero/search hierarchy, Discover filter-summary pattern, and Mentor Profile mobile order where booking context appears before deeper detail sections
+
+## Decision 19: workspace routes now share one shadcn-first section vocabulary
+
+- date: 2026-06-07
+- context: learner, mentor, and admin routes already had domain-correct static structure, but each screen still rebuilt its own cards, summaries, notices, and quick-action panels with ad hoc Tailwind markup
+- decision: add `WorkspacePanel`, `WorkspaceMetricCard`, `WorkspaceActionCard`, and `WorkspaceNotice` on top of `app/components/ui`, then refactor the learner, mentor, and admin workspace routes to compose primarily from those shared pieces plus `ui/input`, `ui/select`, `ui/table`, `ui/textarea`, and `ui/button`
+- rationale: this keeps the route files thinner, aligns the operational workspace surfaces with the repo rule that `app/components/ui` is the default low-level base, and reduces drift between learner, mentor, and admin screens
+- alternatives considered: leaving each route to style its own sections independently, or jumping straight to role-specific component families before proving broader shared reuse
+- follow-up: later API integration work should preserve this shared panel and metric structure, and future dense row patterns can be extracted only if bookings, mentors, reports, or student rows converge enough to justify another shared abstraction

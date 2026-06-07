@@ -1,8 +1,16 @@
 import type { ChangeEvent, FormEvent } from 'react'
 import { useMemo, useState } from 'react'
+import { CheckCircle2, ClipboardList } from 'lucide-react'
 
 import { DashboardPage } from '@/components/DashboardPage'
-import { DashboardSectionHeader } from '@/components/DashboardSectionHeader'
+import { WorkspaceNotice } from '@/components/WorkspaceNotice'
+import { WorkspacePanel } from '@/components/WorkspacePanel'
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Select } from '@/components/ui/select'
+import { Textarea } from '@/components/ui/textarea'
 import { learnerProfileDraft } from '@/mocks/learner-workspace'
 
 export function meta() {
@@ -44,170 +52,168 @@ export default function UserProfilePage() {
       description='Giữ hồ sơ học viên rõ ràng để việc ghép mentor, đặt lịch và theo dõi mục tiêu học tập dễ hơn.'
       title='Hồ sơ học viên'
     >
-      <div className='grid gap-6 xl:grid-cols-[1.6fr_1fr]'>
-        <form
-          className='space-y-6 rounded-3xl border border-slate-200 bg-white p-6 shadow-sm'
-          onSubmit={handleSubmit}
-        >
-          <section className='space-y-4'>
-            <DashboardSectionHeader
-              title='Tài khoản'
-              description='Thông tin cơ bản để mentor và hệ thống liên hệ khi có thay đổi về buổi học.'
-            />
+      <form className='grid gap-6 xl:grid-cols-[1.6fr_1fr]' onSubmit={handleSubmit}>
+        <div className='space-y-6'>
+          <WorkspacePanel
+            title='Tài khoản'
+            description='Thông tin cơ bản để mentor và hệ thống liên hệ khi có thay đổi về buổi học.'
+          >
             <div className='grid gap-4 md:grid-cols-2'>
-              <label className='space-y-2'>
-                <span className='text-ink text-sm font-medium'>Họ và tên</span>
-                <input
-                  className='focus:ring-primary/20 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm focus:ring-2 focus:outline-none'
+              <div className='space-y-2'>
+                <Label htmlFor='learner-full-name'>Họ và tên</Label>
+                <Input
+                  id='learner-full-name'
                   onChange={handleFieldChange('fullName')}
-                  type='text'
                   value={formValues.fullName}
                 />
-              </label>
-              <label className='space-y-2'>
-                <span className='text-ink text-sm font-medium'>Email</span>
-                <input
-                  className='focus:ring-primary/20 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm focus:ring-2 focus:outline-none'
+              </div>
+              <div className='space-y-2'>
+                <Label htmlFor='learner-email'>Email</Label>
+                <Input
+                  id='learner-email'
                   onChange={handleFieldChange('email')}
                   type='email'
                   value={formValues.email}
                 />
-              </label>
-              <label className='space-y-2'>
-                <span className='text-ink text-sm font-medium'>Số điện thoại</span>
-                <input
-                  className='focus:ring-primary/20 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm focus:ring-2 focus:outline-none'
+              </div>
+              <div className='space-y-2'>
+                <Label htmlFor='learner-phone'>Số điện thoại</Label>
+                <Input
+                  id='learner-phone'
                   onChange={handleFieldChange('phone')}
                   type='tel'
                   value={formValues.phone}
                 />
-              </label>
-              <label className='space-y-2'>
-                <span className='text-ink text-sm font-medium'>Giới tính</span>
-                <select
-                  className='focus:ring-primary/20 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm focus:ring-2 focus:outline-none'
+              </div>
+              <div className='space-y-2'>
+                <Label htmlFor='learner-gender'>Giới tính</Label>
+                <Select
+                  id='learner-gender'
                   onChange={handleFieldChange('gender')}
                   value={formValues.gender}
                 >
                   <option value='Nam'>Nam</option>
                   <option value='Nữ'>Nữ</option>
                   <option value='Khác'>Khác</option>
-                </select>
-              </label>
+                </Select>
+              </div>
             </div>
-          </section>
+          </WorkspacePanel>
 
-          <section className='space-y-4 border-t border-slate-100 pt-6'>
-            <DashboardSectionHeader
-              title='Hồ sơ học viên'
-              description='Bối cảnh trường lớp giúp mentor chuẩn bị nội dung đúng trình độ và mục tiêu.'
-            />
+          <WorkspacePanel
+            title='Hồ sơ học viên'
+            description='Bối cảnh trường lớp giúp mentor chuẩn bị nội dung đúng trình độ và mục tiêu.'
+          >
             <div className='grid gap-4 md:grid-cols-2'>
-              <label className='space-y-2'>
-                <span className='text-ink text-sm font-medium'>Năm sinh</span>
-                <input
-                  className='focus:ring-primary/20 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm focus:ring-2 focus:outline-none'
+              <div className='space-y-2'>
+                <Label htmlFor='learner-birth-year'>Năm sinh</Label>
+                <Input
+                  id='learner-birth-year'
                   onChange={handleFieldChange('birthYear')}
-                  type='text'
                   value={formValues.birthYear}
                 />
-              </label>
-              <label className='space-y-2'>
-                <span className='text-ink text-sm font-medium'>Lớp hiện tại</span>
-                <input
-                  className='focus:ring-primary/20 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm focus:ring-2 focus:outline-none'
+              </div>
+              <div className='space-y-2'>
+                <Label htmlFor='learner-grade'>Lớp hiện tại</Label>
+                <Input
+                  id='learner-grade'
                   onChange={handleFieldChange('grade')}
-                  type='text'
                   value={formValues.grade}
                 />
-              </label>
-              <label className='space-y-2 md:col-span-2'>
-                <span className='text-ink text-sm font-medium'>Trường / trung tâm</span>
-                <input
-                  className='focus:ring-primary/20 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm focus:ring-2 focus:outline-none'
+              </div>
+              <div className='space-y-2 md:col-span-2'>
+                <Label htmlFor='learner-school'>Trường / trung tâm</Label>
+                <Input
+                  id='learner-school'
                   onChange={handleFieldChange('schoolName')}
-                  type='text'
                   value={formValues.schoolName}
                 />
-              </label>
+              </div>
             </div>
-          </section>
+          </WorkspacePanel>
 
-          <section className='space-y-4 border-t border-slate-100 pt-6'>
-            <DashboardSectionHeader
-              title='Mục tiêu học tập'
-              description='Mô tả ngắn mục tiêu hiện tại để mentor hiểu rõ vì sao bạn đặt buổi học.'
-            />
-            <label className='space-y-2'>
-              <span className='text-ink text-sm font-medium'>Mục tiêu</span>
-              <textarea
-                className='focus:ring-primary/20 min-h-36 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm focus:ring-2 focus:outline-none'
+          <WorkspacePanel
+            title='Mục tiêu học tập'
+            description='Mô tả ngắn mục tiêu hiện tại để mentor hiểu rõ vì sao bạn đặt buổi học.'
+          >
+            <div className='space-y-2'>
+              <Label htmlFor='learner-goal'>Mục tiêu</Label>
+              <Textarea
+                className='min-h-36'
+                id='learner-goal'
                 onChange={handleFieldChange('learningGoal')}
                 value={formValues.learningGoal}
               />
-            </label>
-          </section>
-
-          <div className='flex flex-col gap-3 border-t border-slate-100 pt-6 sm:flex-row sm:items-center sm:justify-between'>
-            <p className='text-muted text-sm'>
-              Milestone 3 lưu nháp cục bộ để chốt trải nghiệm biểu mẫu. Kết nối API sẽ được thêm ở
-              milestone tích hợp dữ liệu.
-            </p>
-            <button
-              className='bg-primary rounded-xl px-5 py-3 text-sm font-semibold text-white transition hover:opacity-90'
-              type='submit'
-            >
-              Lưu thông tin
-            </button>
-          </div>
-        </form>
+            </div>
+            <div className='flex flex-col gap-3 border-t border-slate-100 pt-4 sm:flex-row sm:items-center sm:justify-between'>
+              <p className='text-muted text-sm'>
+                Milestone 3 lưu nháp cục bộ để chốt trải nghiệm biểu mẫu. Kết nối API sẽ được thêm ở
+                milestone tích hợp dữ liệu.
+              </p>
+              <Button type='submit'>Lưu thông tin</Button>
+            </div>
+          </WorkspacePanel>
+        </div>
 
         <aside className='space-y-6'>
-          <section className='rounded-3xl border border-slate-200 bg-white p-6 shadow-sm'>
-            <DashboardSectionHeader
-              title='Mức độ hoàn thiện'
-              description='Hồ sơ càng rõ thì mentor càng dễ chuẩn bị nội dung và lịch phù hợp.'
-            />
-            <div className='mt-5 space-y-3'>
-              <p className='text-ink text-3xl font-semibold'>
-                {completedCount}/{completionItems.length}
-              </p>
+          <WorkspacePanel
+            title='Mức độ hoàn thiện'
+            description='Hồ sơ càng rõ thì mentor càng dễ chuẩn bị nội dung và lịch phù hợp.'
+          >
+            <p className='text-ink text-3xl font-semibold'>
+              {completedCount}/{completionItems.length}
+            </p>
+            <div className='space-y-3'>
               {completionItems.map((item) => (
                 <div
                   className='flex items-center justify-between rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3'
                   key={item.label}
                 >
                   <span className='text-sm font-medium text-slate-700'>{item.label}</span>
-                  <span
-                    className={`rounded-full px-2.5 py-1 text-xs font-semibold ${
-                      item.done ? 'bg-emerald-50 text-emerald-700' : 'bg-amber-50 text-amber-700'
-                    }`}
-                  >
+                  <Badge variant={item.done ? 'success' : 'warning'}>
                     {item.done ? 'Đã có' : 'Cần bổ sung'}
-                  </span>
+                  </Badge>
                 </div>
               ))}
             </div>
-          </section>
-
-          <section className='rounded-3xl border border-slate-200 bg-white p-6 shadow-sm'>
-            <DashboardSectionHeader
-              title='Ghi chú triển khai'
-              description='Giữ trải nghiệm trung thực trong giai đoạn giao diện tĩnh.'
-            />
-            <ul className='text-muted mt-5 space-y-3 text-sm'>
-              <li>Biểu mẫu này đã sẵn sàng để nối dữ liệu hồ sơ thực ở milestone tiếp theo.</li>
-              <li>Trường lớp và mục tiêu học tập nên giữ gọn, cụ thể và dễ hiểu với mentor.</li>
-              <li>Không nên thêm khả năng lưu thật trước khi chốt API current user/profile.</li>
-            </ul>
             {isDraftSaved ? (
-              <p className='mt-4 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800'>
-                Đã lưu nháp cục bộ cho bố cục hiện tại. Dữ liệu chưa được đồng bộ lên backend.
-              </p>
+              <WorkspaceNotice
+                className='rounded-2xl'
+                description='Đã lưu nháp cục bộ cho bố cục hiện tại. Dữ liệu chưa được đồng bộ lên backend.'
+                icon={CheckCircle2}
+                title='Đã lưu nháp'
+              />
             ) : null}
-          </section>
+          </WorkspacePanel>
+
+          <WorkspacePanel
+            title='Ghi chú triển khai'
+            description='Giữ trải nghiệm trung thực trong giai đoạn giao diện tĩnh.'
+          >
+            <div className='space-y-3 text-sm text-slate-700'>
+              {[
+                'Biểu mẫu này đã sẵn sàng để nối dữ liệu hồ sơ thực ở milestone tiếp theo.',
+                'Trường lớp và mục tiêu học tập nên giữ gọn, cụ thể và dễ hiểu với mentor.',
+                'Không nên thêm khả năng lưu thật trước khi chốt API current user/profile.'
+              ].map((item) => (
+                <div
+                  className='rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3'
+                  key={item}
+                >
+                  {item}
+                </div>
+              ))}
+            </div>
+          </WorkspacePanel>
+
+          <WorkspaceNotice
+            description='Các trường hiện tại ưu tiên đúng ngữ cảnh booking, học tập và ghép mentor trước khi đi sâu vào workflow tài khoản đầy đủ.'
+            icon={ClipboardList}
+            title='Static UI first'
+            tone='neutral'
+          />
         </aside>
-      </div>
+      </form>
     </DashboardPage>
   )
 }

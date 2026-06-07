@@ -1,5 +1,6 @@
 import { CheckCircle2, RotateCcw, SlidersHorizontal, X } from 'lucide-react'
 
+import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Checkbox } from '@/components/ui/checkbox'
@@ -83,24 +84,38 @@ const FilterSidebar = ({
   onToggleValue,
   selectedValues = []
 }: FilterSidebarProps) => {
-  return (
-    <Card className='shadow-soft flex w-full flex-col rounded-3xl'>
-      <CardContent className='flex flex-1 flex-col gap-6 p-5'>
-        <div className='flex items-center justify-between md:hidden'>
-          <h3 className='text-ink text-base font-semibold'>Bộ lọc</h3>
-          <Button size='icon' type='button' variant='outline' onClick={onClose}>
-            <X size={16} />
-          </Button>
-        </div>
+  const selectedCount = selectedValues.length
 
-        <div className='rounded-2xl border border-slate-200 bg-slate-50 p-4'>
-          <div className='flex items-center gap-2'>
-            <SlidersHorizontal className='text-primary h-4 w-4' />
-            <p className='text-ink text-sm font-semibold'>Lọc theo tiêu chí học tập</p>
+  return (
+    <Card className='shadow-soft flex w-full flex-col rounded-[28px] border-slate-200/80'>
+      <CardContent className='flex flex-1 flex-col gap-6 p-5'>
+        <div className='flex items-start justify-between gap-3'>
+          <div className='space-y-2'>
+            <div className='flex items-center gap-2'>
+              <Badge className='gap-1.5' variant='info'>
+                <SlidersHorizontal size={12} />
+                Bộ lọc
+              </Badge>
+              {selectedCount ? <Badge variant='muted'>{selectedCount} đang chọn</Badge> : null}
+            </div>
+            <div>
+              <h3 className='text-ink text-base font-semibold'>Thu hẹp danh sách mentor</h3>
+              <p className='text-muted mt-1 text-sm leading-relaxed'>
+                Chọn theo môn học, cấp lớp, hình thức học, học phí và mức độ sẵn sàng nhận lịch.
+              </p>
+            </div>
           </div>
-          <p className='text-muted mt-2 text-sm'>
-            Thu hẹp danh sách theo môn học, cấp lớp, hình thức học, học phí và tín nhiệm của mentor.
-          </p>
+          {onClose ? (
+            <Button
+              className='shrink-0 md:hidden'
+              size='icon'
+              type='button'
+              variant='outline'
+              onClick={onClose}
+            >
+              <X size={16} />
+            </Button>
+          ) : null}
         </div>
 
         {groups.map((group, index) => (
@@ -111,7 +126,11 @@ const FilterSidebar = ({
               {group.items.map((item) => (
                 <label
                   key={item.value}
-                  className='flex cursor-pointer items-start gap-3 rounded-2xl border border-transparent px-2 py-2 transition hover:border-slate-200 hover:bg-slate-50'
+                  className={`flex cursor-pointer items-start gap-3 rounded-2xl border px-3 py-3 transition ${
+                    selectedValues.includes(item.value)
+                      ? 'border-blue-200 bg-blue-50'
+                      : 'border-transparent hover:border-slate-200 hover:bg-slate-50'
+                  }`}
                 >
                   <Checkbox
                     checked={selectedValues.includes(item.value)}

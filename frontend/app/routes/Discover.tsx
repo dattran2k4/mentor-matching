@@ -6,6 +6,9 @@ import FilterSidebar from '@/components/FilterSidebar'
 import MentorCard from '@/components/MentorCard'
 import SearchBar from '@/components/SearchBar'
 import SectionTitle from '@/components/SectionTitle'
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent } from '@/components/ui/card'
 import { mentors } from '@/constants/mentors'
 import { path } from '@/config/path'
 import type { Mentor } from '@/types/mentor'
@@ -31,38 +34,44 @@ const Discover = () => {
     }),
     activeSort
   )
+  const activeSearchContext = [keyword.trim(), context.trim()].filter(Boolean)
 
   return (
     <div className='flex flex-col gap-8 py-6'>
-      <section className='rounded-3xl border border-slate-200 bg-white p-6 md:p-8'>
-        <div className='flex flex-wrap items-start justify-between gap-4'>
-          <SectionTitle
-            size='md'
-            subtitle='Lọc theo môn học, lớp, lịch học, hình thức học và mức độ tín nhiệm để so sánh mentor phù hợp.'
-            title='Tìm mentor'
-          />
-          <button
-            className='inline-flex items-center gap-2 rounded-2xl border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 md:hidden'
-            onClick={() => setFiltersOpen(true)}
-            type='button'
-          >
-            <Filter size={16} /> Bộ lọc
-          </button>
-        </div>
+      <section>
+        <Card className='rounded-[32px] border-slate-200/80'>
+          <CardContent className='p-6 md:p-8'>
+            <div className='flex flex-wrap items-start justify-between gap-4'>
+              <SectionTitle
+                size='md'
+                subtitle='Lọc theo môn học, lớp, lịch học, hình thức học và mức độ tín nhiệm để so sánh mentor phù hợp.'
+                title='Tìm mentor'
+              />
+              <Button
+                className='rounded-2xl md:hidden'
+                onClick={() => setFiltersOpen(true)}
+                type='button'
+                variant='outline'
+              >
+                <Filter size={16} /> Bộ lọc
+              </Button>
+            </div>
 
-        <div className='mt-6'>
-          <SearchBar
-            buttonLabel='Tìm kết quả'
-            contextPlaceholder='Lớp, khu vực hoặc thời gian muốn học'
-            helperText='Tìm theo môn học, cấp lớp, lịch học mong muốn hoặc bối cảnh như online, cuối tuần, luyện thi.'
-            keywordValue={keyword}
-            contextValue={context}
-            onKeywordChange={setKeyword}
-            onContextChange={setContext}
-            onQuickTagClick={(tag) => handleQuickTag(tag, setKeyword, setContext)}
-            quickTags={['Toán lớp 9', 'Tiếng Anh THPT', 'Cuối tuần', 'Hybrid tại Quận 7']}
-          />
-        </div>
+            <div className='mt-6'>
+              <SearchBar
+                buttonLabel='Tìm kết quả'
+                contextPlaceholder='Lớp, khu vực hoặc thời gian muốn học'
+                helperText='Tìm theo môn học, cấp lớp, lịch học mong muốn hoặc bối cảnh như online, cuối tuần, luyện thi.'
+                keywordValue={keyword}
+                contextValue={context}
+                onKeywordChange={setKeyword}
+                onContextChange={setContext}
+                onQuickTagClick={(tag) => handleQuickTag(tag, setKeyword, setContext)}
+                quickTags={['Toán lớp 9', 'Tiếng Anh THPT', 'Cuối tuần', 'Hybrid tại Quận 7']}
+              />
+            </div>
+          </CardContent>
+        </Card>
       </section>
 
       <div className='grid gap-8 lg:grid-cols-[280px_1fr]'>
@@ -77,55 +86,69 @@ const Discover = () => {
         </div>
 
         <section className='space-y-6'>
-          <div className='rounded-3xl border border-slate-200 bg-slate-50 p-4 md:p-5'>
-            <div className='flex flex-col gap-4 md:flex-row md:items-start md:justify-between'>
-              <div>
-                <p className='text-ink text-lg font-semibold'>
-                  {filteredMentors.length} mentor phù hợp
-                </p>
-                <p className='text-muted mt-1 text-sm'>
-                  Ưu tiên hồ sơ đã duyệt, có môn học phù hợp và khung giờ dễ đặt lịch.
-                </p>
+          <Card className='rounded-[28px] border-slate-200/80 bg-slate-50 shadow-none'>
+            <CardContent className='p-4 md:p-5'>
+              <div className='flex flex-col gap-4 md:flex-row md:items-start md:justify-between'>
+                <div>
+                  <p className='text-ink text-lg font-semibold'>
+                    {filteredMentors.length} mentor phù hợp
+                  </p>
+                  <p className='text-muted mt-1 text-sm'>
+                    Ưu tiên hồ sơ đã duyệt, có môn học phù hợp và khung giờ dễ đặt lịch.
+                  </p>
+                </div>
+                <div className='flex flex-wrap gap-2'>
+                  {sortOptions.map((option) => (
+                    <Button
+                      key={option}
+                      type='button'
+                      onClick={() => setActiveSort(option)}
+                      className='rounded-full px-3'
+                      size='sm'
+                      variant={activeSort === option ? 'default' : 'outline'}
+                    >
+                      {option}
+                    </Button>
+                  ))}
+                </div>
               </div>
-              <div className='flex flex-wrap gap-2'>
-                {sortOptions.map((option) => (
+
+              {activeSearchContext.length ? (
+                <div className='mt-4 flex flex-wrap gap-2'>
+                  {activeSearchContext.map((item) => (
+                    <Badge key={item} variant='outline'>
+                      {item}
+                    </Badge>
+                  ))}
+                </div>
+              ) : null}
+
+              <div className='mt-4 flex flex-wrap items-center gap-2'>
+                {selectedFilters.map((filter) => (
                   <button
-                    key={option}
+                    key={filter}
                     type='button'
-                    onClick={() => setActiveSort(option)}
-                    className={`rounded-full px-3 py-1.5 text-xs font-semibold transition ${
-                      activeSort === option
-                        ? 'bg-primary text-white'
-                        : 'border border-slate-200 bg-white text-slate-600 hover:border-slate-300'
-                    }`}
+                    onClick={() => setSelectedFilters(toggleValue(selectedFilters, filter))}
+                    className='inline-flex items-center rounded-full border border-blue-100 bg-blue-50 px-3 py-1.5 text-xs font-medium text-blue-700 transition hover:border-blue-200'
                   >
-                    {option}
+                    {formatFilterLabel(filter)} ×
                   </button>
                 ))}
+                {selectedFilters.length ? (
+                  <Button
+                    className='rounded-full px-3'
+                    size='sm'
+                    type='button'
+                    onClick={() => setSelectedFilters([])}
+                    variant='outline'
+                  >
+                    <RotateCcw size={12} />
+                    Xóa bộ lọc
+                  </Button>
+                ) : null}
               </div>
-            </div>
-
-            <div className='mt-4 flex flex-wrap items-center gap-2'>
-              {selectedFilters.map((filter) => (
-                <button
-                  key={filter}
-                  type='button'
-                  onClick={() => setSelectedFilters(toggleValue(selectedFilters, filter))}
-                  className='rounded-full border border-blue-100 bg-blue-50 px-3 py-1.5 text-xs font-medium text-blue-700'
-                >
-                  {formatFilterLabel(filter)} ×
-                </button>
-              ))}
-              <button
-                type='button'
-                onClick={() => setSelectedFilters([])}
-                className='inline-flex items-center gap-1 rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-600 transition hover:border-slate-300'
-              >
-                <RotateCcw size={12} />
-                Xóa bộ lọc
-              </button>
-            </div>
-          </div>
+            </CardContent>
+          </Card>
 
           {filteredMentors.length ? (
             <>
@@ -135,24 +158,27 @@ const Discover = () => {
                 ))}
               </div>
 
-              <div className='flex items-center justify-between rounded-3xl border border-slate-200 bg-white px-5 py-4'>
-                <p className='text-muted text-sm'>
-                  Danh sách công khai đang hiển thị {filteredMentors.length} mentor đã duyệt phù hợp
-                  nhất với tiêu chí hiện tại.
-                </p>
-                <button
-                  type='button'
-                  onClick={() => {
-                    setKeyword('')
-                    setContext('')
-                    setSelectedFilters([])
-                    setActiveSort('Phù hợp')
-                  }}
-                  className='text-primary text-sm font-semibold'
-                >
-                  Đặt lại tìm kiếm
-                </button>
-              </div>
+              <Card className='rounded-[24px] border-slate-200/80 shadow-none'>
+                <CardContent className='flex flex-col gap-3 px-5 py-4 md:flex-row md:items-center md:justify-between'>
+                  <p className='text-muted text-sm'>
+                    Danh sách công khai đang hiển thị {filteredMentors.length} mentor đã duyệt phù
+                    hợp nhất với tiêu chí hiện tại.
+                  </p>
+                  <Button
+                    className='rounded-2xl'
+                    type='button'
+                    variant='outline'
+                    onClick={() => {
+                      setKeyword('')
+                      setContext('')
+                      setSelectedFilters([])
+                      setActiveSort('Phù hợp')
+                    }}
+                  >
+                    Đặt lại tìm kiếm
+                  </Button>
+                </CardContent>
+              </Card>
             </>
           ) : (
             <EmptyState

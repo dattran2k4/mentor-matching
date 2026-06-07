@@ -1,4 +1,12 @@
-import { ArrowRight, ArrowUpRight, CheckCircle2, ShieldCheck, Star } from 'lucide-react'
+import {
+  ArrowRight,
+  ArrowUpRight,
+  CalendarDays,
+  CheckCircle2,
+  ShieldCheck,
+  Star,
+  Users
+} from 'lucide-react'
 import { motion } from 'framer-motion'
 import { Link } from 'react-router'
 
@@ -7,10 +15,15 @@ import SearchBar from '@/components/SearchBar'
 import SectionTitle from '@/components/SectionTitle'
 import SubjectCard from '@/components/SubjectCard'
 import TestimonialCard from '@/components/TestimonialCard'
+import { Badge } from '@/components/ui/badge'
+import { buttonVariants } from '@/components/ui/button'
+import { Card, CardContent } from '@/components/ui/card'
+import { Separator } from '@/components/ui/separator'
 import { path } from '@/config/path'
 import { mentors } from '@/constants/mentors'
 import { subjects } from '@/constants/subjects'
 import { testimonials } from '@/constants/testimonials'
+import { cn } from '@/utils/cn'
 
 const featuredMentors = mentors.filter((mentor) => mentor.approvalStatus === 'APPROVED').slice(0, 3)
 
@@ -35,20 +48,55 @@ const trustSteps = [
   }
 ] as const
 
+const decisionSignals = [
+  {
+    icon: <CheckCircle2 className='h-4 w-4 text-emerald-600' />,
+    title: 'Offering theo môn và cấp lớp',
+    description: 'Mỗi hồ sơ cho thấy rõ mentor dạy môn nào, cho cấp lớp nào và học phí tương ứng.'
+  },
+  {
+    icon: <Star className='h-4 w-4 text-amber-500' />,
+    title: 'Đánh giá bám sát buổi học thật',
+    description: 'Phản hồi từ học viên và phụ huynh giúp so sánh độ phù hợp trước khi gửi yêu cầu.'
+  },
+  {
+    icon: <CalendarDays className='h-4 w-4 text-blue-600' />,
+    title: 'Khung giờ dễ đối chiếu',
+    description: 'Lịch gần nhất và khung giờ lặp lại được giữ gần hành động đặt buổi để giảm mơ hồ.'
+  }
+] as const
+
+const marketplaceTracks = [
+  {
+    title: 'Bắt đầu như học viên',
+    description:
+      'Tìm mentor theo môn học, cấp lớp, mục tiêu và học phí rồi tiếp tục tới hồ sơ chi tiết.',
+    href: path.discover,
+    action: 'Tìm mentor phù hợp'
+  },
+  {
+    title: 'Bắt đầu như mentor',
+    description:
+      'Hoàn thiện hồ sơ giảng dạy, khai báo offering và khung giờ để nhận yêu cầu học phù hợp.',
+    href: path.mentorPanel.root,
+    action: 'Chuẩn bị hồ sơ mentor'
+  }
+] as const
+
 const Home = () => {
   return (
     <div className='flex flex-col gap-16 py-8'>
-      <section className='grid gap-8 lg:grid-cols-[1.1fr_0.9fr] lg:items-start'>
+      <section className='grid gap-8 lg:grid-cols-[1.08fr_0.92fr] lg:items-start'>
         <motion.div
           initial={{ opacity: 0, y: 24 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.45, ease: 'easeOut' }}
           className='space-y-6'
         >
-          <div className='inline-flex items-center gap-2 rounded-full border border-blue-100 bg-blue-50 px-4 py-2 text-xs font-semibold text-blue-700'>
+          <Badge className='gap-2 rounded-full px-4 py-2' variant='info'>
             <ShieldCheck size={14} />
             Mentor đã duyệt cho từng mục tiêu học tập
-          </div>
+          </Badge>
           <div className='space-y-4'>
             <h1 className='text-ink max-w-3xl text-4xl leading-tight font-semibold tracking-tight md:text-5xl'>
               Tìm mentor phù hợp để học đúng thứ, đúng nhịp và đúng mục tiêu.
@@ -62,17 +110,30 @@ const Home = () => {
 
           <SearchBar
             buttonLabel='Tìm mentor'
-            className='bg-slate-50'
             contextPlaceholder='Lớp, khu vực hoặc online/offline'
             quickTags={['Toán lớp 9', 'IELTS Foundation', 'Ôn thi lớp 10', 'Học cuối tuần']}
           />
 
+          <div className='flex flex-wrap gap-3'>
+            <Link className={cn(buttonVariants({ className: 'rounded-2xl' }))} to={path.discover}>
+              Khám phá mentor <ArrowRight size={16} />
+            </Link>
+            <Link
+              className={cn(buttonVariants({ className: 'rounded-2xl', variant: 'outline' }))}
+              to={path.mentorPanel.root}
+            >
+              Trở thành mentor
+            </Link>
+          </div>
+
           <div className='grid gap-3 sm:grid-cols-3'>
             {marketplaceStats.map((stat) => (
-              <div key={stat.label} className='rounded-2xl border border-slate-200 bg-white p-4'>
-                <p className='text-ink text-2xl font-semibold'>{stat.value}</p>
-                <p className='text-muted mt-1 text-sm capitalize'>{stat.label}</p>
-              </div>
+              <Card key={stat.label} className='rounded-2xl border-slate-200/80 shadow-none'>
+                <CardContent className='p-4'>
+                  <p className='text-ink text-2xl font-semibold'>{stat.value}</p>
+                  <p className='text-muted mt-1 text-sm capitalize'>{stat.label}</p>
+                </CardContent>
+              </Card>
             ))}
           </div>
         </motion.div>
@@ -81,50 +142,58 @@ const Home = () => {
           initial={{ opacity: 0, y: 28 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.55, ease: 'easeOut', delay: 0.05 }}
-          className='space-y-4 rounded-3xl border border-slate-200 bg-white p-6'
+          className='space-y-4'
         >
-          <div className='rounded-3xl bg-slate-900 p-6 text-white'>
-            <p className='text-sm font-medium text-blue-100'>Cách người học chọn mentor</p>
-            <div className='mt-4 space-y-3'>
-              <div className='flex items-start gap-3 rounded-2xl bg-white/8 p-4'>
-                <CheckCircle2 className='mt-0.5 h-5 w-5 text-blue-200' />
+          <Card className='rounded-[28px] border-slate-200/80 bg-white'>
+            <CardContent className='p-6'>
+              <div className='flex flex-wrap items-start justify-between gap-3'>
                 <div>
-                  <p className='font-semibold'>Môn học và cấp lớp rõ ràng</p>
-                  <p className='mt-1 text-sm text-slate-200'>
-                    Xem mentor có dạy đúng môn, đúng lớp và đúng mức học phí hay không.
+                  <p className='text-ink text-xl font-semibold'>Cách người học ra quyết định</p>
+                  <p className='text-muted mt-1 text-sm leading-relaxed'>
+                    Marketplace này ưu tiên thông tin đủ dùng để phụ huynh và học viên so sánh nhanh
+                    mà không phải đoán phần quan trọng nhất.
                   </p>
                 </div>
+                <Badge variant='outline'>Tập trung vào so sánh thực tế</Badge>
               </div>
-              <div className='flex items-start gap-3 rounded-2xl bg-white/8 p-4'>
-                <Star className='mt-0.5 h-5 w-5 text-amber-300' />
-                <div>
-                  <p className='font-semibold'>Tín nhiệm và đánh giá dễ so sánh</p>
-                  <p className='mt-1 text-sm text-slate-200'>
-                    Trạng thái duyệt, xác minh và phản hồi từ học viên luôn nằm gần phần quyết định.
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
 
-          <div className='rounded-3xl border border-slate-200 bg-slate-50 p-5'>
-            <p className='text-ink text-sm font-semibold tracking-[0.16em] uppercase'>
-              Hành trình đặt buổi học
-            </p>
-            <div className='mt-4 space-y-4'>
-              {trustSteps.map((step, index) => (
-                <div key={step.title} className='flex gap-4'>
-                  <div className='bg-primary text-primary-foreground flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-sm font-semibold text-white'>
-                    {index + 1}
+              <div className='mt-5 space-y-3'>
+                {decisionSignals.map((signal) => (
+                  <div
+                    key={signal.title}
+                    className='rounded-2xl border border-slate-200 bg-slate-50 p-4'
+                  >
+                    <div className='flex items-center gap-2'>
+                      {signal.icon}
+                      <p className='text-ink font-semibold'>{signal.title}</p>
+                    </div>
+                    <p className='text-muted mt-2 text-sm leading-relaxed'>{signal.description}</p>
                   </div>
-                  <div>
-                    <p className='text-ink font-semibold'>{step.title}</p>
-                    <p className='text-muted mt-1 text-sm'>{step.description}</p>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className='rounded-[28px] border-slate-200/80 bg-slate-50'>
+            <CardContent className='p-5'>
+              <p className='text-ink text-sm font-semibold tracking-[0.16em] uppercase'>
+                Hành trình đặt buổi học
+              </p>
+              <div className='mt-4 space-y-4'>
+                {trustSteps.map((step, index) => (
+                  <div key={step.title} className='flex gap-4'>
+                    <div className='bg-primary text-primary-foreground flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-sm font-semibold text-white'>
+                      {index + 1}
+                    </div>
+                    <div>
+                      <p className='text-ink font-semibold'>{step.title}</p>
+                      <p className='text-muted mt-1 text-sm'>{step.description}</p>
+                    </div>
                   </div>
-                </div>
-              ))}
-            </div>
-          </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
         </motion.div>
       </section>
 
@@ -137,8 +206,10 @@ const Home = () => {
             title='Mentor đang được phụ huynh và học viên quan tâm'
           />
           <Link
+            className={cn(
+              buttonVariants({ className: 'hidden rounded-2xl md:inline-flex', variant: 'outline' })
+            )}
             to={path.discover}
-            className='text-primary hidden items-center gap-2 text-sm font-semibold md:flex'
           >
             Xem tất cả <ArrowUpRight size={16} />
           </Link>
@@ -165,67 +236,62 @@ const Home = () => {
       </section>
 
       <section className='grid gap-6 lg:grid-cols-[1.1fr_0.9fr]'>
-        <div className='rounded-3xl border border-slate-200 bg-slate-50 p-8'>
-          <SectionTitle
-            eyebrow='Quy trình'
-            size='md'
-            subtitle='Từng bước được thiết kế để giúp phụ huynh và học viên ra quyết định nhanh nhưng vẫn đủ căn cứ.'
-            title='Cách Mentor Matching giữ trải nghiệm đặt lịch thực tế'
-          />
-          <div className='mt-6 grid gap-4 md:grid-cols-3'>
-            {trustSteps.map((step, index) => (
-              <div key={step.title} className='rounded-2xl border border-slate-200 bg-white p-5'>
-                <p className='text-primary text-sm font-semibold'>Bước {index + 1}</p>
-                <p className='text-ink mt-2 font-semibold'>{step.title}</p>
-                <p className='text-muted mt-2 text-sm leading-relaxed'>{step.description}</p>
-              </div>
-            ))}
-          </div>
-        </div>
+        <Card className='rounded-[32px] border-slate-200/80 bg-slate-50'>
+          <CardContent className='p-8'>
+            <SectionTitle
+              eyebrow='Quy trình'
+              size='md'
+              subtitle='Từng bước được thiết kế để giúp phụ huynh và học viên ra quyết định nhanh nhưng vẫn đủ căn cứ.'
+              title='Cách Mentor Matching giữ trải nghiệm đặt lịch thực tế'
+            />
+            <div className='mt-6 grid gap-4 md:grid-cols-3'>
+              {trustSteps.map((step, index) => (
+                <Card key={step.title} className='rounded-2xl border-slate-200/80 shadow-none'>
+                  <CardContent className='p-5'>
+                    <p className='text-primary text-sm font-semibold'>Bước {index + 1}</p>
+                    <p className='text-ink mt-2 font-semibold'>{step.title}</p>
+                    <p className='text-muted mt-2 text-sm leading-relaxed'>{step.description}</p>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
 
         <div className='grid gap-4'>
-          <div className='rounded-3xl bg-slate-900 p-8 text-white'>
-            <p className='text-sm font-semibold tracking-[0.18em] text-blue-200 uppercase'>
-              Vì sao phụ huynh tin dùng
-            </p>
-            <div className='mt-5 space-y-4'>
-              <div className='rounded-2xl bg-white/8 p-4'>
-                <p className='font-semibold'>Thông tin học và học phí hiển thị ngay</p>
-                <p className='mt-2 text-sm leading-relaxed text-slate-300'>
-                  Mỗi hồ sơ đều cho thấy môn dạy, cấp lớp, mức học phí, hình thức học và phản hồi từ
-                  người học trước đó.
-                </p>
-              </div>
-              <div className='rounded-2xl bg-white/8 p-4'>
-                <p className='font-semibold'>Tín hiệu tin cậy xuất hiện gần quyết định</p>
-                <p className='mt-2 text-sm leading-relaxed text-slate-300'>
-                  Trạng thái duyệt và xác minh được giữ ngay trong luồng khám phá để người học không
-                  phải tự dò tìm.
-                </p>
-              </div>
-            </div>
-          </div>
-
-          <div className='flex h-full flex-col justify-between rounded-3xl border border-slate-200 bg-white p-8'>
-            <div>
-              <p className='text-primary text-sm font-semibold tracking-[0.18em] uppercase'>
-                Dành cho mentor
-              </p>
-              <h3 className='text-ink mt-4 text-2xl font-semibold'>
-                Hoàn thiện hồ sơ giảng dạy rõ ràng để nhận yêu cầu học phù hợp với lịch của bạn.
-              </h3>
-              <p className='text-muted mt-4 text-sm leading-relaxed'>
-                Khai báo môn dạy, cấp lớp, học phí và khung giờ rảnh. Sau khi được duyệt, hồ sơ của
-                bạn có thể xuất hiện trong danh sách tìm mentor công khai.
-              </p>
-            </div>
-            <Link
-              to={path.mentorPanel.root}
-              className='bg-primary mt-8 inline-flex w-fit items-center gap-2 rounded-2xl px-5 py-3 text-sm font-semibold text-white transition hover:bg-blue-700'
-            >
-              Bắt đầu hồ sơ mentor <ArrowRight size={16} />
-            </Link>
-          </div>
+          {marketplaceTracks.map((track, index) => (
+            <Card key={track.title} className='rounded-[28px] border-slate-200/80 bg-white'>
+              <CardContent className='flex h-full flex-col p-6'>
+                <Badge className='w-fit' variant={index === 0 ? 'info' : 'outline'}>
+                  {index === 0 ? 'Dành cho học viên và phụ huynh' : 'Dành cho mentor'}
+                </Badge>
+                <h3 className='text-ink mt-4 text-2xl font-semibold'>{track.title}</h3>
+                <p className='text-muted mt-3 text-sm leading-relaxed'>{track.description}</p>
+                <Separator className='my-5' />
+                <div className='flex items-center gap-2 text-sm text-slate-600'>
+                  {index === 0 ? (
+                    <Users size={16} className='text-primary' />
+                  ) : (
+                    <ShieldCheck size={16} className='text-primary' />
+                  )}
+                  {index === 0
+                    ? 'So sánh nhanh học phí, đánh giá và khung giờ.'
+                    : 'Chỉ mentor đã duyệt mới hiển thị ở khu vực công khai.'}
+                </div>
+                <Link
+                  className={cn(
+                    buttonVariants({
+                      className: 'mt-6 w-fit rounded-2xl',
+                      variant: index === 0 ? 'default' : 'outline'
+                    })
+                  )}
+                  to={track.href}
+                >
+                  {track.action} <ArrowRight size={16} />
+                </Link>
+              </CardContent>
+            </Card>
+          ))}
         </div>
       </section>
 

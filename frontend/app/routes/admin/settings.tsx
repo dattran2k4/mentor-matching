@@ -1,7 +1,10 @@
 import { AlertTriangle, Settings2 } from 'lucide-react'
 
 import { DashboardPage } from '@/components/DashboardPage'
-import { DashboardSectionHeader } from '@/components/DashboardSectionHeader'
+import { WorkspaceNotice } from '@/components/WorkspaceNotice'
+import { WorkspacePanel } from '@/components/WorkspacePanel'
+import { Badge } from '@/components/ui/badge'
+import { Card, CardContent } from '@/components/ui/card'
 import { adminSettingsGroups } from '@/mocks/admin-workspace'
 
 export function meta() {
@@ -15,69 +18,62 @@ export default function AdminSettingsPage() {
       title='Cài đặt hệ thống'
     >
       <div className='space-y-6'>
-        <section className='rounded-3xl border border-slate-200 bg-white p-6 shadow-sm'>
-          <DashboardSectionHeader
-            title='Phạm vi cấu hình hiện tại'
-            description='Admin cần một nơi nhìn thấy các nhóm cấu hình quan trọng, nhưng không nên bị dẫn tới cảm giác đây đã là form cấu hình hoàn chỉnh.'
-          />
-
-          <div className='mt-6 grid gap-4 xl:grid-cols-3'>
+        <WorkspacePanel
+          title='Phạm vi cấu hình hiện tại'
+          description='Admin cần một nơi nhìn thấy các nhóm cấu hình quan trọng, nhưng không nên bị dẫn tới cảm giác đây đã là form cấu hình hoàn chỉnh.'
+        >
+          <div className='grid gap-4 xl:grid-cols-3'>
             {adminSettingsGroups.map((group) => (
-              <article className='rounded-2xl border border-slate-200 p-5' key={group.id}>
-                <div className='flex items-start gap-3'>
-                  <div className='bg-primary/10 text-primary flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl'>
-                    <Settings2 aria-hidden='true' size={18} />
-                  </div>
-                  <div className='space-y-1'>
-                    <h2 className='text-ink font-semibold'>{group.title}</h2>
-                    <p className='text-muted text-sm'>{group.description}</p>
-                  </div>
-                </div>
-
-                <div className='mt-5 space-y-3'>
-                  {group.items.map((item) => (
-                    <div
-                      className='rounded-2xl border border-slate-200 bg-slate-50 p-4'
-                      key={item.label}
-                    >
-                      <div className='flex flex-wrap items-center gap-2'>
-                        <p className='text-ink font-medium'>{item.label}</p>
-                        <span
-                          className={`rounded-full px-2.5 py-1 text-xs font-semibold ${
-                            item.supportLabel === 'Đã có quy ước'
-                              ? 'bg-emerald-50 text-emerald-700'
-                              : item.supportLabel === 'Cần backend'
-                                ? 'bg-amber-50 text-amber-700'
-                                : 'bg-slate-200 text-slate-700'
-                          }`}
-                        >
-                          {item.supportLabel}
-                        </span>
-                      </div>
-                      <p className='text-muted mt-2 text-sm'>{item.value}</p>
+              <Card className='rounded-2xl shadow-none' key={group.id}>
+                <CardContent className='space-y-5 p-5'>
+                  <div className='flex items-start gap-3'>
+                    <div className='bg-primary/10 text-primary flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl'>
+                      <Settings2 aria-hidden='true' size={18} />
                     </div>
-                  ))}
-                </div>
-              </article>
+                    <div className='space-y-1'>
+                      <h2 className='text-ink font-semibold'>{group.title}</h2>
+                      <p className='text-muted text-sm'>{group.description}</p>
+                    </div>
+                  </div>
+
+                  <div className='space-y-3'>
+                    {group.items.map((item) => (
+                      <Card
+                        className='rounded-2xl border-slate-200 bg-slate-50 shadow-none'
+                        key={item.label}
+                      >
+                        <CardContent className='space-y-2 p-4'>
+                          <div className='flex flex-wrap items-center gap-2'>
+                            <p className='text-ink font-medium'>{item.label}</p>
+                            <Badge
+                              variant={
+                                item.supportLabel === 'Đã có quy ước'
+                                  ? 'success'
+                                  : item.supportLabel === 'Cần backend'
+                                    ? 'warning'
+                                    : 'muted'
+                              }
+                            >
+                              {item.supportLabel}
+                            </Badge>
+                          </div>
+                          <p className='text-muted text-sm'>{item.value}</p>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
             ))}
           </div>
-        </section>
+        </WorkspacePanel>
 
-        <section className='rounded-3xl border border-amber-200 bg-amber-50 p-6 shadow-sm'>
-          <div className='flex items-start gap-3'>
-            <div className='text-amber-700'>
-              <AlertTriangle aria-hidden='true' size={18} />
-            </div>
-            <div className='space-y-2'>
-              <p className='font-semibold text-amber-900'>Vì sao chưa có nút lưu cấu hình</p>
-              <p className='text-sm text-amber-800'>
-                Các nhóm settings này đang giúp admin nhìn đúng phạm vi hỗ trợ hiện có. Chúng chưa
-                nên có submit state hoặc toggle thật cho tới khi backend định nghĩa rõ dữ liệu,
-                quyền sửa và hậu quả vận hành của từng thay đổi.
-              </p>
-            </div>
-          </div>
-        </section>
+        <WorkspaceNotice
+          description='Các nhóm settings này đang giúp admin nhìn đúng phạm vi hỗ trợ hiện có. Chúng chưa nên có submit state hoặc toggle thật cho tới khi backend định nghĩa rõ dữ liệu, quyền sửa và hậu quả vận hành của từng thay đổi.'
+          icon={AlertTriangle}
+          title='Vì sao chưa có nút lưu cấu hình'
+          tone='warning'
+        />
       </div>
     </DashboardPage>
   )

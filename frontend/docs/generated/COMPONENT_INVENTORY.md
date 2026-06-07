@@ -32,6 +32,22 @@
   status: added in Milestone 3
   notes: lightweight shared header for learner, mentor, and admin workspace sections with optional helper copy and right-aligned actions; used to keep dashboard, bookings, schedule, students, earnings, profile, reports, and settings routes focused on composition instead of repeating section chrome
 
+- component: `WorkspacePanel`
+  status: added in workspace route refactor
+  notes: shared role-workspace section shell composed from `ui/card` plus `DashboardSectionHeader`; now the default panel wrapper for learner, mentor, and admin route sections so route files do not keep rebuilding the same heading, spacing, and border structure
+
+- component: `WorkspaceMetricCard`
+  status: added in workspace route refactor
+  notes: compact summary card for operational metrics and weekly signals; used across learner, mentor, and admin dashboards plus earnings and users summary surfaces to keep metric density and icon treatment consistent
+
+- component: `WorkspaceActionCard`
+  status: added in workspace route refactor
+  notes: shared linked action card for role workspaces; keeps quick-action sections on learner, mentor, and admin routes aligned to one buttonless card pattern instead of ad hoc hover panels
+
+- component: `WorkspaceNotice`
+  status: added in workspace route refactor
+  notes: shared informational or warning notice built from `ui/card`; used for static-phase caveats, route-scope warnings, and implementation notes across learner, mentor, and admin screens
+
 - component: `RoleGuard`
   status: stable reusable foundation
   notes: should remain the standard role gate for learner, mentor, and admin route groups
@@ -42,23 +58,23 @@
 
 - component: `Footer`
   status: reusable with tutoring-domain revision
-  notes: footer now reinforces approved mentors, real booking flow, and practical discovery/login entry points instead of generic newsletter-style messaging
+  notes: footer now reinforces approved mentors, offering-based discovery, and practical discovery/login entry points instead of generic newsletter-style messaging; the current version also mirrors the calmer public card-and-action hierarchy used on Home, Discover, and Mentor Profile
 
 - component: `SearchBar`
   status: reusable with milestone 2 and shared-foundation refactor
-  notes: supports tutoring-domain helper copy, controlled keyword/context fields, submit handling, and quick-tag shortcuts for home and discover surfaces; now built from `ui/card`, `ui/input`, and `ui/button`
+  notes: supports tutoring-domain helper copy, controlled keyword/context fields, submit handling, and quick-tag shortcuts for home and discover surfaces; the current composition keeps one search card with labeled fields, helper guidance, and quick tags in the same rhythm, and is built from `ui/card`, `ui/input`, `ui/button`, and `ui/separator`
 
 - component: `FilterSidebar`
   status: reusable with milestone 2 and shared-foundation refactor
-  notes: accepts reusable filter groups plus controlled selected values, and groups tutoring criteria such as subject, grade, meeting type, price, availability, and trust for both desktop and mobile discover flows; now built from `ui/card`, `ui/checkbox`, `ui/button`, and `ui/separator`
+  notes: accepts reusable filter groups plus controlled selected values, and groups tutoring criteria such as subject, grade, meeting type, price, availability, and trust for both desktop and mobile discover flows; the current version also surfaces selected-count context and calmer option cards, and is built from `ui/card`, `ui/checkbox`, `ui/button`, `ui/badge`, and `ui/separator`
 
 - component: `MentorCard`
   status: reusable with milestone 2 and shared-foundation refactor
-  notes: emphasizes mentor offerings, expertise fit, trust state, availability hint, and comparison-friendly metadata instead of a soft marketing-card treatment; now uses `ui/card`, `ui/button`, and `ui/badge` as its low-level structure
+  notes: emphasizes mentor offerings, expertise fit, trust state, availability hint, and comparison-friendly metadata instead of a soft marketing-card treatment; the latest pass tightens header, stats, offering rows, and CTA spacing into one calmer comparison card using `ui/card`, `ui/button`, `ui/badge`, and `ui/separator`
 
 - component: `BookingSidebar`
   status: reusable with milestone 2 and shared-foundation refactor
-  notes: summarizes the selected offering, near-term availability windows, weekly schedule, trust badges, next-step guidance, and a session estimate; later milestones can layer real booking actions on top of this shell; low-level structure now comes from `ui/card`, `ui/button`, and `ui/badge`
+  notes: summarizes the selected offering, near-term availability windows, weekly schedule, trust badges, next-step guidance, and a session estimate; the latest pass also supports class-based layout control so Mentor Profile can place booking earlier on mobile, and its low-level structure now comes from `ui/card`, `ui/button`, `ui/badge`, and `ui/separator`
 
 - component: `MentorTrustBlock`
   status: added in Milestone 2
@@ -66,11 +82,11 @@
 
 - component: `SectionTitle`
   status: reusable
-  notes: suitable for public screens and profile sections; should be used more selectively in dense dashboards
+  notes: suitable for public screens and profile sections; the current version uses tighter title/subtitle rhythm for calmer hierarchy and should still be used more selectively in dense dashboards
 
 - component: `SubjectCard`
   status: reusable with milestone 2 refactor
-  notes: now presents subject description and grade coverage so the home page can lead users into discovery from tutoring-domain entry points
+  notes: now presents subject description and grade coverage through the shared card/badge language so the home page can lead users into discovery from tutoring-domain entry points
 
 - component: `RatingStars`
   status: reusable
@@ -98,6 +114,18 @@
   status: stable
   notes: default text input for search and form entry before building custom wrappers
 
+- component: `ui/label`
+  status: added in workspace route refactor
+  notes: lightweight label primitive for learner and mentor profile forms so form copy and spacing stay aligned with the shared primitive layer
+
+- component: `ui/select`
+  status: added in workspace route refactor
+  notes: shared styled select wrapper currently used by learner profile and admin user filters to avoid falling back to route-local control styling
+
+- component: `ui/table`
+  status: added in workspace route refactor
+  notes: shared table wrapper for admin user lists and future dense admin or booking views; keeps headers, rows, and cell spacing inside the same low-level vocabulary as cards and inputs
+
 - component: `ui/checkbox`
   status: stable
   notes: default boolean control for shared filter and form patterns
@@ -112,17 +140,14 @@
 
 ## Additional UI Primitives Worth Adding Later
 
-- component: `ui/table`
-  reason: admin and earnings/bookings views still repeat structured row markup that could move to a shared table base later
-
 - component: `ui/sheet`
   reason: mobile filters and future mobile detail panels would benefit from a consistent slide-over primitive
 
 - component: `ui/dialog`
   reason: focused confirmations and future operational actions should share one modal foundation
 
-- component: `ui/select`, `ui/radio-group`, `ui/switch`
-  reason: profile, schedule, and settings forms will need broader form coverage as API integration expands
+- component: `ui/radio-group`, `ui/switch`
+  reason: schedule and settings forms will need broader form coverage as API integration expands
 
 - component: `ui/skeleton`
   reason: route-level loading states should eventually use one shared placeholder language

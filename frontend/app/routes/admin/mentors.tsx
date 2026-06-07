@@ -2,9 +2,12 @@ import { useMemo, useState } from 'react'
 import { ExternalLink, Filter, Search, ShieldCheck, Users } from 'lucide-react'
 
 import { DashboardPage } from '@/components/DashboardPage'
-import { DashboardSectionHeader } from '@/components/DashboardSectionHeader'
 import { EmptyState } from '@/components/EmptyState'
 import { StatusBadge } from '@/components/StatusBadge'
+import { WorkspacePanel } from '@/components/WorkspacePanel'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent } from '@/components/ui/card'
+import { Input } from '@/components/ui/input'
 import {
   adminMentorDirectory,
   adminQueueItems,
@@ -77,27 +80,21 @@ export default function AdminMentorsPage() {
       title='Quản lý mentor'
     >
       <div className='space-y-6'>
-        <section className='rounded-3xl border border-amber-200 bg-amber-50 p-6 shadow-sm'>
-          <DashboardSectionHeader
-            title='Hồ sơ chờ duyệt'
-            description='Approval và verification luôn hiển thị tách riêng để admin biết hồ sơ nào thiếu giấy tờ, hồ sơ nào chỉ còn bước quyết định cuối.'
-          />
-
+        <WorkspacePanel
+          className='border-amber-200'
+          title='Hồ sơ chờ duyệt'
+          description='Approval và verification luôn hiển thị tách riêng để admin biết hồ sơ nào thiếu giấy tờ, hồ sơ nào chỉ còn bước quyết định cuối.'
+        >
           {adminQueueItems.length === 0 ? (
-            <div className='mt-6'>
-              <EmptyState
-                description='Khi có mentor mới gửi hồ sơ, hàng chờ xét duyệt sẽ xuất hiện tại đây để đội admin xử lý trước khi mentor lên marketplace.'
-                title='Không có hồ sơ cần duyệt'
-              />
-            </div>
+            <EmptyState
+              description='Khi có mentor mới gửi hồ sơ, hàng chờ xét duyệt sẽ xuất hiện tại đây để đội admin xử lý trước khi mentor lên marketplace.'
+              title='Không có hồ sơ cần duyệt'
+            />
           ) : (
-            <div className='mt-6 grid gap-4'>
+            <div className='grid gap-4'>
               {adminQueueItems.map((mentor) => (
-                <article
-                  className='rounded-2xl border border-amber-200 bg-white p-5'
-                  key={mentor.id}
-                >
-                  <div className='flex flex-col gap-5 xl:flex-row xl:items-start'>
+                <Card className='rounded-2xl border-amber-200 shadow-none' key={mentor.id}>
+                  <CardContent className='flex flex-col gap-5 p-5 xl:flex-row xl:items-start'>
                     <div className='flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-amber-100 text-lg font-semibold text-amber-700'>
                       {getInitials(mentor.mentorName)}
                     </div>
@@ -124,102 +121,78 @@ export default function AdminMentorsPage() {
                         </p>
                       </div>
 
-                      <p className='rounded-2xl bg-slate-50 px-4 py-3 text-sm text-slate-600'>
-                        {mentor.note}
-                      </p>
+                      <Card className='rounded-2xl border-slate-200 bg-slate-50 shadow-none'>
+                        <CardContent className='p-4 text-sm text-slate-600'>
+                          {mentor.note}
+                        </CardContent>
+                      </Card>
                     </div>
 
                     <div className='flex flex-wrap items-center gap-3 border-t border-slate-100 pt-4 xl:border-t-0 xl:pt-0'>
-                      <button
-                        className='bg-primary inline-flex items-center gap-2 rounded-xl px-4 py-3 text-sm font-semibold text-white transition hover:opacity-90'
-                        type='button'
-                      >
-                        Duyệt
-                      </button>
-                      <button
-                        className='inline-flex items-center gap-2 rounded-xl border border-red-200 px-4 py-3 text-sm font-semibold text-red-700 transition hover:bg-red-50'
-                        type='button'
-                      >
-                        Từ chối
-                      </button>
-                      <button
-                        className='text-primary inline-flex items-center gap-2 rounded-xl border border-slate-200 px-4 py-3 text-sm font-semibold transition hover:bg-slate-50'
-                        type='button'
-                      >
+                      <Button>Duyệt</Button>
+                      <Button variant='destructive'>Từ chối</Button>
+                      <Button variant='outline'>
                         <ExternalLink aria-hidden='true' size={16} />
                         Xem hồ sơ
-                      </button>
+                      </Button>
                     </div>
-                  </div>
-                </article>
+                  </CardContent>
+                </Card>
               ))}
             </div>
           )}
-        </section>
+        </WorkspacePanel>
 
-        <section className='rounded-3xl border border-slate-200 bg-white p-6 shadow-sm'>
-          <DashboardSectionHeader
-            title='Mentor đang hoạt động'
-            description='Dùng để rà soát mentor đã lên sàn, tạm dừng hồ sơ khi cần và theo dõi chất lượng hoạt động hiện tại.'
-            action={
-              <div className='flex flex-wrap items-center gap-2 rounded-2xl bg-slate-100 p-1'>
-                {mentorDirectoryFilters.map((filter) => {
-                  const isActive = directoryFilter === filter.key
-
-                  return (
-                    <button
-                      className={`rounded-xl px-4 py-2 text-sm font-semibold transition ${
-                        isActive ? 'text-primary bg-white shadow-sm' : 'text-muted hover:text-ink'
-                      }`}
-                      key={filter.key}
-                      onClick={() => setDirectoryFilter(filter.key)}
-                      type='button'
-                    >
-                      {filter.label} ({directoryCounts[filter.key]})
-                    </button>
-                  )
-                })}
-              </div>
-            }
-          />
-
-          <div className='mt-5 flex w-full flex-wrap items-center gap-3'>
-            <label className='relative min-w-[260px] flex-1' htmlFor='admin-mentor-search'>
+        <WorkspacePanel
+          title='Mentor đang hoạt động'
+          description='Dùng để rà soát mentor đã lên sàn, tạm dừng hồ sơ khi cần và theo dõi chất lượng hoạt động hiện tại.'
+          action={
+            <div className='flex flex-wrap items-center gap-2'>
+              {mentorDirectoryFilters.map((filter) => (
+                <Button
+                  key={filter.key}
+                  onClick={() => setDirectoryFilter(filter.key)}
+                  size='sm'
+                  variant={directoryFilter === filter.key ? 'default' : 'secondary'}
+                >
+                  {filter.label} ({directoryCounts[filter.key]})
+                </Button>
+              ))}
+            </div>
+          }
+        >
+          <div className='flex w-full flex-wrap items-center gap-3'>
+            <div className='relative min-w-[260px] flex-1'>
               <Search
                 aria-hidden='true'
                 className='text-muted absolute top-1/2 left-3 -translate-y-1/2'
                 size={16}
               />
-              <input
-                className='focus:ring-primary/20 w-full rounded-xl border border-slate-200 bg-white py-2.5 pr-4 pl-10 text-sm transition focus:ring-2 focus:outline-none'
+              <Input
+                className='pl-10'
                 id='admin-mentor-search'
                 onChange={(event) => setSearchQuery(event.target.value)}
                 placeholder='Tìm theo mentor, môn học hoặc headline'
                 type='search'
                 value={searchQuery}
               />
-            </label>
-            <button
-              className='text-muted inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm font-medium'
-              type='button'
-            >
+            </div>
+            <Button variant='outline'>
               <Filter aria-hidden='true' size={16} />
               Bộ lọc mở rộng
-            </button>
+            </Button>
           </div>
 
           {filteredMentorDirectory.length === 0 ? (
-            <div className='mt-6'>
-              <EmptyState
-                description='Hãy thử đổi từ khóa hoặc quay lại trạng thái khác để xem thêm mentor phù hợp với hàng duyệt hiện tại.'
-                title='Không tìm thấy mentor phù hợp'
-              />
-            </div>
+            <EmptyState
+              description='Hãy thử đổi từ khóa hoặc quay lại trạng thái khác để xem thêm mentor phù hợp với hàng duyệt hiện tại.'
+              title='Không tìm thấy mentor phù hợp'
+            />
           ) : (
-            <div className='mt-6 grid gap-4'>
+            <div className='grid gap-4'>
               {filteredMentorDirectory.map((mentor) => (
-                <article className='rounded-2xl border border-slate-200 p-5' key={mentor.id}>
-                  <div className='flex flex-col gap-5 xl:flex-row xl:items-center'>
+                <Card className='rounded-2xl shadow-none' key={mentor.id}>
+                  <CardContent className='flex flex-col gap-5 p-5 xl:flex-row xl:items-center'>
                     <div className='bg-primary/10 text-primary flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl text-lg font-semibold'>
                       {getInitials(mentor.mentorName)}
                     </div>
@@ -246,32 +219,28 @@ export default function AdminMentorsPage() {
                         <p>{mentor.submittedAtLabel}</p>
                       </div>
 
-                      <p className='rounded-2xl bg-slate-50 px-4 py-3 text-sm text-slate-600'>
-                        {mentor.reviewNote}
-                      </p>
+                      <Card className='rounded-2xl border-slate-200 bg-slate-50 shadow-none'>
+                        <CardContent className='p-4 text-sm text-slate-600'>
+                          {mentor.reviewNote}
+                        </CardContent>
+                      </Card>
                     </div>
 
                     <div className='flex flex-wrap items-center gap-3 border-t border-slate-100 pt-4 xl:border-t-0 xl:pt-0'>
-                      <button
-                        className='text-primary inline-flex items-center gap-2 rounded-xl border border-slate-200 px-4 py-3 text-sm font-semibold transition hover:bg-slate-50'
-                        type='button'
-                      >
+                      <Button variant='outline'>
                         <ShieldCheck aria-hidden='true' size={16} />
                         Xem hồ sơ
-                      </button>
-                      <button
-                        className='rounded-xl border border-slate-200 px-4 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50'
-                        type='button'
-                      >
+                      </Button>
+                      <Button variant='outline'>
                         {mentor.approvalStatus === 'SUSPENDED' ? 'Mở lại' : 'Tạm dừng'}
-                      </button>
+                      </Button>
                     </div>
-                  </div>
-                </article>
+                  </CardContent>
+                </Card>
               ))}
             </div>
           )}
-        </section>
+        </WorkspacePanel>
       </div>
     </DashboardPage>
   )

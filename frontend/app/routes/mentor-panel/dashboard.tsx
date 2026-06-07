@@ -10,14 +10,20 @@ import {
 } from 'lucide-react'
 
 import { DashboardPage } from '@/components/DashboardPage'
-import { DashboardSectionHeader } from '@/components/DashboardSectionHeader'
 import { StatusBadge } from '@/components/StatusBadge'
+import { WorkspaceActionCard } from '@/components/WorkspaceActionCard'
+import { WorkspaceMetricCard } from '@/components/WorkspaceMetricCard'
+import { WorkspaceNotice } from '@/components/WorkspaceNotice'
+import { WorkspacePanel } from '@/components/WorkspacePanel'
+import { Button, buttonVariants } from '@/components/ui/button'
+import { Card, CardContent } from '@/components/ui/card'
 import { path } from '@/config/path'
 import {
   mentorUpcomingSessions,
   mentorWorkspaceProfile,
   mentorWorkspaceSummary
 } from '@/mocks/mentor-workspace'
+import { cn } from '@/utils/cn'
 import { formatShortBookingDate, formatTimeRange } from '@/utils/format'
 
 const quickActions = [
@@ -73,38 +79,39 @@ export default function MentorDashboardPage() {
       title='Tổng quan'
     >
       <div className='grid gap-4 xl:grid-cols-3'>
-        {mentorWorkspaceSummary.map((item) => (
-          <section
-            className='rounded-3xl border border-slate-200 bg-white p-5 shadow-sm'
-            key={item.label}
-          >
-            <p className='text-muted text-xs font-semibold tracking-wide uppercase'>{item.label}</p>
-            <p className='text-ink mt-3 text-3xl font-semibold'>{item.value}</p>
-            <p className='text-muted mt-2 text-sm'>{item.helper}</p>
-          </section>
-        ))}
+        {mentorWorkspaceSummary.map((item, index) => {
+          const icons = [CalendarDays, Users, CircleDollarSign] as const
+
+          return (
+            <WorkspaceMetricCard
+              helper={item.helper}
+              icon={icons[index]}
+              key={item.label}
+              label={item.label}
+              value={item.value}
+            />
+          )
+        })}
       </div>
 
       <div className='grid gap-6 xl:grid-cols-[1.45fr_1fr]'>
-        <section className='rounded-3xl border border-slate-200 bg-white p-6 shadow-sm'>
-          <DashboardSectionHeader
-            title='Buổi dạy sắp tới'
-            description='Tách rõ trạng thái booking và thanh toán để biết buổi nào đã chốt, buổi nào mới chỉ đang giữ chỗ.'
-            action={
-              <Link
-                className='text-primary inline-flex items-center gap-1 text-sm font-semibold hover:underline'
-                to={path.mentorPanel.schedule}
-              >
-                Mở lịch dạy
-                <ArrowRight aria-hidden='true' size={14} />
-              </Link>
-            }
-          />
-
-          <div className='mt-6 space-y-4'>
+        <WorkspacePanel
+          title='Buổi dạy sắp tới'
+          description='Tách rõ trạng thái booking và thanh toán để biết buổi nào đã chốt, buổi nào mới chỉ đang giữ chỗ.'
+          action={
+            <Link
+              className={cn(buttonVariants({ size: 'sm', variant: 'link' }), 'h-auto px-0')}
+              to={path.mentorPanel.schedule}
+            >
+              Mở lịch dạy
+              <ArrowRight aria-hidden='true' size={14} />
+            </Link>
+          }
+        >
+          <div className='space-y-4'>
             {mentorUpcomingSessions.map((session) => (
-              <article className='rounded-2xl border border-slate-200 p-4' key={session.id}>
-                <div className='flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between'>
+              <Card className='rounded-2xl shadow-none' key={session.id}>
+                <CardContent className='flex flex-col gap-4 p-4 lg:flex-row lg:items-start lg:justify-between'>
                   <div className='space-y-3'>
                     <div className='flex flex-wrap items-center gap-2'>
                       <p className='text-ink font-semibold'>
@@ -129,89 +136,58 @@ export default function MentorDashboardPage() {
                     <p className='text-muted text-sm'>{session.prepNote}</p>
                   </div>
 
-                  <button
-                    className={`rounded-xl px-4 py-3 text-sm font-semibold transition ${
-                      session.action.variant === 'primary'
-                        ? 'bg-primary text-white hover:opacity-90'
-                        : 'border border-slate-200 bg-white text-slate-700 hover:bg-slate-50'
-                    }`}
-                    type='button'
-                  >
+                  <Button variant={session.action.variant === 'primary' ? 'default' : 'outline'}>
                     {session.action.label}
-                  </button>
-                </div>
-              </article>
+                  </Button>
+                </CardContent>
+              </Card>
             ))}
           </div>
-        </section>
+        </WorkspacePanel>
 
-        <section className='rounded-3xl border border-slate-200 bg-white p-6 shadow-sm'>
-          <DashboardSectionHeader
+        <div className='space-y-6'>
+          <WorkspacePanel
             title='Tín hiệu vận hành'
             description='Các nhắc việc ngắn để mentor ưu tiên đúng phần: lịch, học viên và doanh thu.'
-          />
-          <div className='mt-6 space-y-3'>
-            {weeklySignals.map((item) => (
-              <div
-                className='flex items-start gap-4 rounded-2xl border border-slate-200 bg-slate-50 p-4'
-                key={item.label}
-              >
-                <div className='bg-primary/10 text-primary flex h-11 w-11 items-center justify-center rounded-2xl'>
-                  <item.icon aria-hidden='true' size={20} />
-                </div>
-                <div className='space-y-1'>
-                  <p className='text-ink font-semibold'>{item.label}</p>
-                  <p className='text-ink text-lg font-semibold'>{item.value}</p>
-                  <p className='text-muted text-sm'>{item.helper}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-
-          <div className='mt-6 rounded-2xl border border-blue-100 bg-blue-50 p-4 text-sm'>
-            <div className='space-y-2'>
-              <div className='flex flex-wrap items-center gap-2'>
-                <p className='font-semibold text-blue-900'>{mentorWorkspaceProfile.name}</p>
-                <StatusBadge kind='approval' status={mentorWorkspaceProfile.approvalStatus} />
-                <StatusBadge
-                  kind='verification'
-                  status={mentorWorkspaceProfile.verificationStatus}
+          >
+            <div className='grid gap-3'>
+              {weeklySignals.map((item) => (
+                <WorkspaceMetricCard
+                  helper={item.helper}
+                  icon={item.icon}
+                  key={item.label}
+                  label={item.label}
+                  value={item.value}
                 />
-              </div>
-              <p className='text-blue-800'>
-                Hồ sơ hiện đang đủ điều kiện nhận lịch công khai. Vẫn nên rà soát offerings và ghi
-                chú dạy học trước mỗi tuần cao điểm.
-              </p>
+              ))}
             </div>
-          </div>
-        </section>
+          </WorkspacePanel>
+
+          <WorkspaceNotice
+            description='Hồ sơ hiện đang đủ điều kiện nhận lịch công khai. Vẫn nên rà soát offerings và ghi chú dạy học trước mỗi tuần cao điểm.'
+            icon={FileText}
+            title={`${mentorWorkspaceProfile.name} · hồ sơ đang sẵn sàng`}
+            tone='info'
+          />
+        </div>
       </div>
 
-      <section className='rounded-3xl border border-slate-200 bg-white p-6 shadow-sm'>
-        <DashboardSectionHeader
-          title='Hành động nhanh'
-          description='Đi thẳng vào phần mentor thường phải cập nhật nhất trong giai đoạn giao diện tĩnh.'
-        />
-        <div className='mt-6 grid gap-3 lg:grid-cols-3'>
+      <WorkspacePanel
+        title='Hành động nhanh'
+        description='Đi thẳng vào phần mentor thường phải cập nhật nhất trong giai đoạn giao diện tĩnh.'
+      >
+        <div className='grid gap-3 lg:grid-cols-3'>
           {quickActions.map((action) => (
-            <Link
-              className='hover:border-primary/30 hover:bg-primary/5 rounded-2xl border border-slate-200 p-4 transition'
+            <WorkspaceActionCard
+              description={action.description}
+              icon={action.icon}
               key={action.title}
+              title={action.title}
               to={action.href}
-            >
-              <div className='flex items-start gap-4'>
-                <div className='bg-primary/10 text-primary flex h-11 w-11 items-center justify-center rounded-2xl'>
-                  <action.icon aria-hidden='true' size={20} />
-                </div>
-                <div className='space-y-1'>
-                  <p className='text-ink font-semibold'>{action.title}</p>
-                  <p className='text-muted text-sm'>{action.description}</p>
-                </div>
-              </div>
-            </Link>
+            />
           ))}
         </div>
-      </section>
+      </WorkspacePanel>
     </DashboardPage>
   )
 }
