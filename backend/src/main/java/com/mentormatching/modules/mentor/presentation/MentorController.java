@@ -21,18 +21,15 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.mentormatching.modules.mentor.application.dto.GetMentorsQuery;
-import com.mentormatching.modules.mentor.application.dto.MentorAchievementDetail;
 import com.mentormatching.modules.mentor.application.dto.MentorAvailabilityDetail;
 import com.mentormatching.modules.mentor.application.dto.MentorDetail;
 import com.mentormatching.modules.mentor.application.dto.MentorListItem;
 import com.mentormatching.modules.mentor.application.dto.MentorSubjectDetail;
 import com.mentormatching.modules.mentor.application.dto.MentorTraitsDetail;
-import com.mentormatching.modules.mentor.application.port.in.GetCurrentMentorAchievementsUseCase;
 import com.mentormatching.modules.mentor.application.port.in.GetCurrentMentorTraitsUseCase;
 import com.mentormatching.modules.mentor.application.port.in.GetCurrentMentorUseCase;
 import com.mentormatching.modules.mentor.application.port.in.GetCurrentMentorSubjectsUseCase;
 import com.mentormatching.modules.mentor.application.port.in.GetCurrentMentorVerificationUseCase;
-import com.mentormatching.modules.mentor.application.port.in.GetMentorAchievementsUseCase;
 import com.mentormatching.modules.mentor.application.port.in.GetMentorAvailabilitiesUseCase;
 import com.mentormatching.modules.mentor.application.port.in.GetMentorDetailUseCase;
 import com.mentormatching.modules.mentor.application.port.in.GetMentorSubjectsUseCase;
@@ -51,7 +48,6 @@ import com.mentormatching.modules.mentor.presentation.dto.request.UpdateCurrentM
 import com.mentormatching.modules.mentor.presentation.dto.response.CurrentMentorResponse;
 import com.mentormatching.modules.mentor.presentation.dto.response.CurrentMentorTraitsResponse;
 import com.mentormatching.modules.mentor.presentation.dto.response.CurrentMentorVerificationResponse;
-import com.mentormatching.modules.mentor.presentation.dto.response.MentorAchievementDetailResponse;
 import com.mentormatching.modules.mentor.presentation.dto.response.MentorAvailabilityDetailResponse;
 import com.mentormatching.modules.mentor.presentation.dto.response.MentorDetailResponse;
 import com.mentormatching.modules.mentor.presentation.dto.response.MentorListItemResponse;
@@ -74,7 +70,6 @@ import jakarta.validation.constraints.Min;
 public class MentorController {
 
     private final GetCurrentMentorTraitsUseCase getCurrentMentorTraitsUseCase;
-    private final GetCurrentMentorAchievementsUseCase getCurrentMentorAchievementsUseCase;
     private final GetCurrentMentorUseCase getCurrentMentorUseCase;
     private final GetCurrentMentorSubjectsUseCase getCurrentMentorSubjectsUseCase;
     private final GetCurrentMentorVerificationUseCase getCurrentMentorVerificationUseCase;
@@ -86,7 +81,6 @@ public class MentorController {
     private final GetMentorDetailUseCase getMentorDetailUseCase;
     private final GetMentorSubjectsUseCase getMentorSubjectsUseCase;
     private final GetMentorTraitsUseCase getMentorTraitsUseCase;
-    private final GetMentorAchievementsUseCase getMentorAchievementsUseCase;
     private final GetMentorAvailabilitiesUseCase getMentorAvailabilitiesUseCase;
     private final ApiResponseFactory apiResponseFactory;
 
@@ -157,16 +151,6 @@ public class MentorController {
     }
 
     @PreAuthorize("isAuthenticated()")
-    @GetMapping("/me/achievements")
-    public ApiResponse<List<MentorAchievementDetailResponse>> getCurrentMentorAchievements(
-            @AuthenticationPrincipal AuthenticatedPrincipal principal) {
-        List<MentorAchievementDetail> achievements = getCurrentMentorAchievementsUseCase
-                .getCurrentMentorAchievements(principal.getId());
-        return apiResponseFactory.success(achievements.stream().map(MentorAchievementDetailResponse::from).toList(),
-                "Get current mentor achievements successfully");
-    }
-
-    @PreAuthorize("isAuthenticated()")
     @PutMapping("/me/subjects")
     public ApiResponse<MentorSubjectDetailResponse> upsertCurrentMentorSubject(
             @AuthenticationPrincipal AuthenticatedPrincipal principal,
@@ -210,13 +194,6 @@ public class MentorController {
     public ApiResponse<MentorTraitsDetailResponse> getMentorTraits(@PathVariable Long id) {
         MentorTraitsDetail traits = getMentorTraitsUseCase.getMentorTraits(id);
         return apiResponseFactory.success(MentorTraitsDetailResponse.from(traits), "Get mentor traits successfully");
-    }
-
-    @GetMapping("/{id}/achievements")
-    public ApiResponse<List<MentorAchievementDetailResponse>> getMentorAchievements(@PathVariable Long id) {
-        List<MentorAchievementDetail> achievements = getMentorAchievementsUseCase.getMentorAchievements(id);
-        return apiResponseFactory.success(achievements.stream().map(MentorAchievementDetailResponse::from).toList(),
-                "Get mentor achievements successfully");
     }
 
     @GetMapping("/{id}/availabilities")
