@@ -12,7 +12,10 @@ import org.springframework.util.StringUtils;
 
 import com.mentormatching.modules.mentor.application.dto.AdminMentorVerificationDetail;
 import com.mentormatching.modules.mentor.application.dto.AdminMentorVerificationListItem;
+import com.mentormatching.modules.mentor.application.dto.AdminMentorDetail;
+import com.mentormatching.modules.mentor.application.dto.AdminMentorListItem;
 import com.mentormatching.modules.mentor.application.dto.CurrentMentorDetails;
+import com.mentormatching.modules.mentor.application.dto.GetAdminMentorsQuery;
 import com.mentormatching.modules.mentor.application.dto.GetAdminMentorVerificationsQuery;
 import com.mentormatching.modules.mentor.application.dto.GetMentorsQuery;
 import com.mentormatching.modules.mentor.application.dto.MentorAchievementDetail;
@@ -27,6 +30,8 @@ import com.mentormatching.modules.mentor.domain.MentorApprovalStatus;
 import com.mentormatching.modules.mentor.infrastructure.persistence.entity.MentorAchievementJpaEntity;
 import com.mentormatching.modules.mentor.infrastructure.persistence.repository.AdminMentorVerificationDetailProjection;
 import com.mentormatching.modules.mentor.infrastructure.persistence.repository.AdminMentorVerificationListProjection;
+import com.mentormatching.modules.mentor.infrastructure.persistence.repository.AdminMentorDetailProjection;
+import com.mentormatching.modules.mentor.infrastructure.persistence.repository.AdminMentorListItemProjection;
 import com.mentormatching.modules.mentor.infrastructure.persistence.repository.MentorAchievementJpaRepository;
 import com.mentormatching.modules.mentor.infrastructure.persistence.repository.CurrentMentorDetailsProjection;
 import com.mentormatching.modules.mentor.infrastructure.persistence.repository.MentorDetailProjection;
@@ -50,6 +55,8 @@ public class MentorReadPersistenceAdapter implements MentorReadRepositoryPort {
 
     private static final Set<String> SORTABLE_FIELDS = Set.of("id", "fullName", "gender", "experienceYears",
             "meetingType", "createdAt", "minPrice");
+    private static final Set<String> ADMIN_MENTOR_SORTABLE_FIELDS = Set.of("id", "fullName", "gender",
+            "experienceYears", "meetingType", "createdAt", "approvalStatus", "minPrice");
     private static final Set<String> ADMIN_VERIFICATION_SORTABLE_FIELDS = Set.of("id", "createdAt", "updatedAt",
             "verificationStatus");
 
@@ -81,6 +88,22 @@ public class MentorReadPersistenceAdapter implements MentorReadRepositoryPort {
         this.mentorAchievementJpaRepository = mentorAchievementJpaRepository;
         this.mentorAvailabilityJpaRepository = mentorAvailabilityJpaRepository;
         this.mentorVerificationJpaRepository = mentorVerificationJpaRepository;
+    }
+
+    @Override
+    public PageResponse<AdminMentorListItem> findAdminMentors(GetAdminMentorsQuery query, List<Long> subjectGradeIds) {
+        Pageable pageable = PageableUtils.buildPageable(query.page(), query.size(), query.sortBy(), query.sortDir(),
+                ADMIN_MENTOR_SORTABLE_FIELDS);
+        Page<AdminMentorListItemProjection> mentorPage = mentorProfileJpaRepository.findAdminMentors(
+                query.approvalStatus(), containsPattern(query.search()), query.gender(), query.meetingType(),
+                query.cityId(), query.districtId(), subjectGradeIds, pageable);
+        return PageableUtils.toPageResponse(mentorPage, this::toAdminListItem);
+    }
+
+    @Override
+    public Optional<AdminMentorDetail> findAdminMentorDetailById(Long mentorId) {
+        return mentorProfileJpaRepository.findAdminMentorDetail(mentorId)
+                .map(this::toAdminDetail);
     }
 
     @Override
@@ -189,6 +212,26 @@ public class MentorReadPersistenceAdapter implements MentorReadRepositoryPort {
                 projection.getExperienceYears(), projection.getCurrentPosition(), projection.getWorkplace(),
                 projection.getEducation(), projection.getMajor(), projection.getMeetingType(), projection.getMinPrice(),
                 projection.getCreatedAt());
+    }
+
+    private AdminMentorListItem toAdminListItem(AdminMentorListItemProjection projection) {
+        return new AdminMentorListItem(projection.getId(), projection.getUserId(), projection.getFullName(),
+                projection.getAvatarUrl(), projection.getGender(), projection.getHeadline(),
+                projection.getExperienceYears(), projection.getCurrentPosition(), projection.getWorkplace(),
+                projection.getEducation(), projection.getMajor(), projection.getMeetingType(),
+                projection.getApprovalStatus(), projection.getMinPrice(), projection.getCreatedAt());
+    }
+
+    private AdminMentorDetail toAdminDetail(AdminMentorDetailProjection projection) {
+        return new AdminMentorDetail(projection.getId(), projection.getUserId(), projection.getFullName(),
+                projection.getEmail(), projection.getPhone(), projection.getAvatarUrl(), projection.getGender(),
+                projection.getHometownCityId(), projection.getHometownCityName(), projection.getCurrentCityId(),
+                projection.getCurrentCityName(), projection.getCurrentDistrictId(),
+                projection.getCurrentDistrictName(), projection.getHeadline(), projection.getIntroduction(),
+                projection.getTeachingStyle(), projection.getExperienceYears(), projection.getCurrentPosition(),
+                projection.getWorkplace(), projection.getEducation(), projection.getMajor(),
+                projection.getMeetingType(), projection.getApprovalStatus(), projection.getApprovalNote(),
+                projection.getCreatedAt(), projection.getUpdatedAt());
     }
 
     private AdminMentorVerificationListItem toAdminVerificationListItem(AdminMentorVerificationListProjection projection) {
