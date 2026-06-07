@@ -20,10 +20,11 @@ Always read:
 3. `frontend/docs/AI_RUNBOOK.md`
 4. `frontend/docs/framework/PROJECT_CONTEXT.md`
 5. `frontend/docs/framework/UI_WORKFLOW.md`
-6. `frontend/docs/framework/DESIGN_RULES.md`
-7. `frontend/docs/framework/DESIGN_SYSTEM.md`
-8. `frontend/docs/framework/SCREEN_SPECS.md`
-9. this file
+6. `frontend/docs/framework/ROUTER_DATA_STRATEGY.md`
+7. `frontend/docs/framework/DESIGN_RULES.md`
+8. `frontend/docs/framework/DESIGN_SYSTEM.md`
+9. `frontend/docs/framework/SCREEN_SPECS.md`
+10. this file
 
 ## Product Constraints
 
@@ -87,6 +88,7 @@ Always read:
 - Put shared domain types in `app/types`.
 - Put app/auth state in Zustand only when it is client state.
 - Keep server state in React Query.
+- Use `loader`, `action`, and `useFetcher` intentionally according to `ROUTER_DATA_STRATEGY.md`.
 - Do not use `any`; prefer explicit types or `unknown` with guards.
 - Do not read raw `import.meta.env` outside `app/config/env.ts`.
 

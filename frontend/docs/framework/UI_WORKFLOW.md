@@ -8,6 +8,7 @@ It should be used together with:
 
 - `frontend/RULES.md`
 - `frontend/docs/framework/PROJECT_CONTEXT.md`
+- `frontend/docs/framework/ROUTER_DATA_STRATEGY.md`
 - `frontend/docs/framework/DESIGN_RULES.md`
 - `frontend/docs/framework/DESIGN_SYSTEM.md`
 - `frontend/docs/framework/SCREEN_SPECS.md`
@@ -44,9 +45,10 @@ When sources conflict, use this priority:
 1. explicit user instruction in the current task
 2. `frontend/RULES.md` for engineering conventions
 3. backend docs and migrations for business/domain truth
-4. `PROJECT_CONTEXT.md` for product interpretation
-5. current frontend code for existing UI and implementation patterns
-6. generated docs for current cycle plans
+4. `ROUTER_DATA_STRATEGY.md` for route/data ownership decisions
+5. `PROJECT_CONTEXT.md` for product interpretation
+6. current frontend code for existing UI and implementation patterns
+7. generated docs for current cycle plans
 
 Current frontend mock copy is useful for structure, but backend schema and migrations are stronger product truth.
 
