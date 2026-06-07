@@ -1,10 +1,10 @@
 import { AlertTriangle, CheckCircle2, Clock, ShieldAlert, XCircle } from 'lucide-react'
-import { clsx } from 'clsx'
-import { twMerge } from 'tailwind-merge'
 
+import { Badge } from '@/components/ui/badge'
 import type { BookingStatus, PaymentStatus } from '@/types/booking'
 import type { MentorApprovalStatus, MentorVerificationStatus } from '@/types/mentor'
 import type { UserStatus } from '@/types/user'
+import { cn } from '@/utils/cn'
 
 type StatusBadgeKind = 'booking' | 'payment' | 'approval' | 'verification' | 'user'
 type StatusBadgeValue =
@@ -25,13 +25,14 @@ type StatusBadgeProps = {
   className?: string
 }
 
-const toneClassMap: Record<StatusTone, string> = {
-  success: 'border-emerald-200 bg-emerald-50 text-emerald-700',
-  warning: 'border-amber-200 bg-amber-50 text-amber-700',
-  danger: 'border-red-200 bg-red-50 text-red-700',
-  info: 'border-blue-200 bg-blue-50 text-blue-700',
-  muted: 'border-slate-200 bg-slate-50 text-slate-600'
-}
+const toneVariantMap: Record<StatusTone, 'success' | 'warning' | 'destructive' | 'info' | 'muted'> =
+  {
+    success: 'success',
+    warning: 'warning',
+    danger: 'destructive',
+    info: 'info',
+    muted: 'muted'
+  }
 
 const statusConfigMap: Record<
   StatusBadgeKind,
@@ -80,17 +81,9 @@ export function StatusBadge({ className, kind, status }: StatusBadgeProps) {
   const Icon = config.icon
 
   return (
-    <span
-      className={twMerge(
-        clsx(
-          'inline-flex w-fit items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-semibold',
-          toneClassMap[config.tone],
-          className
-        )
-      )}
-    >
+    <Badge className={cn('gap-1.5', className)} variant={toneVariantMap[config.tone]}>
       <Icon aria-hidden='true' size={13} />
       {config.label}
-    </span>
+    </Badge>
   )
 }

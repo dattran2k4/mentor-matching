@@ -1,6 +1,7 @@
 import { AlertTriangle } from 'lucide-react'
 
 import { EmptyState } from '@/components/EmptyState'
+import { Button } from '@/components/ui/button'
 
 type ScreenErrorStateProps = {
   title?: string
@@ -23,13 +24,9 @@ export function ScreenErrorState({
       title={title}
       action={
         onRetry ? (
-          <button
-            className='rounded-full bg-red-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:-translate-y-0.5 hover:bg-red-700'
-            onClick={onRetry}
-            type='button'
-          >
+          <Button className='rounded-full' onClick={onRetry} type='button' variant='destructive'>
             {retryLabel}
-          </button>
+          </Button>
         ) : null
       }
     />

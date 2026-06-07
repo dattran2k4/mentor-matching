@@ -1,5 +1,10 @@
 import { CheckCircle2, RotateCcw, SlidersHorizontal, X } from 'lucide-react'
 
+import { Button } from '@/components/ui/button'
+import { Card, CardContent } from '@/components/ui/card'
+import { Checkbox } from '@/components/ui/checkbox'
+import { Separator } from '@/components/ui/separator'
+
 interface FilterSidebarProps {
   onClose?: () => void
   groups?: FilterGroup[]
@@ -79,86 +84,79 @@ const FilterSidebar = ({
   selectedValues = []
 }: FilterSidebarProps) => {
   return (
-    <aside className='shadow-soft flex w-full flex-col gap-6 rounded-3xl border border-slate-200 bg-white p-5'>
-      <div className='flex items-center justify-between md:hidden'>
-        <h3 className='text-ink text-base font-semibold'>Bộ lọc</h3>
-        <button
-          className='rounded-full border border-slate-200 p-2 text-slate-600'
-          onClick={onClose}
-          type='button'
-        >
-          <X size={16} />
-        </button>
-      </div>
-
-      <div className='rounded-2xl border border-slate-200 bg-slate-50 p-4'>
-        <div className='flex items-center gap-2'>
-          <SlidersHorizontal className='text-primary h-4 w-4' />
-          <p className='text-ink text-sm font-semibold'>Lọc theo tiêu chí học tập</p>
+    <Card className='shadow-soft flex w-full flex-col rounded-3xl'>
+      <CardContent className='flex flex-1 flex-col gap-6 p-5'>
+        <div className='flex items-center justify-between md:hidden'>
+          <h3 className='text-ink text-base font-semibold'>Bộ lọc</h3>
+          <Button size='icon' type='button' variant='outline' onClick={onClose}>
+            <X size={16} />
+          </Button>
         </div>
-        <p className='text-muted mt-2 text-sm'>
-          Thu hẹp danh sách theo môn học, cấp lớp, hình thức học, học phí và tín nhiệm của mentor.
-        </p>
-      </div>
 
-      {groups.map((group) => (
-        <div key={group.title}>
-          <p className='text-ink text-sm font-semibold'>{group.title}</p>
-          <div className='mt-3 space-y-2'>
-            {group.items.map((item) => (
-              <label
-                key={item.value}
-                className='flex cursor-pointer items-start gap-3 rounded-2xl border border-transparent px-2 py-2 transition hover:border-slate-200 hover:bg-slate-50'
-              >
-                <input
-                  type='checkbox'
-                  className='accent-primary mt-0.5'
-                  checked={selectedValues.includes(item.value)}
-                  onChange={() => onToggleValue?.(item.value)}
-                />
-                <span>
-                  <span className='block text-sm font-medium text-slate-700'>{item.label}</span>
-                  {item.helper ? (
-                    <span className='mt-1 block text-xs text-slate-500'>{item.helper}</span>
-                  ) : null}
-                </span>
-              </label>
-            ))}
+        <div className='rounded-2xl border border-slate-200 bg-slate-50 p-4'>
+          <div className='flex items-center gap-2'>
+            <SlidersHorizontal className='text-primary h-4 w-4' />
+            <p className='text-ink text-sm font-semibold'>Lọc theo tiêu chí học tập</p>
           </div>
-        </div>
-      ))}
-
-      <div className='rounded-2xl border border-emerald-100 bg-emerald-50 p-4 text-sm text-emerald-800'>
-        <div className='flex items-start gap-2'>
-          <CheckCircle2 className='mt-0.5 h-4 w-4 shrink-0' />
-          <p>
-            Danh sách công khai hiện ưu tiên mentor đã duyệt. Các bộ lọc này giúp thu hẹp nhanh hơn
-            theo nhu cầu học và mức độ sẵn sàng nhận lịch.
+          <p className='text-muted mt-2 text-sm'>
+            Thu hẹp danh sách theo môn học, cấp lớp, hình thức học, học phí và tín nhiệm của mentor.
           </p>
         </div>
-      </div>
 
-      <div className='mt-auto flex gap-3 border-t border-slate-200 pt-4'>
-        <button
-          type='button'
-          onClick={onReset}
-          className='flex-1 rounded-2xl border border-slate-200 px-4 py-2.5 text-sm font-semibold text-slate-600 transition hover:border-slate-300 hover:bg-slate-50'
-        >
-          <RotateCcw size={14} className='mr-2 inline-flex' />
-          Xóa bộ lọc
-        </button>
-        <button
-          type='button'
-          onClick={() => {
-            onApply?.()
-            onClose?.()
-          }}
-          className='bg-primary flex-1 rounded-2xl px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-blue-700'
-        >
-          Áp dụng
-        </button>
-      </div>
-    </aside>
+        {groups.map((group, index) => (
+          <div key={group.title}>
+            {index > 0 ? <Separator className='mb-6' /> : null}
+            <p className='text-ink text-sm font-semibold'>{group.title}</p>
+            <div className='mt-3 space-y-2'>
+              {group.items.map((item) => (
+                <label
+                  key={item.value}
+                  className='flex cursor-pointer items-start gap-3 rounded-2xl border border-transparent px-2 py-2 transition hover:border-slate-200 hover:bg-slate-50'
+                >
+                  <Checkbox
+                    checked={selectedValues.includes(item.value)}
+                    onChange={() => onToggleValue?.(item.value)}
+                  />
+                  <span>
+                    <span className='block text-sm font-medium text-slate-700'>{item.label}</span>
+                    {item.helper ? (
+                      <span className='mt-1 block text-xs text-slate-500'>{item.helper}</span>
+                    ) : null}
+                  </span>
+                </label>
+              ))}
+            </div>
+          </div>
+        ))}
+
+        <div className='rounded-2xl border border-emerald-100 bg-emerald-50 p-4 text-sm text-emerald-800'>
+          <div className='flex items-start gap-2'>
+            <CheckCircle2 className='mt-0.5 h-4 w-4 shrink-0' />
+            <p>
+              Danh sách công khai hiện ưu tiên mentor đã duyệt. Các bộ lọc này giúp thu hẹp nhanh
+              hơn theo nhu cầu học và mức độ sẵn sàng nhận lịch.
+            </p>
+          </div>
+        </div>
+
+        <div className='mt-auto flex gap-3 border-t border-slate-200 pt-4'>
+          <Button className='flex-1' type='button' variant='outline' onClick={onReset}>
+            <RotateCcw size={14} />
+            Xóa bộ lọc
+          </Button>
+          <Button
+            className='flex-1'
+            type='button'
+            onClick={() => {
+              onApply?.()
+              onClose?.()
+            }}
+          >
+            Áp dụng
+          </Button>
+        </div>
+      </CardContent>
+    </Card>
   )
 }
 

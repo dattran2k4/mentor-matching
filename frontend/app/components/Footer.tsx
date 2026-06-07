@@ -1,6 +1,9 @@
 import { Link } from 'react-router'
 
+import { Badge } from '@/components/ui/badge'
+import { buttonVariants } from '@/components/ui/button'
 import { path } from '@/config/path'
+import { cn } from '@/utils/cn'
 
 const Footer = () => {
   return (
@@ -15,12 +18,8 @@ const Footer = () => {
             học tập.
           </p>
           <div className='mt-4 flex flex-wrap gap-2 text-xs'>
-            <span className='rounded-full border border-slate-200 bg-white px-3 py-1 text-slate-600'>
-              Mentor đã duyệt
-            </span>
-            <span className='rounded-full border border-slate-200 bg-white px-3 py-1 text-slate-600'>
-              Đặt buổi học theo khung giờ thật
-            </span>
+            <Badge variant='outline'>Mentor đã duyệt</Badge>
+            <Badge variant='outline'>Đặt buổi học theo khung giờ thật</Badge>
           </div>
         </div>
         <div>
@@ -71,13 +70,18 @@ const Footer = () => {
           </p>
           <div className='mt-4 space-y-3'>
             <Link
-              className='bg-primary block rounded-2xl px-4 py-2.5 text-center text-sm font-semibold text-white transition hover:bg-blue-700'
+              className={cn(buttonVariants({ className: 'block rounded-2xl text-center' }))}
               to={path.discover}
             >
               Tìm mentor ngay
             </Link>
             <Link
-              className='block rounded-2xl border border-slate-200 px-4 py-2.5 text-center text-sm font-semibold text-slate-700 transition hover:bg-white'
+              className={cn(
+                buttonVariants({
+                  className: 'block rounded-2xl text-center',
+                  variant: 'outline'
+                })
+              )}
               to={path.login}
             >
               Đăng nhập để quản lý lịch học

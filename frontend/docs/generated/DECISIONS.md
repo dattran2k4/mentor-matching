@@ -143,3 +143,12 @@
 - rationale: the admin routes share queue, status, and oversight language more than they need new custom chrome, and honest placeholder framing reduces future rework when real APIs arrive
 - alternatives considered: leaving large route-local arrays in each admin screen, or building interactive moderation/settings flows that imply unsupported backend behavior
 - follow-up: later integration work can replace the static admin workspace module route by route, especially for mentor review, user management, reports, and settings, while preserving the current action-first hierarchy
+
+## Decision 17: shared frontend foundation now composes from `app/components/ui` primitives first
+
+- date: 2026-06-07
+- context: framework docs and rules already treated `frontend/app/components/ui` as the default low-level UI system, but the codebase still relied heavily on ad hoc Tailwind blocks in shared components and the `ui` directory was missing
+- decision: add the missing primitive layer under `frontend/app/components/ui` and refactor shared foundation components such as `DashboardPage`, `DashboardShell`, `StatusBadge`, `EmptyState`, `ScreenErrorState`, `SearchBar`, `FilterSidebar`, `MentorCard`, `BookingSidebar`, `Navbar`, `Footer`, and `MentorTrustBlock` to compose from those primitives where appropriate
+- rationale: this aligns implementation with repo rules, reduces duplicated presentation code, and gives future route work a stable low-level system without forcing a broad route rewrite in the same milestone
+- alternatives considered: continuing to add one-off class-based shared components, or rewriting all route screens immediately to prove adoption
+- follow-up: future screen work should default to `ui/button`, `ui/badge`, `ui/card`, `ui/input`, `ui/checkbox`, `ui/textarea`, and related primitives before introducing new low-level wrappers

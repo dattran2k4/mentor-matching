@@ -3,9 +3,11 @@ import { useState, useEffect } from 'react'
 import { Link, NavLink, useNavigate } from 'react-router'
 import { motion, AnimatePresence } from 'framer-motion'
 
+import { buttonVariants } from '@/components/ui/button'
 import { path } from '@/config/path'
 import { useDashboardPath } from '@/hooks/use-dashboard-path'
 import { useAuthStore } from '@/store/auth-store'
+import { cn } from '@/utils/cn'
 
 const Navbar = () => {
   const navigate = useNavigate()
@@ -107,7 +109,12 @@ const Navbar = () => {
 
         <div className='flex items-center gap-4'>
           <Link
-            className='border-primary/20 text-primary hover:border-primary hover:bg-primary/5 hover:shadow-soft hidden items-center gap-2 rounded-full border-2 bg-white/50 px-5 py-2 text-sm font-semibold backdrop-blur transition-all duration-300 md:inline-flex'
+            className={cn(
+              buttonVariants({
+                className: 'hidden rounded-full md:inline-flex',
+                variant: 'outline'
+              })
+            )}
             to={path.mentorPanel.root}
           >
             Trở thành Mentor
@@ -116,7 +123,13 @@ const Navbar = () => {
           {accessToken ? (
             <>
               <button
-                className='hover:border-primary hover:text-primary hover:shadow-soft relative hidden h-10 w-10 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-600 shadow-sm transition-all md:flex'
+                className={cn(
+                  buttonVariants({
+                    className: 'relative hidden rounded-full md:flex',
+                    size: 'icon',
+                    variant: 'outline'
+                  })
+                )}
                 type='button'
               >
                 <Bell size={18} />
@@ -124,14 +137,25 @@ const Navbar = () => {
               </button>
               {dashboardPath ? (
                 <Link
-                  className='from-primary to-secondary shadow-soft hidden h-10 w-10 items-center justify-center rounded-full bg-gradient-to-tr text-xs font-semibold text-white transition-transform hover:scale-105 md:flex'
+                  className={cn(
+                    buttonVariants({
+                      className: 'hidden rounded-full md:flex',
+                      size: 'icon'
+                    })
+                  )}
                   to={dashboardPath}
                 >
                   EM
                 </Link>
               ) : null}
               <button
-                className='hidden items-center gap-2 rounded-full border border-slate-200 bg-white py-2.5 pr-4 pl-3 text-sm font-medium text-slate-600 shadow-sm transition-all hover:border-red-200 hover:bg-red-50 hover:text-red-600 md:inline-flex'
+                className={cn(
+                  buttonVariants({
+                    className: 'hidden rounded-full md:inline-flex',
+                    variant: 'outline'
+                  }),
+                  'hover:border-red-200 hover:bg-red-50 hover:text-red-600'
+                )}
                 type='button'
                 onClick={handleLogout}
               >
@@ -141,7 +165,12 @@ const Navbar = () => {
             </>
           ) : (
             <Link
-              className='bg-primary from-primary to-primary-light hover:shadow-glow hidden rounded-full bg-gradient-to-r px-6 py-2.5 text-sm font-semibold text-white transition-all hover:-translate-y-0.5 md:inline-flex'
+              className={cn(
+                buttonVariants({
+                  className: 'hidden rounded-full md:inline-flex',
+                  size: 'lg'
+                })
+              )}
               to={path.login}
             >
               Đăng nhập
@@ -149,7 +178,13 @@ const Navbar = () => {
           )}
 
           <button
-            className='flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-600 transition-colors hover:bg-slate-50 active:bg-slate-100 md:hidden'
+            className={cn(
+              buttonVariants({
+                className: 'rounded-full md:hidden',
+                size: 'icon',
+                variant: 'outline'
+              })
+            )}
             type='button'
             onClick={() => setMobileOpen((open) => !open)}
           >
@@ -170,7 +205,7 @@ const Navbar = () => {
               <div className='flex flex-col gap-2'>{navLinks}</div>
               <div className='mt-5 flex flex-col gap-3 border-t border-slate-200/50 pt-5'>
                 <Link
-                  className='border-primary/20 bg-primary/5 text-primary hover:bg-primary rounded-xl border-2 px-4 py-3 text-center text-sm font-semibold transition-colors hover:text-white'
+                  className={cn(buttonVariants({ className: 'rounded-xl', variant: 'outline' }))}
                   to={path.mentorPanel.root}
                   onClick={() => setMobileOpen(false)}
                 >
@@ -178,7 +213,10 @@ const Navbar = () => {
                 </Link>
                 {accessToken ? (
                   <button
-                    className='flex items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-600 transition-colors hover:border-red-200 hover:bg-red-50 hover:text-red-600'
+                    className={cn(
+                      buttonVariants({ className: 'rounded-xl', variant: 'outline' }),
+                      'hover:border-red-200 hover:bg-red-50 hover:text-red-600'
+                    )}
                     type='button'
                     onClick={handleLogout}
                   >
@@ -187,7 +225,7 @@ const Navbar = () => {
                   </button>
                 ) : (
                   <Link
-                    className='bg-primary from-primary to-primary-light shadow-soft rounded-xl bg-gradient-to-r px-4 py-3 text-center text-sm font-semibold text-white hover:opacity-90'
+                    className={cn(buttonVariants({ className: 'rounded-xl', size: 'lg' }))}
                     to={path.login}
                     onClick={() => setMobileOpen(false)}
                   >

@@ -2,7 +2,7 @@
 
 ## Inventory Scope
 
-- date: 2026-06-05
+- date: 2026-06-07
 - source: current frontend implementation plus framework docs
 - purpose: identify what we can reuse now, what needs refactor, and what should be added before broader implementation
 
@@ -10,23 +10,23 @@
 
 - component: `StatusBadge`
   status: added in Milestone 1
-  notes: shared status vocabulary for booking, payment, mentor approval, verification, and user states; currently adopted by learner bookings, mentor cards, mentor profile, mentor dashboard, mentor schedule, mentor students, mentor earnings, admin dashboard queues, admin mentor review, and admin users surfaces
+  notes: shared status vocabulary for booking, payment, mentor approval, verification, and user states; now composed on top of `ui/badge` so tone, spacing, and border treatment stay aligned with the primitive layer; currently adopted by learner bookings, mentor cards, mentor profile, mentor dashboard, mentor schedule, mentor students, mentor earnings, admin dashboard queues, admin mentor review, and admin users surfaces
 
 - component: `EmptyState`
   status: added in Milestone 1
-  notes: shared empty/placeholder state with icon, title, helper copy, and optional action; used by `DashboardPage` default content plus filtered empty states in learner bookings and admin mentor management
+  notes: shared empty/placeholder state with icon, title, helper copy, and optional action; now uses `ui/card` and `ui/button` primitives; used by `DashboardPage` default content plus filtered empty states in learner bookings and admin mentor management
 
 - component: `ScreenErrorState`
   status: added in Milestone 1
-  notes: shared screen-level error/retry surface built on `EmptyState`; ready for API-backed routes as data integration expands
+  notes: shared screen-level error/retry surface built on `EmptyState` and `ui/button`; ready for API-backed routes as data integration expands
 
 - component: `DashboardShell`
   status: stable reusable foundation
-  notes: correct choice for all role dashboards; should remain the workspace shell
+  notes: correct choice for all role dashboards; header and shell actions now reuse `ui/button` styling so workspace controls inherit one shared action system
 
 - component: `DashboardPage`
   status: reusable foundation
-  notes: good page wrapper; default placeholder now delegates to `EmptyState` so route placeholders share the same state pattern, and mentor workspace refactors keep using it as the route-level shell instead of inventing mentor-specific wrappers
+  notes: good page wrapper; default placeholder delegates to `EmptyState`, keeps dashboard headings compact per design rules, and remains the route-level shell instead of inventing mentor-specific wrappers
 
 - component: `DashboardSectionHeader`
   status: added in Milestone 3
@@ -45,24 +45,24 @@
   notes: footer now reinforces approved mentors, real booking flow, and practical discovery/login entry points instead of generic newsletter-style messaging
 
 - component: `SearchBar`
-  status: reusable with milestone 2 refactor
-  notes: now supports tutoring-domain helper copy, controlled keyword/context fields, submit handling, and quick-tag shortcuts for home and discover surfaces
+  status: reusable with milestone 2 and shared-foundation refactor
+  notes: supports tutoring-domain helper copy, controlled keyword/context fields, submit handling, and quick-tag shortcuts for home and discover surfaces; now built from `ui/card`, `ui/input`, and `ui/button`
 
 - component: `FilterSidebar`
-  status: reusable with milestone 2 refactor
-  notes: now accepts reusable filter groups plus controlled selected values, and groups tutoring criteria such as subject, grade, meeting type, price, availability, and trust for both desktop and mobile discover flows
+  status: reusable with milestone 2 and shared-foundation refactor
+  notes: accepts reusable filter groups plus controlled selected values, and groups tutoring criteria such as subject, grade, meeting type, price, availability, and trust for both desktop and mobile discover flows; now built from `ui/card`, `ui/checkbox`, `ui/button`, and `ui/separator`
 
 - component: `MentorCard`
-  status: reusable with milestone 2 refactor
-  notes: now emphasizes mentor offerings, expertise fit, trust state, availability hint, and comparison-friendly metadata instead of a soft marketing-card treatment
+  status: reusable with milestone 2 and shared-foundation refactor
+  notes: emphasizes mentor offerings, expertise fit, trust state, availability hint, and comparison-friendly metadata instead of a soft marketing-card treatment; now uses `ui/card`, `ui/button`, and `ui/badge` as its low-level structure
 
 - component: `BookingSidebar`
-  status: reusable with milestone 2 refactor
-  notes: now summarizes the selected offering, near-term availability windows, weekly schedule, trust badges, next-step guidance, and a session estimate; later milestones can layer real booking actions on top of this shell
+  status: reusable with milestone 2 and shared-foundation refactor
+  notes: summarizes the selected offering, near-term availability windows, weekly schedule, trust badges, next-step guidance, and a session estimate; later milestones can layer real booking actions on top of this shell; low-level structure now comes from `ui/card`, `ui/button`, and `ui/badge`
 
 - component: `MentorTrustBlock`
   status: added in Milestone 2
-  notes: shared public trust summary for approval status, verification status, highlights, and mentor achievements; first used on mentor profile and intended for future admin mentor review reuse
+  notes: shared public trust summary for approval status, verification status, highlights, and mentor achievements; first used on mentor profile and intended for future admin mentor review reuse; now built from `ui/card` and `ui/badge`
 
 - component: `SectionTitle`
   status: reusable
@@ -84,57 +84,61 @@
 
 - component: `ui/button`
   status: stable
-  notes: default for actions before building custom button variants
+  notes: base action primitive with shared variants and sizes; `app/components/Button` now maps onto this primitive for compatibility
 
 - component: `ui/badge`
   status: stable
-  notes: best base for shared status badge system
+  notes: best base for shared status badge system and shared chips/tags such as meeting-type and highlight labels
+
+- component: `ui/card`
+  status: stable
+  notes: default low-level panel/card surface for shared dashboard and marketplace components
+
+- component: `ui/input`
+  status: stable
+  notes: default text input for search and form entry before building custom wrappers
+
+- component: `ui/checkbox`
+  status: stable
+  notes: default boolean control for shared filter and form patterns
+
+- component: `ui/textarea`
+  status: stable
+  notes: default multi-line text control for future profile and workflow forms
+
+- component: `ui/separator`
+  status: stable
+  notes: default low-level divider for dense filter, panel, and dashboard sections
+
+## Additional UI Primitives Worth Adding Later
 
 - component: `ui/table`
-  status: stable
-  notes: important for admin and earnings/bookings views
+  reason: admin and earnings/bookings views still repeat structured row markup that could move to a shared table base later
 
 - component: `ui/sheet`
-  status: stable
-  notes: key for mobile filters and mobile detail panels
+  reason: mobile filters and future mobile detail panels would benefit from a consistent slide-over primitive
 
 - component: `ui/dialog`
-  status: stable
-  notes: useful for confirmations and focused actions
+  reason: focused confirmations and future operational actions should share one modal foundation
 
-- component: `ui/input`, `ui/select`, `ui/textarea`, `ui/checkbox`, `ui/radio-group`, `ui/switch`
-  status: stable
-  notes: sufficient form foundation for profile and schedule work
+- component: `ui/select`, `ui/radio-group`, `ui/switch`
+  reason: profile, schedule, and settings forms will need broader form coverage as API integration expands
 
 - component: `ui/skeleton`
-  status: stable
-  notes: should be used for route-level loading shapes
+  reason: route-level loading states should eventually use one shared placeholder language
 
 - component: `ui/tooltip`
-  status: stable
-  notes: useful for icon-only actions and status explanations
+  reason: dense admin and dashboard actions will likely need compact explanatory affordances
 
-## Components Needing Refactor Before Broad Reuse
-
-- component: `MentorCard`
-  reason: data shape and copy are tied to the wrong product domain
-  likely consumers: home, discover, favorites, future admin/mentor cross-reference views
-
-- component: `BookingSidebar`
-  reason: booking model is too simplified for real mentor offering and availability flows
-  likely consumers: mentor profile, future booking steps
-
-- component: `SearchBar`
-  reason: placeholder and behavior are generic rather than tutoring-specific
-  likely consumers: home, discover, maybe future dashboard quick search
-
-- component: `FilterSidebar`
-  reason: current filter semantics need to match backend catalog, meeting type, trust, and availability
-  likely consumers: discover
+## Components Needing Further Evolution Before Broad Reuse
 
 - component: `DashboardPage`
-  reason: default empty state needs role-aware variants
+  reason: route teams may still want a light way to override placeholder tone or actions without reimplementing the wrapper
   likely consumers: most dashboard routes
+
+- component: `Data list / table row pattern`
+  reason: many dashboard routes still render repeated operational rows directly in route files
+  likely consumers: learner bookings, mentor students, mentor earnings, admin users, admin mentors, reports
 
 ## Candidate Shared Components To Add
 

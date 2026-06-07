@@ -1,3 +1,5 @@
+import { cn } from '@/utils/cn'
+
 interface SectionTitleProps {
   eyebrow?: string
   title: string
@@ -17,13 +19,13 @@ const SectionTitle = ({
   const titleClassName = size === 'md' ? 'text-2xl md:text-3xl' : 'text-3xl md:text-4xl'
 
   return (
-    <div className={`flex flex-col gap-2 ${alignment}`}>
+    <div className={cn('flex flex-col gap-2', alignment)}>
       {eyebrow ? (
         <span className='text-primary text-xs font-semibold tracking-[0.3em] uppercase'>
           {eyebrow}
         </span>
       ) : null}
-      <h2 className={`text-ink font-semibold ${titleClassName}`}>{title}</h2>
+      <h2 className={cn('text-ink font-semibold', titleClassName)}>{title}</h2>
       {subtitle ? <p className='text-muted max-w-2xl text-sm md:text-base'>{subtitle}</p> : null}
     </div>
   )
