@@ -20,6 +20,10 @@ public class MentorPersonality {
         return new MentorPersonality(data);
     }
 
+    public static MentorPersonality create(Long mentorId, Long personalityOptionId) {
+        return new MentorPersonality(new MentorPersonalityRestoreData(null, mentorId, personalityOptionId, null));
+    }
+
     public Long getId() {
         return id;
     }

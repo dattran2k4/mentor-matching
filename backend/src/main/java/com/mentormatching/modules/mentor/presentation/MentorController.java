@@ -27,6 +27,7 @@ import com.mentormatching.modules.mentor.application.dto.MentorDetail;
 import com.mentormatching.modules.mentor.application.dto.MentorListItem;
 import com.mentormatching.modules.mentor.application.dto.MentorSubjectDetail;
 import com.mentormatching.modules.mentor.application.dto.MentorTraitsDetail;
+import com.mentormatching.modules.mentor.application.port.in.GetCurrentMentorTraitsUseCase;
 import com.mentormatching.modules.mentor.application.port.in.GetCurrentMentorUseCase;
 import com.mentormatching.modules.mentor.application.port.in.GetCurrentMentorSubjectsUseCase;
 import com.mentormatching.modules.mentor.application.port.in.GetCurrentMentorVerificationUseCase;
@@ -36,15 +37,18 @@ import com.mentormatching.modules.mentor.application.port.in.GetMentorDetailUseC
 import com.mentormatching.modules.mentor.application.port.in.GetMentorSubjectsUseCase;
 import com.mentormatching.modules.mentor.application.port.in.GetMentorTraitsUseCase;
 import com.mentormatching.modules.mentor.application.port.in.GetMentorsUseCase;
+import com.mentormatching.modules.mentor.application.port.in.UpdateCurrentMentorTraitsUseCase;
 import com.mentormatching.modules.mentor.application.port.in.UpsertCurrentMentorSubjectUseCase;
 import com.mentormatching.modules.mentor.application.port.in.UpsertCurrentMentorVerificationUseCase;
 import com.mentormatching.modules.mentor.application.port.in.UpdateCurrentMentorUseCase;
 import com.mentormatching.modules.mentor.domain.Gender;
 import com.mentormatching.modules.mentor.domain.MeetingType;
+import com.mentormatching.modules.mentor.presentation.dto.request.UpdateCurrentMentorTraitsRequest;
 import com.mentormatching.modules.mentor.presentation.dto.request.UpsertCurrentMentorSubjectRequest;
 import com.mentormatching.modules.mentor.presentation.dto.request.UpsertCurrentMentorVerificationRequest;
 import com.mentormatching.modules.mentor.presentation.dto.request.UpdateCurrentMentorRequest;
 import com.mentormatching.modules.mentor.presentation.dto.response.CurrentMentorResponse;
+import com.mentormatching.modules.mentor.presentation.dto.response.CurrentMentorTraitsResponse;
 import com.mentormatching.modules.mentor.presentation.dto.response.CurrentMentorVerificationResponse;
 import com.mentormatching.modules.mentor.presentation.dto.response.MentorAchievementDetailResponse;
 import com.mentormatching.modules.mentor.presentation.dto.response.MentorAvailabilityDetailResponse;
@@ -68,9 +72,11 @@ import jakarta.validation.constraints.Min;
 @RequestMapping("/api/v1/mentors")
 public class MentorController {
 
+    private final GetCurrentMentorTraitsUseCase getCurrentMentorTraitsUseCase;
     private final GetCurrentMentorUseCase getCurrentMentorUseCase;
     private final GetCurrentMentorSubjectsUseCase getCurrentMentorSubjectsUseCase;
     private final GetCurrentMentorVerificationUseCase getCurrentMentorVerificationUseCase;
+    private final UpdateCurrentMentorTraitsUseCase updateCurrentMentorTraitsUseCase;
     private final UpsertCurrentMentorSubjectUseCase upsertCurrentMentorSubjectUseCase;
     private final UpsertCurrentMentorVerificationUseCase upsertCurrentMentorVerificationUseCase;
     private final UpdateCurrentMentorUseCase updateCurrentMentorUseCase;
@@ -117,6 +123,25 @@ public class MentorController {
                 upsertCurrentMentorVerificationUseCase.upsertCurrentMentorVerification(
                         request.toCommand(principal))),
                 "Save current mentor verification successfully");
+    }
+
+    @PreAuthorize("isAuthenticated()")
+    @GetMapping("/me/traits")
+    public ApiResponse<CurrentMentorTraitsResponse> getCurrentMentorTraits(
+            @AuthenticationPrincipal AuthenticatedPrincipal principal) {
+        return apiResponseFactory.success(CurrentMentorTraitsResponse.from(
+                getCurrentMentorTraitsUseCase.getCurrentMentorTraits(principal.getId())),
+                "Get current mentor traits successfully");
+    }
+
+    @PreAuthorize("isAuthenticated()")
+    @PutMapping("/me/traits")
+    public ApiResponse<CurrentMentorTraitsResponse> updateCurrentMentorTraits(
+            @AuthenticationPrincipal AuthenticatedPrincipal principal,
+            @Valid @RequestBody UpdateCurrentMentorTraitsRequest request) {
+        return apiResponseFactory.success(CurrentMentorTraitsResponse.from(
+                updateCurrentMentorTraitsUseCase.updateCurrentMentorTraits(request.toCommand(principal))),
+                "Update current mentor traits successfully");
     }
 
     @PreAuthorize("isAuthenticated()")
