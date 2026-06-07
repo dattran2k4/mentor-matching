@@ -26,14 +26,18 @@ export type FilterGroup = {
   items: FilterOption[]
 }
 
-const defaultFilterGroups: FilterGroup[] = [
+export const defaultFilterGroups: FilterGroup[] = [
   {
     title: 'Môn học',
     items: [
-      { label: 'Toán', value: 'subject:Toán' },
-      { label: 'Tiếng Anh', value: 'subject:Tiếng Anh' },
-      { label: 'Vật lý', value: 'subject:Vật lý' },
-      { label: 'Lập trình', value: 'subject:Lập trình Python' }
+      { label: 'Toán', value: 'subject:Toán', helper: 'THCS, ôn chuyển cấp và nền tảng' },
+      { label: 'Tiếng Anh', value: 'subject:Tiếng Anh', helper: 'THPT và giao tiếp cơ bản' },
+      { label: 'Vật lý', value: 'subject:Vật lý', helper: 'Môn học cần so sánh cách giảng dạy' },
+      {
+        label: 'Lập trình',
+        value: 'subject:Lập trình Python',
+        helper: 'Cho học sinh cần nền tảng logic'
+      }
     ]
   },
   {
@@ -48,9 +52,9 @@ const defaultFilterGroups: FilterGroup[] = [
   {
     title: 'Hình thức học',
     items: [
-      { label: 'Online', value: 'meeting:ONLINE' },
-      { label: 'Offline', value: 'meeting:OFFLINE' },
-      { label: 'Hybrid', value: 'meeting:HYBRID' }
+      { label: 'Online', value: 'meeting:ONLINE', helper: 'Phù hợp lịch linh hoạt' },
+      { label: 'Offline', value: 'meeting:OFFLINE', helper: 'Cần gặp trực tiếp' },
+      { label: 'Hybrid', value: 'meeting:HYBRID', helper: 'Có thể kết hợp online và gặp mặt' }
     ]
   },
   {
@@ -65,13 +69,21 @@ const defaultFilterGroups: FilterGroup[] = [
   {
     title: 'Khả dụng và tín nhiệm',
     items: [
-      { label: 'Buổi tối', value: 'availability:evening' },
-      { label: 'Cuối tuần', value: 'availability:weekend' },
-      { label: 'Có lịch gần nhất', value: 'availability:upcoming' },
-      { label: 'Phản hồi nhanh', value: 'availability:fast-response' },
-      { label: 'Đã duyệt', value: 'trust:approved' },
-      { label: 'Đã xác minh', value: 'trust:verified' },
-      { label: 'Từ 4.5 sao', value: 'trust:rating-4.5' }
+      { label: 'Buổi tối', value: 'availability:evening', helper: 'Dễ ghép lịch sau giờ học' },
+      { label: 'Cuối tuần', value: 'availability:weekend', helper: 'Ưu tiên Thứ 7 và Chủ nhật' },
+      {
+        label: 'Có lịch gần nhất',
+        value: 'availability:upcoming',
+        helper: 'Có slot cụ thể sắp mở'
+      },
+      {
+        label: 'Phản hồi nhanh',
+        value: 'availability:fast-response',
+        helper: 'Thường phản hồi trong 1-2 giờ'
+      },
+      { label: 'Đã duyệt', value: 'trust:approved', helper: 'Hồ sơ đã qua bước duyệt công khai' },
+      { label: 'Đã xác minh', value: 'trust:verified', helper: 'Có tín hiệu xác minh bổ sung' },
+      { label: 'Từ 4.5 sao', value: 'trust:rating-4.5', helper: 'Phù hợp khi cần tín nhiệm cao' }
     ]
   }
 ]
@@ -87,8 +99,8 @@ const FilterSidebar = ({
   const selectedCount = selectedValues.length
 
   return (
-    <Card className='shadow-soft flex w-full flex-col rounded-[28px] border-slate-200/80'>
-      <CardContent className='flex flex-1 flex-col gap-6 p-5'>
+    <Card className='flex w-full flex-col rounded-3xl border-slate-200 bg-white shadow-sm'>
+      <CardContent className='flex flex-1 flex-col gap-5 p-5'>
         <div className='flex items-start justify-between gap-3'>
           <div className='space-y-2'>
             <div className='flex items-center gap-2'>
@@ -101,13 +113,13 @@ const FilterSidebar = ({
             <div>
               <h3 className='text-ink text-base font-semibold'>Thu hẹp danh sách mentor</h3>
               <p className='text-muted mt-1 text-sm leading-relaxed'>
-                Chọn theo môn học, cấp lớp, hình thức học, học phí và mức độ sẵn sàng nhận lịch.
+                Chọn theo nhu cầu học thực tế để danh sách dễ so sánh hơn ngay từ đầu.
               </p>
             </div>
           </div>
           {onClose ? (
             <Button
-              className='shrink-0 md:hidden'
+              className='shrink-0 rounded-xl md:hidden'
               size='icon'
               type='button'
               variant='outline'
@@ -120,26 +132,28 @@ const FilterSidebar = ({
 
         {groups.map((group, index) => (
           <div key={group.title}>
-            {index > 0 ? <Separator className='mb-6' /> : null}
+            {index > 0 ? <Separator className='mb-5' /> : null}
             <p className='text-ink text-sm font-semibold'>{group.title}</p>
             <div className='mt-3 space-y-2'>
               {group.items.map((item) => (
                 <label
                   key={item.value}
-                  className={`flex cursor-pointer items-start gap-3 rounded-2xl border px-3 py-3 transition ${
+                  className={`flex cursor-pointer items-start gap-3 rounded-xl border px-3 py-3 transition ${
                     selectedValues.includes(item.value)
                       ? 'border-blue-200 bg-blue-50'
-                      : 'border-transparent hover:border-slate-200 hover:bg-slate-50'
+                      : 'border-slate-200/80 bg-white hover:border-slate-300 hover:bg-slate-50'
                   }`}
                 >
                   <Checkbox
                     checked={selectedValues.includes(item.value)}
                     onChange={() => onToggleValue?.(item.value)}
                   />
-                  <span>
+                  <span className='min-w-0'>
                     <span className='block text-sm font-medium text-slate-700'>{item.label}</span>
                     {item.helper ? (
-                      <span className='mt-1 block text-xs text-slate-500'>{item.helper}</span>
+                      <span className='mt-1 block text-xs leading-relaxed text-slate-500'>
+                        {item.helper}
+                      </span>
                     ) : null}
                   </span>
                 </label>
@@ -152,19 +166,19 @@ const FilterSidebar = ({
           <div className='flex items-start gap-2'>
             <CheckCircle2 className='mt-0.5 h-4 w-4 shrink-0' />
             <p>
-              Danh sách công khai hiện ưu tiên mentor đã duyệt. Các bộ lọc này giúp thu hẹp nhanh
-              hơn theo nhu cầu học và mức độ sẵn sàng nhận lịch.
+              Danh sách công khai hiện ưu tiên hồ sơ đã duyệt. Hãy dùng bộ lọc theo mục tiêu học,
+              rồi mới tinh chỉnh học phí hoặc lịch học để tránh bỏ sót mentor phù hợp.
             </p>
           </div>
         </div>
 
         <div className='mt-auto flex gap-3 border-t border-slate-200 pt-4'>
-          <Button className='flex-1' type='button' variant='outline' onClick={onReset}>
+          <Button className='flex-1 rounded-xl' type='button' variant='outline' onClick={onReset}>
             <RotateCcw size={14} />
             Xóa bộ lọc
           </Button>
           <Button
-            className='flex-1'
+            className='flex-1 rounded-xl'
             type='button'
             onClick={() => {
               onApply?.()
