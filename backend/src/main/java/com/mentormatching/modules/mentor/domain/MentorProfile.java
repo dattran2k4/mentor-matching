@@ -76,10 +76,45 @@ public class MentorProfile {
         this.meetingType = meetingType;
     }
 
+    public void approve(Long adminUserId, String approvalNote) {
+        validatePendingForReview();
+        if (adminUserId == null) {
+            throw new InvalidDataException("Admin user id is required when approving mentor");
+        }
+        this.approvalStatus = MentorApprovalStatus.APPROVED;
+        this.approvalNote = normalizeApprovalNote(approvalNote);
+        this.approvedBy = adminUserId;
+        this.approvedAt = LocalDateTime.now();
+    }
+
+    public void reject(String approvalNote) {
+        validatePendingForReview();
+        if (approvalNote == null || approvalNote.isBlank()) {
+            throw new InvalidDataException("Approval note is required when rejecting mentor");
+        }
+        this.approvalStatus = MentorApprovalStatus.REJECTED;
+        this.approvalNote = approvalNote.trim();
+        this.approvedBy = null;
+        this.approvedAt = null;
+    }
+
     private void validateExperienceYears(Integer experienceYears) {
         if (experienceYears != null && experienceYears < 0) {
             throw new InvalidDataException("Experience years must be greater than or equal to 0");
         }
+    }
+
+    private void validatePendingForReview() {
+        if (approvalStatus != MentorApprovalStatus.PENDING) {
+            throw new InvalidDataException("Only pending mentor profile can be reviewed");
+        }
+    }
+
+    private String normalizeApprovalNote(String approvalNote) {
+        if (approvalNote == null || approvalNote.isBlank()) {
+            return null;
+        }
+        return approvalNote.trim();
     }
 
     public Long getId() {

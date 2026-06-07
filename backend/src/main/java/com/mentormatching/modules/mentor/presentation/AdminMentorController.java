@@ -8,9 +8,12 @@ import static com.mentormatching.shared.response.PageQueryDefaults.DEFAULT_SORT_
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -20,15 +23,19 @@ import com.mentormatching.modules.mentor.application.dto.AdminMentorListItem;
 import com.mentormatching.modules.mentor.application.dto.GetAdminMentorsQuery;
 import com.mentormatching.modules.mentor.application.port.in.GetAdminMentorDetailUseCase;
 import com.mentormatching.modules.mentor.application.port.in.GetAdminMentorsUseCase;
+import com.mentormatching.modules.mentor.application.port.in.ReviewMentorApprovalUseCase;
 import com.mentormatching.modules.mentor.domain.Gender;
 import com.mentormatching.modules.mentor.domain.MeetingType;
 import com.mentormatching.modules.mentor.domain.MentorApprovalStatus;
+import com.mentormatching.modules.mentor.presentation.dto.request.ReviewMentorApprovalRequest;
 import com.mentormatching.modules.mentor.presentation.dto.response.AdminMentorDetailResponse;
 import com.mentormatching.modules.mentor.presentation.dto.response.AdminMentorListItemResponse;
 import com.mentormatching.shared.response.ApiResponse;
 import com.mentormatching.shared.response.ApiResponseFactory;
 import com.mentormatching.shared.response.PageResponse;
+import com.mentormatching.shared.security.model.AuthenticatedPrincipal;
 
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 
@@ -42,6 +49,7 @@ public class AdminMentorController {
 
     private final GetAdminMentorsUseCase getAdminMentorsUseCase;
     private final GetAdminMentorDetailUseCase getAdminMentorDetailUseCase;
+    private final ReviewMentorApprovalUseCase reviewMentorApprovalUseCase;
     private final ApiResponseFactory apiResponseFactory;
 
     @GetMapping
@@ -70,5 +78,16 @@ public class AdminMentorController {
         AdminMentorDetail mentor = getAdminMentorDetailUseCase.getAdminMentorDetail(mentorId);
         return apiResponseFactory.success(AdminMentorDetailResponse.from(mentor),
                 "Get admin mentor detail successfully");
+    }
+
+    @PatchMapping("/{mentorId}/approval")
+    public ApiResponse<AdminMentorDetailResponse> reviewMentorApproval(
+            @AuthenticationPrincipal AuthenticatedPrincipal principal,
+            @PathVariable Long mentorId,
+            @Valid @RequestBody ReviewMentorApprovalRequest request) {
+        AdminMentorDetail mentor = reviewMentorApprovalUseCase.reviewMentorApproval(
+                request.toCommand(principal, mentorId));
+        return apiResponseFactory.success(AdminMentorDetailResponse.from(mentor),
+                "Review mentor approval successfully");
     }
 }
