@@ -12,9 +12,11 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
+import com.mentormatching.shared.security.handler.CustomAuthenticationEntryPoint;
 import com.mentormatching.shared.security.jwt.JwtTokenProvider;
 import com.mentormatching.shared.security.model.AuthenticatedUser;
 
@@ -37,11 +39,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtTokenProvider jwtTokenProvider;
     private final ObjectProvider<UserDetailsService> userDetailsServiceProvider;
+    private final AuthenticationEntryPoint authenticationEntryPoint;
 
     public JwtAuthenticationFilter(JwtTokenProvider jwtTokenProvider,
-                                   ObjectProvider<UserDetailsService> userDetailsServiceProvider) {
+                                   ObjectProvider<UserDetailsService> userDetailsServiceProvider,
+                                   CustomAuthenticationEntryPoint authenticationEntryPoint) {
         this.jwtTokenProvider = jwtTokenProvider;
         this.userDetailsServiceProvider = userDetailsServiceProvider;
+        this.authenticationEntryPoint = authenticationEntryPoint;
     }
 
     @Override
@@ -62,29 +67,23 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             UsernamePasswordAuthenticationToken authentication = buildAuthentication(tokenUser);
             SecurityContextHolder.getContext().setAuthentication(authentication);
         } catch (ExpiredJwtException ex) {
-            SecurityContextHolder.clearContext();
-            setAuthError(request, "TOKEN_EXPIRED", "JWT token has expired");
-            throw new BadCredentialsException("JWT token has expired", ex);
+            commenceAuthenticationError(request, response, "TOKEN_EXPIRED", "JWT token has expired", ex);
+            return;
         } catch (MalformedJwtException ex) {
-            SecurityContextHolder.clearContext();
-            setAuthError(request, "TOKEN_MALFORMED", "JWT token is malformed");
-            throw new BadCredentialsException("JWT token is malformed", ex);
+            commenceAuthenticationError(request, response, "TOKEN_MALFORMED", "JWT token is malformed", ex);
+            return;
         } catch (UnsupportedJwtException ex) {
-            SecurityContextHolder.clearContext();
-            setAuthError(request, "TOKEN_UNSUPPORTED", "JWT token is unsupported");
-            throw new BadCredentialsException("JWT token is unsupported", ex);
+            commenceAuthenticationError(request, response, "TOKEN_UNSUPPORTED", "JWT token is unsupported", ex);
+            return;
         } catch (SignatureException ex) {
-            SecurityContextHolder.clearContext();
-            setAuthError(request, "TOKEN_SIGNATURE_INVALID", "JWT signature is invalid");
-            throw new BadCredentialsException("JWT signature is invalid", ex);
+            commenceAuthenticationError(request, response, "TOKEN_SIGNATURE_INVALID", "JWT signature is invalid", ex);
+            return;
         } catch (UsernameNotFoundException ex) {
-            SecurityContextHolder.clearContext();
-            setAuthError(request, "USER_NOT_FOUND", "Authenticated user does not exist");
-            throw new BadCredentialsException("Authenticated user does not exist", ex);
+            commenceAuthenticationError(request, response, "USER_NOT_FOUND", "Authenticated user does not exist", ex);
+            return;
         } catch (IllegalArgumentException ex) {
-            SecurityContextHolder.clearContext();
-            setAuthError(request, "TOKEN_INVALID", "JWT token is invalid");
-            throw new BadCredentialsException("JWT token is invalid", ex);
+            commenceAuthenticationError(request, response, "TOKEN_INVALID", "JWT token is invalid", ex);
+            return;
         }
 
         filterChain.doFilter(request, response);
@@ -108,5 +107,15 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private void setAuthError(HttpServletRequest request, String code, String message) {
         request.setAttribute(AUTH_ERROR_CODE_ATTR, code);
         request.setAttribute(AUTH_ERROR_MESSAGE_ATTR, message);
+    }
+
+    private void commenceAuthenticationError(HttpServletRequest request,
+                                             HttpServletResponse response,
+                                             String code,
+                                             String message,
+                                             Exception ex) throws IOException, ServletException {
+        SecurityContextHolder.clearContext();
+        setAuthError(request, code, message);
+        authenticationEntryPoint.commence(request, response, new BadCredentialsException(message, ex));
     }
 }
