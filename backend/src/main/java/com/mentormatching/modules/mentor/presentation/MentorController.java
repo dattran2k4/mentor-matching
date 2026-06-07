@@ -30,14 +30,12 @@ import com.mentormatching.modules.mentor.application.dto.MentorTraitsDetail;
 import com.mentormatching.modules.mentor.application.port.in.GetCurrentMentorUseCase;
 import com.mentormatching.modules.mentor.application.port.in.GetCurrentMentorSubjectsUseCase;
 import com.mentormatching.modules.mentor.application.port.in.GetCurrentMentorVerificationUseCase;
-import com.mentormatching.modules.mentor.application.port.in.GetHighlightOptionsUseCase;
 import com.mentormatching.modules.mentor.application.port.in.GetMentorAchievementsUseCase;
 import com.mentormatching.modules.mentor.application.port.in.GetMentorAvailabilitiesUseCase;
 import com.mentormatching.modules.mentor.application.port.in.GetMentorDetailUseCase;
 import com.mentormatching.modules.mentor.application.port.in.GetMentorSubjectsUseCase;
 import com.mentormatching.modules.mentor.application.port.in.GetMentorTraitsUseCase;
 import com.mentormatching.modules.mentor.application.port.in.GetMentorsUseCase;
-import com.mentormatching.modules.mentor.application.port.in.GetPersonalityOptionsUseCase;
 import com.mentormatching.modules.mentor.application.port.in.UpsertCurrentMentorSubjectUseCase;
 import com.mentormatching.modules.mentor.application.port.in.UpsertCurrentMentorVerificationUseCase;
 import com.mentormatching.modules.mentor.application.port.in.UpdateCurrentMentorUseCase;
@@ -52,7 +50,6 @@ import com.mentormatching.modules.mentor.presentation.dto.response.MentorAchieve
 import com.mentormatching.modules.mentor.presentation.dto.response.MentorAvailabilityDetailResponse;
 import com.mentormatching.modules.mentor.presentation.dto.response.MentorDetailResponse;
 import com.mentormatching.modules.mentor.presentation.dto.response.MentorListItemResponse;
-import com.mentormatching.modules.mentor.presentation.dto.response.MentorOptionDetailResponse;
 import com.mentormatching.modules.mentor.presentation.dto.response.MentorSubjectDetailResponse;
 import com.mentormatching.modules.mentor.presentation.dto.response.MentorTraitsDetailResponse;
 import com.mentormatching.shared.response.ApiResponse;
@@ -74,8 +71,6 @@ public class MentorController {
     private final GetCurrentMentorUseCase getCurrentMentorUseCase;
     private final GetCurrentMentorSubjectsUseCase getCurrentMentorSubjectsUseCase;
     private final GetCurrentMentorVerificationUseCase getCurrentMentorVerificationUseCase;
-    private final GetPersonalityOptionsUseCase getPersonalityOptionsUseCase;
-    private final GetHighlightOptionsUseCase getHighlightOptionsUseCase;
     private final UpsertCurrentMentorSubjectUseCase upsertCurrentMentorSubjectUseCase;
     private final UpsertCurrentMentorVerificationUseCase upsertCurrentMentorVerificationUseCase;
     private final UpdateCurrentMentorUseCase updateCurrentMentorUseCase;
@@ -142,22 +137,6 @@ public class MentorController {
         return apiResponseFactory.success(MentorSubjectDetailResponse.from(
                 upsertCurrentMentorSubjectUseCase.upsertCurrentMentorSubject(request.toCommand(principal))),
                 "Save current mentor subject successfully");
-    }
-
-    @GetMapping("/personality-options")
-    public ApiResponse<List<MentorOptionDetailResponse>> getPersonalityOptions() {
-        List<MentorOptionDetailResponse> options = getPersonalityOptionsUseCase.getPersonalityOptions().stream()
-                .map(MentorOptionDetailResponse::from)
-                .toList();
-        return apiResponseFactory.success(options, "Get personality options successfully");
-    }
-
-    @GetMapping("/highlight-options")
-    public ApiResponse<List<MentorOptionDetailResponse>> getHighlightOptions() {
-        List<MentorOptionDetailResponse> options = getHighlightOptionsUseCase.getHighlightOptions().stream()
-                .map(MentorOptionDetailResponse::from)
-                .toList();
-        return apiResponseFactory.success(options, "Get highlight options successfully");
     }
 
     @GetMapping
