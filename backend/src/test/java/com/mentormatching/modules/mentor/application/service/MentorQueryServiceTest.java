@@ -7,6 +7,7 @@ import static org.mockito.Mockito.when;
 
 import java.time.LocalDateTime;
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -14,6 +15,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import com.mentormatching.modules.mentor.application.dto.CurrentMentorDetails;
+import com.mentormatching.modules.mentor.application.dto.MentorAchievementDetail;
 import com.mentormatching.modules.mentor.application.dto.MentorOptionDetail;
 import com.mentormatching.modules.mentor.application.dto.MentorSubjectDetail;
 import com.mentormatching.modules.mentor.application.port.out.MentorCatalogLookupPort;
@@ -21,6 +23,7 @@ import com.mentormatching.modules.mentor.application.port.out.MentorProfileRepos
 import com.mentormatching.modules.mentor.application.port.out.MentorReadRepositoryPort;
 import com.mentormatching.modules.mentor.application.port.out.MentorSubjectRepositoryPort;
 import com.mentormatching.modules.mentor.domain.Gender;
+import com.mentormatching.modules.mentor.domain.AchievementType;
 import com.mentormatching.modules.mentor.domain.MeetingType;
 import com.mentormatching.modules.mentor.domain.MentorApprovalStatus;
 import com.mentormatching.modules.mentor.domain.ProficiencyLevel;
@@ -99,6 +102,40 @@ class MentorQueryServiceTest {
 
         ResourceNotFoundException exception = assertThrows(ResourceNotFoundException.class,
                 () -> mentorQueryService.getCurrentMentorSubjects(99L));
+
+        assertEquals("Mentor profile not found", exception.getMessage());
+    }
+
+    @Test
+    void getCurrentMentorAchievementsReturnsAchievementsForCurrentMentor() {
+        MentorProfile mentorProfile = MentorProfile.restore(new MentorProfileRestoreData(10L, 20L,
+                "https://example.com/avatar.jpg", Gender.FEMALE, 1L, 2L, "Headline", "Intro",
+                "Style", 6, "Teacher", "Mentor Matching", "HCMUS", "Mathematics", MeetingType.HYBRID,
+                MentorApprovalStatus.PENDING, null, null, null, LocalDateTime.parse("2026-06-01T10:15:30"),
+                LocalDateTime.parse("2026-06-05T12:00:00")));
+        List<MentorAchievementDetail> expected = List.of(
+                new MentorAchievementDetail(100L, "Giai nhat", "Dat giai cap thanh pho",
+                        AchievementType.AWARD, "So Giao duc", LocalDate.parse("2024-05-10"),
+                        "https://example.com/proof-1.jpg", true),
+                new MentorAchievementDetail(101L, "Chung chi", "Hoan thanh khoa dao tao",
+                        AchievementType.CERTIFICATE, "Coursera", LocalDate.parse("2023-11-01"),
+                        "https://example.com/proof-2.jpg", false)
+        );
+
+        when(mentorProfileRepositoryPort.findByUserId(20L)).thenReturn(Optional.of(mentorProfile));
+        when(mentorReadRepositoryPort.findMentorAchievements(10L)).thenReturn(expected);
+
+        List<MentorAchievementDetail> actual = mentorQueryService.getCurrentMentorAchievements(20L);
+
+        assertEquals(expected, actual);
+    }
+
+    @Test
+    void getCurrentMentorAchievementsThrowsWhenMentorProfileDoesNotExist() {
+        when(mentorProfileRepositoryPort.findByUserId(99L)).thenReturn(Optional.empty());
+
+        ResourceNotFoundException exception = assertThrows(ResourceNotFoundException.class,
+                () -> mentorQueryService.getCurrentMentorAchievements(99L));
 
         assertEquals("Mentor profile not found", exception.getMessage());
     }

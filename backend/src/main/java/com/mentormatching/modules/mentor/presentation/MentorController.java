@@ -27,6 +27,7 @@ import com.mentormatching.modules.mentor.application.dto.MentorDetail;
 import com.mentormatching.modules.mentor.application.dto.MentorListItem;
 import com.mentormatching.modules.mentor.application.dto.MentorSubjectDetail;
 import com.mentormatching.modules.mentor.application.dto.MentorTraitsDetail;
+import com.mentormatching.modules.mentor.application.port.in.GetCurrentMentorAchievementsUseCase;
 import com.mentormatching.modules.mentor.application.port.in.GetCurrentMentorTraitsUseCase;
 import com.mentormatching.modules.mentor.application.port.in.GetCurrentMentorUseCase;
 import com.mentormatching.modules.mentor.application.port.in.GetCurrentMentorSubjectsUseCase;
@@ -73,6 +74,7 @@ import jakarta.validation.constraints.Min;
 public class MentorController {
 
     private final GetCurrentMentorTraitsUseCase getCurrentMentorTraitsUseCase;
+    private final GetCurrentMentorAchievementsUseCase getCurrentMentorAchievementsUseCase;
     private final GetCurrentMentorUseCase getCurrentMentorUseCase;
     private final GetCurrentMentorSubjectsUseCase getCurrentMentorSubjectsUseCase;
     private final GetCurrentMentorVerificationUseCase getCurrentMentorVerificationUseCase;
@@ -152,6 +154,16 @@ public class MentorController {
                 principal.getId());
         return apiResponseFactory.success(subjects.stream().map(MentorSubjectDetailResponse::from).toList(),
                 "Get current mentor subjects successfully");
+    }
+
+    @PreAuthorize("isAuthenticated()")
+    @GetMapping("/me/achievements")
+    public ApiResponse<List<MentorAchievementDetailResponse>> getCurrentMentorAchievements(
+            @AuthenticationPrincipal AuthenticatedPrincipal principal) {
+        List<MentorAchievementDetail> achievements = getCurrentMentorAchievementsUseCase
+                .getCurrentMentorAchievements(principal.getId());
+        return apiResponseFactory.success(achievements.stream().map(MentorAchievementDetailResponse::from).toList(),
+                "Get current mentor achievements successfully");
     }
 
     @PreAuthorize("isAuthenticated()")

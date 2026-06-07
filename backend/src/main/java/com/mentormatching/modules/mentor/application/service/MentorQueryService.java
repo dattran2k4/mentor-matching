@@ -18,6 +18,7 @@ import com.mentormatching.modules.mentor.application.dto.MentorSummary;
 import com.mentormatching.modules.mentor.application.dto.MentorTraitsDetail;
 import com.mentormatching.modules.mentor.application.port.in.GetMentorAchievementsUseCase;
 import com.mentormatching.modules.mentor.application.port.in.GetMentorAvailabilitiesUseCase;
+import com.mentormatching.modules.mentor.application.port.in.GetCurrentMentorAchievementsUseCase;
 import com.mentormatching.modules.mentor.application.port.in.GetCurrentMentorUseCase;
 import com.mentormatching.modules.mentor.application.port.in.GetCurrentMentorSubjectsUseCase;
 import com.mentormatching.modules.mentor.application.port.in.GetHighlightOptionsUseCase;
@@ -42,6 +43,7 @@ import com.mentormatching.shared.response.PageResponse;
 public class MentorQueryService implements GetMentorSummaryUseCase, GetMentorSubjectSummaryUseCase, GetMentorsUseCase,
         GetMentorDetailUseCase, GetMentorSubjectsUseCase, GetMentorTraitsUseCase, GetMentorAchievementsUseCase,
         GetMentorAvailabilitiesUseCase, GetMentorSummaryByUserUseCase, GetCurrentMentorUseCase,
+        GetCurrentMentorAchievementsUseCase,
         GetCurrentMentorSubjectsUseCase, GetPersonalityOptionsUseCase, GetHighlightOptionsUseCase {
 
     private final MentorProfileRepositoryPort mentorProfileRepositoryPort;
@@ -122,6 +124,13 @@ public class MentorQueryService implements GetMentorSummaryUseCase, GetMentorSub
     public List<MentorAchievementDetail> getMentorAchievements(Long mentorId) {
         ensureApprovedMentorExists(mentorId);
         return mentorReadRepositoryPort.findMentorAchievements(mentorId);
+    }
+
+    @Override
+    public List<MentorAchievementDetail> getCurrentMentorAchievements(Long userId) {
+        MentorProfile mentor = mentorProfileRepositoryPort.findByUserId(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("Mentor profile not found"));
+        return mentorReadRepositoryPort.findMentorAchievements(mentor.getId());
     }
 
     @Override
