@@ -10,9 +10,11 @@ export function useLoginMutation() {
 
   return useMutation({
     mutationFn: (payload: LoginRequest) => authApi.login(payload),
-    onSuccess: (data) => {
+    onSuccess: (response) => {
+      const data = response.data
+
       setAccessToken(data.accessToken)
-      setRefreshToken(data.refreshToken)
+      setRefreshToken('')
     }
   })
 }

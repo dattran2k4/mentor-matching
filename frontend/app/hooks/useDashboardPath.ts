@@ -1,5 +1,5 @@
 import { getDashboardPath } from '@/utils/get-dashboard-path'
-import { useCurrentUserQuery } from '@/hooks/queries/auth/use-current-user-query'
+import { useCurrentUserQuery } from '@/hooks/queries/auth/useCurrentUserQuery'
 import { useAuthStore } from '@/store/auth-store'
 
 export function useDashboardPath(): string | null {

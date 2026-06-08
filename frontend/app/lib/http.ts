@@ -1,16 +1,16 @@
 import axios, { type AxiosError, type AxiosInstance } from 'axios'
 
 import { env } from '@/config/env'
-import { isMockAccessToken } from '@/services/mock/auth.mock.api'
 import { path } from '@/config/path'
-import { REFRESH_TOKEN_URL } from '@/constants/auth'
+import { isMockAccessToken } from '@/services/mock/auth.mock.api'
 import { HttpStatusCode } from '@/constants/http-status'
 import { useAuthStore } from '@/store/auth-store'
 import type { AuthApiResponse } from '@/types/api/auth'
 import type { ApiResponse, ErrorResponse } from '@/types/api/common'
 import { isAxiosExpiredTokenError, isAxiosUnauthorizedError } from '@/utils/http-error'
 import { getCurrentLocale } from '@/utils/locale'
-import { notify } from '@/utils/notify'
+
+const REFRESH_TOKEN_URL = 'auth/refresh-token'
 
 class HttpClient {
   instance: AxiosInstance
@@ -19,7 +19,7 @@ class HttpClient {
   constructor() {
     this.refreshTokenRequest = null
     this.instance = axios.create({
-      baseURL: env.VITE_API_BASE_URL,
+      baseURL: env.apiBaseUrl,
       timeout: 30000,
       withCredentials: true,
       headers: {
@@ -62,15 +62,9 @@ class HttpClient {
         if (statusCode !== HttpStatusCode.Unauthorized) {
           const accessToken = useAuthStore.getState().accessToken
           const isNetworkError = !error.response
-          const skipNotify = env.VITE_USE_MOCK && (isNetworkError || isMockAccessToken(accessToken))
+          const skipNotify = env.useMock && (isNetworkError || isMockAccessToken(accessToken))
 
-          if (!skipNotify) {
-            const data = error.response?.data as { message?: string } | undefined
-            const message = isNetworkError
-              ? 'Không kết nối được API. Bật mock (VITE_USE_MOCK=true) hoặc chạy backend.'
-              : data?.message || 'Có lỗi xảy ra. Vui lòng thử lại.'
-            notify.error(message)
-          }
+          if (skipNotify) return Promise.reject(error)
 
           return Promise.reject(error)
         }
@@ -100,7 +94,6 @@ class HttpClient {
           }
 
           useAuthStore.getState().logout()
-          notify.error(error.response?.data?.message || 'Phiên đăng nhập đã hết hạn')
         }
 
         return Promise.reject(error)

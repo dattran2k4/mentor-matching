@@ -1,4 +1,3 @@
-export type LoginRequest = {
-  email: string
-  password: string
-}
+import type { LoginFormValues } from '@/schemas/auth'
+
+export type LoginRequest = LoginFormValues
