@@ -1,23 +1,12 @@
 import { env } from '@/config/env'
 import http from '@/lib/http'
 import { mockAuthApi } from '@/services/mock/auth.mock.api'
-import type { AuthResponse, LoginRequest } from '@/types/auth'
-import type { ApiResponse } from '@/types/api-response'
-import type { CurrentUser } from '@/types/user'
-
-type MeResponse = {
-  id: number
-  fullName: string
-  email: string
-  role: string
-}
-
-type LoginApiResponse = {
-  accessToken: string
-  accessTokenExpiresIn: number
-  refreshTokenExpiresIn: number
-  user: MeResponse
-}
+import type { AuthApiResponse } from '@/types/api/auth'
+import { mapApiResponse, type ApiResponse } from '@/types/api/common'
+import type { CurrentUserApiResponse } from '@/types/api/user'
+import type { LoginRequest } from '@/types/form/auth'
+import type { AuthResponse } from '@/types/models/auth'
+import type { CurrentUser } from '@/types/models/user'
 
 const AUTH_ENDPOINTS = {
   login: 'v1/auth/login',
@@ -26,11 +15,11 @@ const AUTH_ENDPOINTS = {
 
 const realAuthApi = {
   async login(payload: LoginRequest): Promise<AuthResponse> {
-    const response = await http.post<ApiResponse<LoginApiResponse>>(AUTH_ENDPOINTS.login, payload, {
+    const response = await http.post<ApiResponse<AuthApiResponse>>(AUTH_ENDPOINTS.login, payload, {
       withCredentials: true
     })
 
-    const data = response.data.data
+    const data = mapApiResponse(response.data)
 
     return {
       accessToken: data.accessToken,
@@ -39,8 +28,8 @@ const realAuthApi = {
   },
 
   async getCurrentUser(): Promise<CurrentUser> {
-    const response = await http.get<ApiResponse<MeResponse>>(AUTH_ENDPOINTS.me)
-    const data = response.data.data
+    const response = await http.get<ApiResponse<CurrentUserApiResponse>>(AUTH_ENDPOINTS.me)
+    const data = mapApiResponse(response.data)
 
     return {
       id: String(data.id),

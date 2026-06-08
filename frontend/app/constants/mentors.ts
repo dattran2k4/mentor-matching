@@ -1,4 +1,4 @@
-import type { Mentor } from '@/types/mentor'
+import type { Mentor } from '@/types/models/mentor'
 
 export const mentors: Mentor[] = [
   {

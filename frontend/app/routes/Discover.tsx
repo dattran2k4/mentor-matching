@@ -12,7 +12,7 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Select } from '@/components/ui/select'
 import { mentors } from '@/constants/mentors'
 import { path } from '@/config/path'
-import type { Mentor } from '@/types/mentor'
+import type { Mentor } from '@/types/models/mentor'
 
 const sortOptions = ['Phù hợp', 'Đánh giá', 'Học phí', 'Mới nhất'] as const
 const publicMentors = mentors.filter((mentor) => mentor.approvalStatus === 'APPROVED')

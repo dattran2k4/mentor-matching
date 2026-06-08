@@ -8,7 +8,7 @@ import { buttonVariants } from '@/components/ui/button'
 import { Card, CardContent, CardFooter } from '@/components/ui/card'
 import { Separator } from '@/components/ui/separator'
 import { path } from '@/config/path'
-import type { Mentor } from '@/types/mentor'
+import type { Mentor } from '@/types/models/mentor'
 import { formatPrice, getInitials } from '@/utils/format'
 import { cn } from '@/utils/cn'
 

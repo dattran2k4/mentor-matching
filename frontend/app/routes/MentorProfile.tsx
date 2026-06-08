@@ -14,7 +14,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { path } from '@/config/path'
 import { mentors } from '@/constants/mentors'
-import type { Mentor, MentorOffering } from '@/types/mentor'
+import type { Mentor, MentorOffering } from '@/types/models/mentor'
 import { formatPrice, getInitials } from '@/utils/format'
 
 const publicMentors = mentors.filter((mentor) => mentor.approvalStatus === 'APPROVED')

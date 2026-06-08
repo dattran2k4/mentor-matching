@@ -1,8 +1,9 @@
 import { ROLES } from '@/constants/roles'
 import { TEST_PASSWORD, testAccounts } from '@/constants/test-accounts'
 import { useAuthStore } from '@/store/auth-store'
-import type { AuthResponse, LoginRequest } from '@/types/auth'
-import type { CurrentUser } from '@/types/user'
+import type { LoginRequest } from '@/types/form/auth'
+import type { AuthResponse } from '@/types/models/auth'
+import type { CurrentUser } from '@/types/models/user'
 
 export const MOCK_TOKEN_PREFIX = 'mock:'
 

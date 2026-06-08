@@ -6,8 +6,8 @@ import { path } from '@/config/path'
 import { REFRESH_TOKEN_URL } from '@/constants/auth'
 import { HttpStatusCode } from '@/constants/http-status'
 import { useAuthStore } from '@/store/auth-store'
-import type { AuthResponse } from '@/types/auth'
-import type { ApiResponse, ErrorResponse } from '@/types/api-response'
+import type { AuthApiResponse } from '@/types/api/auth'
+import type { ApiResponse, ErrorResponse } from '@/types/api/common'
 import { isAxiosExpiredTokenError, isAxiosUnauthorizedError } from '@/utils/http-error'
 import { getCurrentLocale } from '@/utils/locale'
 import { notify } from '@/utils/notify'
@@ -112,7 +112,7 @@ class HttpClient {
     const { setAccessToken, logout } = useAuthStore.getState()
 
     return this.instance
-      .post<ApiResponse<AuthResponse>>(REFRESH_TOKEN_URL, {})
+      .post<ApiResponse<AuthApiResponse>>(REFRESH_TOKEN_URL, {})
       .then((res) => {
         const accessToken = res.data.data.accessToken
         setAccessToken(accessToken)

@@ -1,9 +1,9 @@
 import { AlertTriangle, CheckCircle2, Clock, ShieldAlert, XCircle } from 'lucide-react'
 
 import { Badge } from '@/components/ui/badge'
-import type { BookingStatus, PaymentStatus } from '@/types/booking'
-import type { MentorApprovalStatus, MentorVerificationStatus } from '@/types/mentor'
-import type { UserStatus } from '@/types/user'
+import type { BookingStatus, PaymentStatus } from '@/types/models/booking'
+import type { MentorApprovalStatus, MentorVerificationStatus } from '@/types/models/mentor'
+import type { UserStatus } from '@/types/models/user'
 import { cn } from '@/utils/cn'
 
 type StatusBadgeKind = 'booking' | 'payment' | 'approval' | 'verification' | 'user'
