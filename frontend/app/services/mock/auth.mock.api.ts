@@ -1,12 +1,13 @@
 import { ROLES } from '@/constants/roles'
-import { TEST_PASSWORD, testAccounts } from '@/constants/test-accounts'
-import { useAuthStore } from '@/store/auth-store'
-import type { AuthResponse, LoginRequest } from '@/types/auth'
-import type { CurrentUser } from '@/types/user'
+import type { AuthApiResponse } from '@/types/api/auth'
+import type { ApiResponse } from '@/types/api/common'
+import type { LoginRequest } from '@/types/form/auth'
+import type { CurrentUser } from '@/types/models/user'
 
 export const MOCK_TOKEN_PREFIX = 'mock:'
+const MOCK_PASSWORD = '123456'
 
-const mockUsers: Record<string, CurrentUser> = {
+export const mockUsers: Record<string, CurrentUser> = {
   'learner@test.com': {
     id: '1',
     email: 'learner@test.com',
@@ -38,34 +39,40 @@ export function isMockAccessToken(token: string | null): boolean {
   return Boolean(getMockEmailFromToken(token))
 }
 
+function buildSuccessResponse<T>(data: T, message = 'Success'): ApiResponse<T> {
+  return {
+    status: 200,
+    code: 'SUCCESS',
+    success: true,
+    message,
+    data
+  }
+}
+
 export const mockAuthApi = {
-  async login(payload: LoginRequest): Promise<AuthResponse> {
+  async login(payload: LoginRequest): Promise<ApiResponse<AuthApiResponse>> {
     await delay()
 
     const email = payload.email.trim().toLowerCase()
     const user = mockUsers[email]
 
-    if (!user || payload.password !== TEST_PASSWORD) {
+    if (!user || payload.password !== MOCK_PASSWORD) {
       throw new Error('Email hoặc mật khẩu không đúng. Dùng mật khẩu 123456 cho tài khoản test.')
     }
 
-    return {
-      accessToken: `${MOCK_TOKEN_PREFIX}${email}`,
-      refreshToken: 'mock-refresh-token'
-    }
-  },
-
-  async getCurrentUser(): Promise<CurrentUser> {
-    await delay(200)
-
-    const email = getMockEmailFromToken(useAuthStore.getState().accessToken)
-
-    if (!email || !mockUsers[email]) {
-      throw new Error('Phiên đăng nhập mock không hợp lệ')
-    }
-
-    return mockUsers[email]
+    return buildSuccessResponse(
+      {
+        accessToken: `${MOCK_TOKEN_PREFIX}${email}`,
+        accessTokenExpiresIn: 3600,
+        refreshTokenExpiresIn: 604800,
+        user: {
+          id: Number(user.id),
+          email: user.email,
+          fullName: user.fullName,
+          role: user.roles[0] ?? ''
+        }
+      },
+      'Login successfully'
+    )
   }
 }
-
-export const mockAccountEmails = testAccounts.map((account) => account.email)

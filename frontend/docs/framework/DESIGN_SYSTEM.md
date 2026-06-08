@@ -61,12 +61,12 @@ The app currently defines Tailwind theme tokens in `app.css`.
 
 ### Font
 
-- Sans: `Geist Variable`
-- Earlier theme also references `Inter`, `Outfit`, and `Clash Display`
+- Sans: `Public Sans`
+- Fallbacks still reference `Inter` and `Outfit`
 
 Guidance:
 
-- Keep `Geist Variable` as the practical default unless a brand refresh intentionally changes typography.
+- Keep `Public Sans` as the practical default unless a brand refresh intentionally changes typography.
 - Use compact typography for dashboards.
 - Avoid adding new font packages without a specific design reason.
 - If a premium accent type treatment is introduced later, limit it to public hero or section titles only.

@@ -1,5 +1,5 @@
-import type { MentorApprovalStatus, MentorVerificationStatus } from '@/types/mentor'
-import type { UserStatus } from '@/types/user'
+import type { MentorApprovalStatus, MentorVerificationStatus } from '@/types/models/mentor'
+import type { UserStatus } from '@/types/models/user'
 
 export type AdminQueueItem = {
   id: string

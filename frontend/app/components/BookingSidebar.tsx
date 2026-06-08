@@ -5,7 +5,7 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Separator } from '@/components/ui/separator'
-import type { Mentor } from '@/types/mentor'
+import type { Mentor } from '@/types/models/mentor'
 import { cn } from '@/utils/cn'
 import { formatPrice } from '@/utils/format'
 

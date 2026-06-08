@@ -1,7 +1,7 @@
 import { Link } from 'react-router'
 
 import { path } from '@/config/path'
-import { useDashboardPath } from '@/hooks/use-dashboard-path'
+import { useDashboardPath } from '@/hooks/useDashboardPath'
 
 export default function ForbiddenPage() {
   const dashboardPath = useDashboardPath()

@@ -1,4 +1,4 @@
-import type { MeetingType } from '@/types/mentor'
+import type { MeetingType } from '@/types/models/mentor'
 
 export type BookingStatus =
   | 'PENDING'

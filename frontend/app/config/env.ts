@@ -1,20 +1,30 @@
-import { z } from 'zod'
+function parseApiBaseUrl(value: unknown): string {
+  const rawValue = typeof value === 'string' ? value.trim() : ''
 
-const envSchema = z.object({
-  VITE_API_BASE_URL: z
-    .string()
-    .trim()
-    .url('VITE_API_BASE_URL must be a valid URL, for example: http://localhost:8080/api/')
-    .optional(),
-  VITE_USE_MOCK: z.preprocess(
-    (value) => (value === undefined || value === '' ? 'true' : value),
-    z.enum(['true', 'false', '1', '0']).transform((value) => value === 'true' || value === '1')
-  )
-})
+  if (!rawValue) return 'http://localhost:8080'
 
-const parsed = envSchema.parse(import.meta.env)
+  try {
+    return new URL(rawValue).origin
+  } catch {
+    throw new Error('VITE_API_BASE_URL must be a valid URL, for example: http://localhost:8080')
+  }
+}
+
+function parseBooleanEnv(value: unknown, defaultValue: boolean): boolean {
+  if (value === undefined || value === '') return defaultValue
+  if (value === true || value === 'true' || value === '1') return true
+  if (value === false || value === 'false' || value === '0') return false
+
+  throw new Error('VITE_USE_MOCK must be one of: true, false, 1, 0')
+}
+
+const apiServerUrl = new URL(parseApiBaseUrl(import.meta.env.VITE_API_BASE_URL))
+const apiOrigin = apiServerUrl.origin
+const apiBasePath = '/api/v1'
 
 export const env = {
-  VITE_USE_MOCK: parsed.VITE_USE_MOCK,
-  VITE_API_BASE_URL: parsed.VITE_API_BASE_URL ?? 'http://localhost:8080/api/'
+  useMock: parseBooleanEnv(import.meta.env.VITE_USE_MOCK, true),
+  apiOrigin,
+  apiBasePath,
+  apiBaseUrl: `${apiOrigin}${apiBasePath}/`
 }

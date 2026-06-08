@@ -1,7 +1,7 @@
 import { Navigate, Outlet, useSearchParams } from 'react-router'
 
 import { path } from '@/config/path'
-import { useCurrentUserQuery } from '@/hooks/queries/auth/use-current-user-query'
+import { useCurrentUserQuery } from '@/hooks/queries/auth/useCurrentUserQuery'
 import { useAuthStore } from '@/store/auth-store'
 import { getDashboardPath } from '@/utils/get-dashboard-path'
 

@@ -1,6 +1,6 @@
 import RatingStars from './RatingStars'
 import { getInitials } from '@/utils/format'
-import type { Testimonial } from '../types/testimonial'
+import type { Testimonial } from '@/types/models/testimonial'
 
 interface TestimonialCardProps {
   testimonial: Testimonial
