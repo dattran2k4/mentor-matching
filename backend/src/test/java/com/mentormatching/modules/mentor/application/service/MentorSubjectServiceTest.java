@@ -3,6 +3,7 @@ package com.mentormatching.modules.mentor.application.service;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.math.BigDecimal;
@@ -131,6 +132,47 @@ class MentorSubjectServiceTest {
                 () -> mentorSubjectService.upsertCurrentMentorSubject(command));
 
         assertEquals("Mentor subject not found", exception.getMessage());
+    }
+
+    @Test
+    void deleteCurrentMentorSubjectDeletesSubjectWhenItBelongsToCurrentMentor() {
+        MentorProfile mentorProfile = mentorProfile(10L, 20L);
+        MentorSubject existing = MentorSubject.restore(new MentorSubjectRestoreData(100L, 10L, 200L,
+                ProficiencyLevel.BASIC, "Old", new BigDecimal("200000"), false,
+                LocalDateTime.parse("2026-06-01T10:00:00"), LocalDateTime.parse("2026-06-01T10:00:00")));
+
+        when(mentorProfileRepositoryPort.findByUserId(20L)).thenReturn(Optional.of(mentorProfile));
+        when(mentorSubjectRepositoryPort.findById(100L)).thenReturn(Optional.of(existing));
+
+        mentorSubjectService.deleteCurrentMentorSubject(20L, 100L);
+
+        verify(mentorSubjectRepositoryPort).delete(existing);
+    }
+
+    @Test
+    void deleteCurrentMentorSubjectThrowsWhenSubjectDoesNotBelongToCurrentMentor() {
+        MentorProfile mentorProfile = mentorProfile(10L, 20L);
+        MentorSubject existing = MentorSubject.restore(new MentorSubjectRestoreData(100L, 99L, 200L,
+                ProficiencyLevel.BASIC, "Old", new BigDecimal("200000"), false,
+                LocalDateTime.parse("2026-06-01T10:00:00"), LocalDateTime.parse("2026-06-01T10:00:00")));
+
+        when(mentorProfileRepositoryPort.findByUserId(20L)).thenReturn(Optional.of(mentorProfile));
+        when(mentorSubjectRepositoryPort.findById(100L)).thenReturn(Optional.of(existing));
+
+        ResourceNotFoundException exception = assertThrows(ResourceNotFoundException.class,
+                () -> mentorSubjectService.deleteCurrentMentorSubject(20L, 100L));
+
+        assertEquals("Mentor subject not found", exception.getMessage());
+    }
+
+    @Test
+    void deleteCurrentMentorSubjectThrowsWhenMentorProfileDoesNotExist() {
+        when(mentorProfileRepositoryPort.findByUserId(99L)).thenReturn(Optional.empty());
+
+        ResourceNotFoundException exception = assertThrows(ResourceNotFoundException.class,
+                () -> mentorSubjectService.deleteCurrentMentorSubject(99L, 100L));
+
+        assertEquals("Mentor profile not found", exception.getMessage());
     }
 
     private MentorProfile mentorProfile(Long mentorId, Long userId) {
