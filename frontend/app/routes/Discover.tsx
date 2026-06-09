@@ -1,5 +1,6 @@
 import { Filter, RotateCcw, SlidersHorizontal } from 'lucide-react'
 import { useState } from 'react'
+import { useSearchParams } from 'react-router'
 
 import { EmptyState } from '@/components/EmptyState'
 import FilterSidebar, { defaultFilterGroups } from '@/components/FilterSidebar'
@@ -18,9 +19,10 @@ const sortOptions = ['Phù hợp', 'Đánh giá', 'Học phí', 'Mới nhất'] 
 const publicMentors = mentors.filter((mentor) => mentor.approvalStatus === 'APPROVED')
 
 const Discover = () => {
+  const [searchParams] = useSearchParams()
   const [filtersOpen, setFiltersOpen] = useState(false)
-  const [keyword, setKeyword] = useState('')
-  const [context, setContext] = useState('')
+  const [keyword, setKeyword] = useState(() => searchParams.get('search') ?? '')
+  const [context, setContext] = useState(() => searchParams.get('context') ?? '')
   const [selectedFilters, setSelectedFilters] = useState<string[]>([
     'subject:Toán',
     'grade:Lớp 9',

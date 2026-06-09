@@ -12,18 +12,27 @@ export const mockUsers: Record<string, CurrentUser> = {
     id: '1',
     email: 'learner@test.com',
     fullName: 'Học viên Test',
+    phone: '0900000001',
+    userType: 'STUDENT',
+    status: 'ACTIVE',
     roles: [ROLES.LEARNER]
   },
   'mentor@test.com': {
     id: '2',
     email: 'mentor@test.com',
     fullName: 'Mentor Test',
+    phone: '0900000002',
+    userType: 'WORKING_ADULT',
+    status: 'ACTIVE',
     roles: [ROLES.MENTOR]
   },
   'admin@test.com': {
     id: '3',
     email: 'admin@test.com',
     fullName: 'Admin Test',
+    phone: '0900000003',
+    userType: 'WORKING_ADULT',
+    status: 'ACTIVE',
     roles: [ROLES.ADMIN]
   }
 }
@@ -106,6 +115,9 @@ export const mockAuthApi = {
       id: nextUserId,
       email,
       fullName: payload.fullName,
+      phone: '',
+      userType: 'STUDENT',
+      status: 'ACTIVE',
       roles: [ROLES.LEARNER]
     }
 

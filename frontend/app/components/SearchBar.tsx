@@ -1,11 +1,17 @@
 import { BookOpen, MapPin, Search } from 'lucide-react'
-import type { FormEvent } from 'react'
+import { useState, type FormEvent } from 'react'
 
 import { Button, buttonVariants } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Separator } from '@/components/ui/separator'
 import { cn } from '@/utils/cn'
+
+export type SearchBarSuggestion = {
+  id: string
+  label: string
+  description?: string
+}
 
 type SearchBarProps = {
   keywordPlaceholder?: string
@@ -19,6 +25,12 @@ type SearchBarProps = {
   onContextChange?: (value: string) => void
   onQuickTagClick?: (tag: string) => void
   onSubmit?: () => void
+  isSubmitting?: boolean
+  contextSuggestions?: SearchBarSuggestion[]
+  isContextSuggestionsLoading?: boolean
+  contextSuggestionsError?: string | null
+  contextSuggestionsEmptyText?: string
+  onContextSuggestionSelect?: (suggestion: SearchBarSuggestion) => void
   className?: string
 }
 
@@ -34,12 +46,29 @@ const SearchBar = ({
   onContextChange,
   onQuickTagClick,
   onSubmit,
+  isSubmitting = false,
+  contextSuggestions = [],
+  isContextSuggestionsLoading = false,
+  contextSuggestionsError,
+  contextSuggestionsEmptyText = 'Không tìm thấy thành phố phù hợp.',
+  onContextSuggestionSelect,
   className
 }: SearchBarProps) => {
+  const [isContextFocused, setIsContextFocused] = useState(false)
+
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     onSubmit?.()
   }
+
+  const shouldShowContextSuggestions =
+    isContextFocused &&
+    Boolean(onContextSuggestionSelect) &&
+    Boolean(contextValue?.trim()) &&
+    (isContextSuggestionsLoading ||
+      Boolean(contextSuggestionsError) ||
+      contextSuggestions.length > 0 ||
+      (contextValue?.trim().length ?? 0) >= 2)
 
   return (
     <Card className={cn('shadow-soft rounded-[28px] border-slate-200/80 bg-white', className)}>
@@ -75,12 +104,51 @@ const SearchBar = ({
                 className='h-12 bg-slate-50 pr-4 pl-10'
                 placeholder={contextPlaceholder}
                 value={contextValue}
+                onBlur={() => {
+                  window.setTimeout(() => setIsContextFocused(false), 120)
+                }}
                 onChange={(event) => onContextChange?.(event.target.value)}
+                onFocus={() => setIsContextFocused(true)}
               />
+              {shouldShowContextSuggestions ? (
+                <div className='absolute inset-x-0 top-[calc(100%+0.5rem)] z-20 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-lg'>
+                  {isContextSuggestionsLoading ? (
+                    <p className='px-4 py-3 text-sm text-slate-600'>Đang tìm khu vực phù hợp...</p>
+                  ) : contextSuggestionsError ? (
+                    <p className='px-4 py-3 text-sm text-red-600'>{contextSuggestionsError}</p>
+                  ) : contextSuggestions.length ? (
+                    <div className='py-2'>
+                      {contextSuggestions.map((suggestion) => (
+                        <button
+                          key={suggestion.id}
+                          className='flex w-full flex-col items-start gap-0.5 px-4 py-3 text-left transition hover:bg-slate-50'
+                          type='button'
+                          onClick={() => onContextSuggestionSelect?.(suggestion)}
+                          onMouseDown={(event) => event.preventDefault()}
+                        >
+                          <span className='text-ink text-sm font-medium'>{suggestion.label}</span>
+                          {suggestion.description ? (
+                            <span className='text-muted text-xs'>{suggestion.description}</span>
+                          ) : null}
+                        </button>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className='px-4 py-3 text-sm text-slate-600'>
+                      {contextSuggestionsEmptyText}
+                    </p>
+                  )}
+                </div>
+              ) : null}
             </div>
           </label>
 
-          <Button className='h-12 xl:min-w-[150px]' size='lg' type='submit'>
+          <Button
+            className='h-12 xl:min-w-[150px]'
+            isLoading={isSubmitting}
+            size='lg'
+            type='submit'
+          >
             {buttonLabel}
           </Button>
         </form>

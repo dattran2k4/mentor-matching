@@ -10,6 +10,17 @@ export type MentorVerificationStatusApiResponse = 'UNVERIFIED' | 'PENDING' | 'VE
 
 export type MentorProficiencyLevelApiResponse = 'BASIC' | 'INTERMEDIATE' | 'ADVANCED' | 'EXPERT'
 
+export type MentorListSortByApiParam =
+  | 'id'
+  | 'fullName'
+  | 'gender'
+  | 'experienceYears'
+  | 'meetingType'
+  | 'createdAt'
+  | 'minPrice'
+
+export type AdminMentorListSortByApiParam = MentorListSortByApiParam | 'approvalStatus'
+
 export type MentorAchievementTypeApiResponse =
   | 'AWARD'
   | 'CERTIFICATE'
@@ -111,7 +122,7 @@ export type MentorDetailApiResponse = {
 }
 
 export type GetMentorsQueryParams = PageQueryParams<
-  string,
+  MentorListSortByApiParam,
   {
     search?: string
     gender?: MentorGenderApiResponse
@@ -268,7 +279,7 @@ export type ReviewMentorApprovalRequest = {
 }
 
 export type GetAdminMentorsQueryParams = PageQueryParams<
-  string,
+  AdminMentorListSortByApiParam,
   {
     search?: string
     gender?: MentorGenderApiResponse
