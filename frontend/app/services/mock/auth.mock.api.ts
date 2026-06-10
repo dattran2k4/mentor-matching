@@ -11,19 +11,28 @@ const mockUsers: Record<string, CurrentUser> = {
     id: '1',
     email: 'learner@test.com',
     fullName: 'Học viên Test',
-    roles: [ROLES.LEARNER]
+    phone: '0900000001',
+    roles: [ROLES.LEARNER],
+    userType: 'STUDENT',
+    status: 'ACTIVE'
   },
   'mentor@test.com': {
     id: '2',
     email: 'mentor@test.com',
     fullName: 'Mentor Test',
-    roles: [ROLES.MENTOR]
+    phone: '0900000002',
+    roles: [ROLES.MENTOR],
+    userType: 'WORKING_ADULT',
+    status: 'ACTIVE'
   },
   'admin@test.com': {
     id: '3',
     email: 'admin@test.com',
     fullName: 'Admin Test',
-    roles: [ROLES.ADMIN]
+    phone: '0900000003',
+    roles: [ROLES.ADMIN],
+    userType: 'WORKING_ADULT',
+    status: 'ACTIVE'
   }
 }
 

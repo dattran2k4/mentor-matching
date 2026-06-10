@@ -3,13 +3,16 @@ import http from '@/lib/http'
 import { mockAuthApi } from '@/services/mock/auth.mock.api'
 import type { AuthResponse, LoginRequest } from '@/types/auth'
 import type { ApiResponse } from '@/types/api-response'
-import type { CurrentUser } from '@/types/user'
+import type { CurrentUser, UserStatus, UserType } from '@/types/user'
 
 type MeResponse = {
   id: number
   fullName: string
   email: string
+  phone?: string
   role: string
+  userType?: UserType
+  status?: UserStatus
 }
 
 type LoginApiResponse = {
@@ -46,7 +49,10 @@ const realAuthApi = {
       id: String(data.id),
       email: data.email,
       fullName: data.fullName,
-      roles: data.role ? [data.role] : []
+      phone: data.phone,
+      roles: data.role ? [data.role] : [],
+      userType: data.userType,
+      status: data.status
     }
   }
 }
