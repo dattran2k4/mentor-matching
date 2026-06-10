@@ -248,10 +248,7 @@ function UserProfileForm({ initialValues }: UserProfileFormProps) {
               value={formValues.learningGoal}
             />
           </div>
-          <div className='flex flex-col gap-3 border-t border-slate-100 pt-4 sm:flex-row sm:items-center sm:justify-between'>
-            <p className='text-muted text-sm'>
-              Dữ liệu được tải từ API hồ sơ học viên và lưu trực tiếp về backend.
-            </p>
+          <div className='flex justify-end border-t border-slate-100 pt-4'>
             <Button isLoading={isSaving} type='submit'>
               Lưu thông tin
             </Button>
