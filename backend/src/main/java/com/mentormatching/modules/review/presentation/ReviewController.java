@@ -3,14 +3,18 @@ package com.mentormatching.modules.review.presentation;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.mentormatching.modules.review.application.port.in.CreateReviewUseCase;
+import com.mentormatching.modules.review.application.port.in.GetReviewDetailUseCase;
 import com.mentormatching.modules.review.presentation.dto.request.CreateReviewRequest;
 import com.mentormatching.modules.review.presentation.dto.response.CreateReviewResponse;
+import com.mentormatching.modules.review.presentation.dto.response.ReviewDetailResponse;
 import com.mentormatching.shared.response.ApiResponse;
 import com.mentormatching.shared.response.ApiResponseFactory;
 import com.mentormatching.shared.security.model.AuthenticatedPrincipal;
@@ -25,6 +29,7 @@ import lombok.RequiredArgsConstructor;
 public class ReviewController {
 
     private final CreateReviewUseCase createReviewUseCase;
+    private final GetReviewDetailUseCase getReviewDetailUseCase;
     private final ApiResponseFactory apiResponseFactory;
 
     @PostMapping
@@ -33,5 +38,11 @@ public class ReviewController {
                                                           @Valid @RequestBody CreateReviewRequest request) {
         Long reviewId = createReviewUseCase.createReview(request.toCommand(principal));
         return apiResponseFactory.created(CreateReviewResponse.from(reviewId), "Create review successfully");
+    }
+
+    @GetMapping("/{id}")
+    public ApiResponse<ReviewDetailResponse> getReviewDetail(@PathVariable Long id) {
+        ReviewDetailResponse detail = ReviewDetailResponse.from(getReviewDetailUseCase.getReviewDetail(id));
+        return apiResponseFactory.success(detail, "Get review detail successfully");
     }
 }
