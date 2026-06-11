@@ -2,6 +2,7 @@ package com.mentormatching.modules.booking.application.service;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -17,6 +18,7 @@ import com.mentormatching.modules.booking.application.dto.GetMyBookingsQuery;
 import com.mentormatching.modules.booking.application.port.in.CreateBookingUseCase;
 import com.mentormatching.modules.booking.application.port.in.GetBookingPaymentSummaryUseCase;
 import com.mentormatching.modules.booking.application.port.in.GetBookingsUseCase;
+import com.mentormatching.modules.booking.application.port.in.GetBookingUseCase;
 import com.mentormatching.modules.booking.application.port.in.GetMentorBookingsUseCase;
 import com.mentormatching.modules.booking.application.port.in.GetMyBookingsUseCase;
 import com.mentormatching.modules.booking.application.port.out.BookingAvailabilityLookupPort;
@@ -35,7 +37,7 @@ import com.mentormatching.shared.response.PageResponse;
 
 @Service
 public class BookingService implements CreateBookingUseCase, GetBookingPaymentSummaryUseCase, GetBookingsUseCase,
-        GetMyBookingsUseCase, GetMentorBookingsUseCase {
+        GetMyBookingsUseCase, GetMentorBookingsUseCase, GetBookingUseCase {
 
     private static final List<BookingStatus> SCHEDULE_BLOCKING_STATUSES = List.of(BookingStatus.PENDING,
             BookingStatus.CONFIRMED);
@@ -152,5 +154,11 @@ public class BookingService implements CreateBookingUseCase, GetBookingPaymentSu
         if (overlapping) {
             throw new InvalidDataException("Mentor already has a booking at this time");
         }
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Optional<Booking> getBooking(Long id) {
+        return bookingRepositoryPort.findById(id);
     }
 }
