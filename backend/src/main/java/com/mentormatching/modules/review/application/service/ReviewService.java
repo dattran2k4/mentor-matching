@@ -1,6 +1,8 @@
 package com.mentormatching.modules.review.application.service;
 
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -8,8 +10,10 @@ import org.springframework.transaction.annotation.Transactional;
 import com.mentormatching.modules.booking.domain.Booking;
 import com.mentormatching.modules.booking.domain.BookingStatus;
 import com.mentormatching.modules.review.application.dto.CreateReviewCommand;
+import com.mentormatching.modules.review.application.dto.MentorRatingSummary;
 import com.mentormatching.modules.review.application.dto.MentorReviewItem;
 import com.mentormatching.modules.review.application.dto.ReviewDetail;
+import com.mentormatching.modules.review.application.port.in.CalculateMentorRatingSummaryUseCase;
 import com.mentormatching.modules.review.application.port.in.CreateReviewUseCase;
 import com.mentormatching.modules.review.application.port.in.GetMentorReviewsUseCase;
 import com.mentormatching.modules.review.application.port.in.GetReviewDetailUseCase;
@@ -23,7 +27,7 @@ import com.mentormatching.shared.exception.ResourceNotFoundException;
 import com.mentormatching.shared.response.PageResponse;
 
 @Service
-public class ReviewService implements CreateReviewUseCase, GetReviewDetailUseCase, GetMentorReviewsUseCase {
+public class ReviewService implements CreateReviewUseCase, GetReviewDetailUseCase, GetMentorReviewsUseCase, CalculateMentorRatingSummaryUseCase {
 
     private final ReviewRepositoryPort reviewRepositoryPort;
     private final ReviewBookingLookupPort reviewBookingLookupPort;
@@ -119,5 +123,31 @@ public class ReviewService implements CreateReviewUseCase, GetReviewDetailUseCas
                 .totalItems(reviewPage.getTotalItems())
                 .data(items)
                 .build();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public MentorRatingSummary calculateMentorRatingSummary(Long mentorId) {
+        List<Review> reviews = reviewRepositoryPort.findByMentorId(mentorId);
+
+        long totalReviews = reviews.size();
+        double averageRating = reviews.stream()
+                .mapToInt(Review::getRating)
+                .average()
+                .orElse(0.0);
+
+        averageRating = Math.round(averageRating * 10.0) / 10.0;
+
+        Map<Integer, Long> distribution = reviews.stream()
+                .collect(Collectors.groupingBy(
+                        Review::getRating,
+                        Collectors.counting()
+                ));
+
+        for (int i = 1; i <= 5; i++) {
+            distribution.putIfAbsent(i, 0L);
+        }
+
+        return new MentorRatingSummary(averageRating, totalReviews, distribution);
     }
 }

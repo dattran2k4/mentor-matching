@@ -16,11 +16,13 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.mentormatching.modules.review.application.port.in.CalculateMentorRatingSummaryUseCase;
 import com.mentormatching.modules.review.application.port.in.CreateReviewUseCase;
 import com.mentormatching.modules.review.application.port.in.GetMentorReviewsUseCase;
 import com.mentormatching.modules.review.application.port.in.GetReviewDetailUseCase;
 import com.mentormatching.modules.review.presentation.dto.request.CreateReviewRequest;
 import com.mentormatching.modules.review.presentation.dto.response.CreateReviewResponse;
+import com.mentormatching.modules.review.presentation.dto.response.MentorRatingSummaryResponse;
 import com.mentormatching.modules.review.presentation.dto.response.MentorReviewResponse;
 import com.mentormatching.modules.review.presentation.dto.response.ReviewDetailResponse;
 import com.mentormatching.shared.response.ApiResponse;
@@ -42,6 +44,7 @@ public class ReviewController {
     private final CreateReviewUseCase createReviewUseCase;
     private final GetReviewDetailUseCase getReviewDetailUseCase;
     private final GetMentorReviewsUseCase getMentorReviewsUseCase;
+    private final CalculateMentorRatingSummaryUseCase calculateMentorRatingSummaryUseCase;
     private final ApiResponseFactory apiResponseFactory;
 
     @PostMapping
@@ -67,5 +70,12 @@ public class ReviewController {
         PageResponse<com.mentormatching.modules.review.application.dto.MentorReviewItem> reviews =
                 getMentorReviewsUseCase.getMentorReviews(mentorId, page, size, sortBy, sortDir);
         return apiResponseFactory.success(MentorReviewResponse.from(reviews), "Get mentor reviews successfully");
+    }
+
+    @GetMapping("/mentor/{mentorId}/summary")
+    public ApiResponse<MentorRatingSummaryResponse> getMentorRatingSummary(@PathVariable Long mentorId) {
+        MentorRatingSummaryResponse summary = MentorRatingSummaryResponse.from(
+                calculateMentorRatingSummaryUseCase.calculateMentorRatingSummary(mentorId));
+        return apiResponseFactory.success(summary, "Get mentor rating summary successfully");
     }
 }
