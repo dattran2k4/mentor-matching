@@ -6,9 +6,10 @@ import { cn } from '@/utils/cn'
 type BrandLogoProps = {
   className?: string
   markClassName?: string
+  textClassName?: string
 }
 
-export function BrandLogo({ className, markClassName }: BrandLogoProps) {
+export function BrandLogo({ className, markClassName, textClassName }: BrandLogoProps) {
   return (
     <Link className={cn('group flex items-center gap-2.5', className)} to={path.home}>
       <span
@@ -50,7 +51,12 @@ export function BrandLogo({ className, markClassName }: BrandLogoProps) {
           <path d='M150 75V95' stroke='url(#brandGradient)' strokeLinecap='round' strokeWidth='6' />
         </svg>
       </span>
-      <span className='text-ink group-hover:text-primary text-xl font-bold tracking-tight transition-colors'>
+      <span
+        className={cn(
+          'text-ink group-hover:text-primary text-xl font-bold tracking-tight transition-colors',
+          textClassName
+        )}
+      >
         Mentor Matching
       </span>
     </Link>
