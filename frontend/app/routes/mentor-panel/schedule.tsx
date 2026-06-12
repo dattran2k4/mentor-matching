@@ -1,75 +1,96 @@
 import { useMemo } from 'react'
 import {
+  BookOpen,
   CalendarDays,
+  ChevronRight,
   Clock3,
   Link as LinkIcon,
-  MapPin,
-  Plus,
-  Repeat,
-  Sparkles,
-  Video
+  NotebookText,
+  Plus
 } from 'lucide-react'
+import { Link } from 'react-router'
 
 import { DashboardPage } from '@/components/DashboardPage'
 import { EmptyState } from '@/components/EmptyState'
 import { ScreenErrorState } from '@/components/ScreenErrorState'
-import { StatusBadge } from '@/components/StatusBadge'
-import { WorkspaceNotice } from '@/components/WorkspaceNotice'
-import { WorkspacePanel } from '@/components/WorkspacePanel'
 import { Badge } from '@/components/ui/badge'
 import { Button, buttonVariants } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { useCurrentMentorBookingsQuery } from '@/hooks/queries/booking/useCurrentMentorBookingsQuery'
 import { useCurrentMentorScheduleQuery } from '@/hooks/queries/mentor/useCurrentMentorScheduleQuery'
-import { mentorScheduleNotes } from '@/mocks/mentor-workspace'
+import { path } from '@/config/path'
 import type { BookingApiResponse } from '@/types/api/booking'
 import type {
   MentorAvailabilityDetailApiResponse,
-  MentorAvailabilityTypeApiResponse,
-  MentorMeetingTypeApiResponse
+  MentorAvailabilityTypeApiResponse
 } from '@/types/api/mentor'
-import { formatShortBookingDate, formatTimeRange } from '@/utils/format'
-
-const meetingTypeLabelMap = {
-  ONLINE: 'Online',
-  OFFLINE: 'Offline',
-  HYBRID: 'Linh hoạt'
-} as const
+import { cn } from '@/utils/cn'
+import { formatTimeRange } from '@/utils/format'
 
 type AvailabilityCardItem = {
   id: number
   kind: MentorAvailabilityTypeApiResponse
-  label: string
-  startTime: string
-  endTime: string
-  meetingTypeLabel: string | null
+  title: string
+  timeLabel: string
+  tagLabel: string
 }
 
 type BookedSessionItem = {
   id: number
   learnerName: string
   subjectLabel: string
-  bookingDate: string
-  startTime: string
-  endTime: string
+  dateLabel: string
+  timeLabel: string
+  meetingTypeLabel: string
+  note: string
   bookingStatus: BookingApiResponse['status']
-  meetingDetail: string
-  summary: string
   joinLink: string | null
 }
 
-function formatMeetingTypeLabel(meetingType: MentorMeetingTypeApiResponse | null) {
-  if (!meetingType) return null
+const scheduleTips = [
+  {
+    title: 'Khung giờ lặp lại',
+    description: 'Dùng cho lịch cố định mỗi tuần, phù hợp học viên học đều.',
+    icon: CalendarDays
+  },
+  {
+    title: 'Khung giờ cụ thể',
+    description: 'Dùng cho tăng cường trước kiểm tra hoặc đổi lịch tuần.',
+    icon: Clock3
+  },
+  {
+    title: 'Buổi đã được đặt',
+    description: 'Cần theo dõi riêng để tránh hiểu availability là lịch đã chốt.',
+    icon: BookOpen
+  }
+] as const
 
-  return meetingTypeLabelMap[meetingType]
-}
-
-function formatAvailabilityLabel(item: MentorAvailabilityDetailApiResponse) {
-  if (item.availabilityType === 'RECURRING') {
-    return formatDayOfWeek(item.dayOfWeek)
+function compareAvailability(
+  left: MentorAvailabilityDetailApiResponse,
+  right: MentorAvailabilityDetailApiResponse
+) {
+  if (left.availabilityType !== right.availabilityType) {
+    return left.availabilityType === 'RECURRING' ? -1 : 1
   }
 
-  return formatSpecificDateLabel(item.availableDate)
+  if (left.availabilityType === 'RECURRING' && right.availabilityType === 'RECURRING') {
+    return (
+      (left.dayOfWeek ?? Number.MAX_SAFE_INTEGER) - (right.dayOfWeek ?? Number.MAX_SAFE_INTEGER) ||
+      left.startTime.localeCompare(right.startTime)
+    )
+  }
+
+  return (
+    (left.availableDate ?? '').localeCompare(right.availableDate ?? '') ||
+    left.startTime.localeCompare(right.startTime)
+  )
+}
+
+function compareBookings(left: BookingApiResponse, right: BookingApiResponse) {
+  return (
+    left.bookingDate.localeCompare(right.bookingDate) ||
+    left.startTime.localeCompare(right.startTime)
+  )
 }
 
 function formatDayOfWeek(dayOfWeek: number | null) {
@@ -92,124 +113,67 @@ function formatSpecificDateLabel(value: string | null) {
   return Number.isNaN(date.getTime())
     ? value
     : new Intl.DateTimeFormat('vi-VN', {
-        weekday: 'short',
+        weekday: 'long',
         day: '2-digit',
         month: '2-digit'
       }).format(date)
 }
 
-function compareAvailability(
-  left: MentorAvailabilityDetailApiResponse,
-  right: MentorAvailabilityDetailApiResponse
-) {
-  if (left.availabilityType !== right.availabilityType) {
-    return left.availabilityType === 'RECURRING' ? -1 : 1
-  }
-
-  if (left.availabilityType === 'RECURRING' && right.availabilityType === 'RECURRING') {
-    return (
-      (left.dayOfWeek ?? Number.MAX_SAFE_INTEGER) - (right.dayOfWeek ?? Number.MAX_SAFE_INTEGER) ||
-      left.startTime.localeCompare(right.startTime) ||
-      left.endTime.localeCompare(right.endTime)
-    )
-  }
-
-  return (
-    (left.availableDate ?? '').localeCompare(right.availableDate ?? '') ||
-    left.startTime.localeCompare(right.startTime) ||
-    left.endTime.localeCompare(right.endTime)
-  )
-}
-
-function compareBookings(left: BookingApiResponse, right: BookingApiResponse) {
-  return (
-    left.bookingDate.localeCompare(right.bookingDate) ||
-    left.startTime.localeCompare(right.startTime) ||
-    left.endTime.localeCompare(right.endTime)
-  )
-}
-
-function getMeetingDetail(booking: BookingApiResponse) {
-  if (booking.meetingType === 'ONLINE') {
-    return booking.meetingLink?.trim() || 'Buổi học online'
-  }
-
-  return booking.meetingAddress?.trim() || 'Buổi học trực tiếp'
-}
-
-function getBookingSummary(booking: BookingApiResponse) {
-  if (booking.note?.trim()) return booking.note.trim()
-  if (booking.cancelReason?.trim()) return `Lý do hủy: ${booking.cancelReason.trim()}`
-  if (booking.meetingType === 'ONLINE' && booking.meetingLink?.trim()) {
-    return 'Booking đã có link học trực tuyến.'
-  }
-  if (booking.meetingAddress?.trim()) {
-    return `Địa điểm học: ${booking.meetingAddress.trim()}`
-  }
-
-  return 'Booking hiện chưa có ghi chú bổ sung từ backend.'
-}
-
-function getBookedSessionAction(booking: BookedSessionItem) {
-  if (booking.bookingStatus === 'CONFIRMED' && booking.joinLink) {
-    return {
-      href: booking.joinLink,
-      label: 'Vào buổi học'
-    }
-  }
-
-  if (booking.bookingStatus === 'PENDING') {
-    return {
-      href: null,
-      label: 'Chờ xác nhận'
-    }
-  }
-
-  if (booking.bookingStatus === 'CONFIRMED') {
-    return {
-      href: null,
-      label: 'Đã đặt lịch'
-    }
-  }
-
-  if (booking.bookingStatus === 'COMPLETED') {
-    return {
-      href: null,
-      label: 'Đã hoàn thành'
-    }
-  }
-
+function mapAvailabilityItem(item: MentorAvailabilityDetailApiResponse): AvailabilityCardItem {
   return {
-    href: null,
-    label: 'View-only'
+    id: item.id,
+    kind: item.availabilityType,
+    title:
+      item.availabilityType === 'RECURRING'
+        ? formatDayOfWeek(item.dayOfWeek)
+        : formatSpecificDateLabel(item.availableDate),
+    timeLabel: formatTimeRange(item.startTime, item.endTime),
+    tagLabel: item.availabilityType === 'RECURRING' ? 'Đang mở' : 'Ngắn hạn'
   }
+}
+
+function getMeetingTypeLabel(booking: BookingApiResponse) {
+  if (booking.meetingType === 'ONLINE') return 'Online'
+  return 'Offline'
+}
+
+function getBookingNote(booking: BookingApiResponse) {
+  if (booking.note?.trim()) return booking.note.trim()
+  if (booking.cancelReason?.trim()) return booking.cancelReason.trim()
+  return 'Chưa có ghi chú thêm cho buổi học này.'
 }
 
 function SchedulePageSkeleton() {
   return (
-    <div className='space-y-6'>
-      <div className='grid gap-6 xl:grid-cols-[1.5fr_1fr]'>
-        {['Khung giờ lặp lại hằng tuần', 'Lưu ý khi mở lịch'].map((title) => (
-          <WorkspacePanel key={title} title={title}>
-            <div className='animate-pulse space-y-4'>
-              <div className='h-10 w-40 rounded-xl bg-slate-100' />
-              <div className='h-28 rounded-2xl bg-slate-100' />
-              <div className='h-28 rounded-2xl bg-slate-100' />
-            </div>
-          </WorkspacePanel>
-        ))}
+    <div className='space-y-8'>
+      <div className='grid gap-6 xl:grid-cols-[1.55fr_0.95fr]'>
+        <div className='space-y-4'>
+          <div className='h-10 w-72 animate-pulse rounded-xl bg-slate-100' />
+          <div className='grid gap-4 md:grid-cols-3'>
+            {Array.from({ length: 3 }).map((_, index) => (
+              <div className='h-32 animate-pulse rounded-2xl bg-slate-100' key={index} />
+            ))}
+          </div>
+        </div>
+        <div className='h-[260px] animate-pulse rounded-[22px] bg-slate-100' />
       </div>
 
-      <div className='grid gap-6 xl:grid-cols-[1.1fr_1.3fr]'>
-        {['Khung giờ theo ngày cụ thể', 'Buổi đã được đặt'].map((title) => (
-          <WorkspacePanel key={title} title={title}>
-            <div className='animate-pulse space-y-4'>
-              <div className='h-10 w-48 rounded-xl bg-slate-100' />
-              <div className='h-32 rounded-2xl bg-slate-100' />
-              <div className='h-32 rounded-2xl bg-slate-100' />
-            </div>
-          </WorkspacePanel>
-        ))}
+      <div className='space-y-4'>
+        <div className='h-10 w-72 animate-pulse rounded-xl bg-slate-100' />
+        <div className='grid gap-4 md:grid-cols-2'>
+          {Array.from({ length: 2 }).map((_, index) => (
+            <div className='h-24 animate-pulse rounded-2xl bg-slate-100' key={index} />
+          ))}
+        </div>
+      </div>
+
+      <div className='space-y-4'>
+        <div className='h-10 w-60 animate-pulse rounded-xl bg-slate-100' />
+        <div className='space-y-3'>
+          {Array.from({ length: 2 }).map((_, index) => (
+            <div className='h-32 animate-pulse rounded-2xl bg-slate-100' key={index} />
+          ))}
+        </div>
       </div>
     </div>
   )
@@ -225,37 +189,23 @@ export default function MentorSchedulePage() {
     Boolean(mentorScheduleQuery.data?.currentMentor)
   )
 
-  const recurringAvailability = useMemo(() => {
-    const currentMentor = mentorScheduleQuery.data?.currentMentor
+  const recurringAvailability = useMemo(
+    () =>
+      (mentorScheduleQuery.data?.availabilities ?? [])
+        .filter((item) => item.availabilityType === 'RECURRING')
+        .sort(compareAvailability)
+        .map(mapAvailabilityItem),
+    [mentorScheduleQuery.data?.availabilities]
+  )
 
-    return (mentorScheduleQuery.data?.availabilities ?? [])
-      .filter((item) => item.availabilityType === 'RECURRING')
-      .sort(compareAvailability)
-      .map<AvailabilityCardItem>((item) => ({
-        id: item.id,
-        kind: item.availabilityType,
-        label: formatAvailabilityLabel(item),
-        startTime: item.startTime,
-        endTime: item.endTime,
-        meetingTypeLabel: formatMeetingTypeLabel(currentMentor?.meetingType ?? null)
-      }))
-  }, [mentorScheduleQuery.data?.availabilities, mentorScheduleQuery.data?.currentMentor])
-
-  const specificDateAvailability = useMemo(() => {
-    const currentMentor = mentorScheduleQuery.data?.currentMentor
-
-    return (mentorScheduleQuery.data?.availabilities ?? [])
-      .filter((item) => item.availabilityType === 'SPECIFIC_DATE')
-      .sort(compareAvailability)
-      .map<AvailabilityCardItem>((item) => ({
-        id: item.id,
-        kind: item.availabilityType,
-        label: formatAvailabilityLabel(item),
-        startTime: item.startTime,
-        endTime: item.endTime,
-        meetingTypeLabel: formatMeetingTypeLabel(currentMentor?.meetingType ?? null)
-      }))
-  }, [mentorScheduleQuery.data?.availabilities, mentorScheduleQuery.data?.currentMentor])
+  const specificDateAvailability = useMemo(
+    () =>
+      (mentorScheduleQuery.data?.availabilities ?? [])
+        .filter((item) => item.availabilityType === 'SPECIFIC_DATE')
+        .sort(compareAvailability)
+        .map(mapAvailabilityItem),
+    [mentorScheduleQuery.data?.availabilities]
+  )
 
   const bookedSessions = useMemo(
     () =>
@@ -264,33 +214,21 @@ export default function MentorSchedulePage() {
         .sort(compareBookings)
         .map<BookedSessionItem>((booking) => ({
           id: booking.id,
-          learnerName: booking.studentName.trim() || 'Học viên đang cập nhật',
+          learnerName: booking.studentName.trim() || 'Học sinh đang cập nhật',
           subjectLabel: [booking.subjectName, booking.gradeName].filter(Boolean).join(' · '),
-          bookingDate: booking.bookingDate,
-          startTime: booking.startTime,
-          endTime: booking.endTime,
+          dateLabel: formatSpecificDateLabel(booking.bookingDate),
+          timeLabel: formatTimeRange(booking.startTime, booking.endTime),
+          meetingTypeLabel: getMeetingTypeLabel(booking),
+          note: getBookingNote(booking),
           bookingStatus: booking.status,
-          meetingDetail: getMeetingDetail(booking),
-          summary: getBookingSummary(booking),
           joinLink: booking.meetingType === 'ONLINE' ? booking.meetingLink : null
         })),
     [mentorBookingsQuery.data]
   )
 
-  const handleRetrySchedule = () => {
-    void mentorScheduleQuery.refetch()
-  }
-
-  const handleRetryBookings = () => {
-    void mentorBookingsQuery.refetch()
-  }
-
   if (mentorScheduleQuery.isLoading && !mentorScheduleQuery.data) {
     return (
-      <DashboardPage
-        description='Quản lý availability theo khung giờ lặp lại, ngày cụ thể và xem riêng các buổi đã được đặt.'
-        title='Lịch dạy'
-      >
+      <DashboardPage className='space-y-8' title=''>
         <SchedulePageSkeleton />
       </DashboardPage>
     )
@@ -298,14 +236,11 @@ export default function MentorSchedulePage() {
 
   if (mentorScheduleQuery.isError || !mentorScheduleQuery.data?.currentMentor) {
     return (
-      <DashboardPage
-        description='Quản lý availability theo khung giờ lặp lại, ngày cụ thể và xem riêng các buổi đã được đặt.'
-        title='Lịch dạy'
-      >
+      <DashboardPage className='space-y-8' title=''>
         <ScreenErrorState
-          description='Không thể tải mentor hiện tại hoặc availability từ backend. Vui lòng thử lại để tiếp tục.'
-          onRetry={handleRetrySchedule}
-          retryLabel='Tải lại lịch dạy'
+          description='Không thể tải lịch dạy của mentor lúc này. Vui lòng thử lại.'
+          onRetry={() => void mentorScheduleQuery.refetch()}
+          retryLabel='Tải lại'
           title='Không tải được lịch dạy'
         />
       </DashboardPage>
@@ -313,236 +248,239 @@ export default function MentorSchedulePage() {
   }
 
   return (
-    <DashboardPage
-      description='Quản lý availability theo khung giờ lặp lại, ngày cụ thể và xem riêng các buổi đã được đặt.'
-      title='Lịch dạy'
-    >
-      <div className='grid gap-6 xl:grid-cols-[1.5fr_1fr]'>
-        <WorkspacePanel
-          title='Khung giờ lặp lại hằng tuần'
-          description='Dùng cho lịch dạy cố định theo tuần. Đây là availability, chưa phải lịch đã được học viên chốt.'
-          action={
-            <Button disabled>
-              <Plus aria-hidden='true' size={16} />
+    <DashboardPage className='space-y-8 md:space-y-10' title=''>
+      <div className='space-y-3'>
+        <div className='flex flex-wrap items-center gap-2 text-sm text-slate-500'>
+          <Link className='hover:text-primary transition' to={path.home}>
+            Home
+          </Link>
+          <ChevronRight size={14} />
+          <span className='text-ink font-medium'>Lịch dạy</span>
+        </div>
+      </div>
+
+      <div className='grid gap-8 xl:grid-cols-[1.55fr_0.95fr] xl:items-start'>
+        <section className='space-y-5'>
+          <div className='flex items-center justify-between gap-3'>
+            <h2 className='text-ink text-[2rem] font-bold tracking-tight'>
+              Khung giờ lặp lại hằng tuần
+            </h2>
+            <Button className='h-11 rounded-xl px-5 text-sm font-medium' disabled>
+              <Plus size={16} />
               Thêm khung giờ
             </Button>
-          }
-        >
+          </div>
+
           {recurringAvailability.length === 0 ? (
             <EmptyState
-              className='min-h-[220px] border-solid bg-slate-50'
-              description='Bạn chưa có availability lặp lại nào từ backend. Hãy bổ sung khi workflow create/update availability được nối thật.'
-              icon={<Repeat aria-hidden='true' size={24} />}
+              className='min-h-[180px] border-solid bg-slate-50'
+              description='Hiện chưa có khung giờ lặp lại từ backend.'
               title='Chưa có khung giờ lặp lại'
             />
           ) : (
-            <div className='grid gap-4 md:grid-cols-2'>
+            <div className='grid gap-4 md:grid-cols-3'>
               {recurringAvailability.map((window) => (
-                <Card
-                  className='rounded-2xl border-slate-200 bg-slate-50 shadow-none'
-                  key={window.id}
-                >
-                  <CardContent className='space-y-4 p-4'>
+                <Card className='rounded-[18px] border-sky-200 shadow-none' key={window.id}>
+                  <CardContent className='space-y-5 p-5'>
                     <div className='flex items-start justify-between gap-3'>
-                      <div className='space-y-2'>
-                        <div className='flex items-center gap-2'>
-                          <div className='bg-primary/10 text-primary flex h-10 w-10 items-center justify-center rounded-2xl'>
-                            <Repeat aria-hidden='true' size={18} />
-                          </div>
-                          <div>
-                            <p className='text-ink font-semibold'>{window.label}</p>
-                            <p className='text-muted text-sm'>
-                              {formatTimeRange(window.startTime, window.endTime)}
-                            </p>
-                          </div>
-                        </div>
+                      <div className='space-y-1'>
+                        <p className='text-ink text-[1.05rem] font-semibold'>{window.title}</p>
+                        <p className='text-ink text-[0.98rem]'>{window.timeLabel}</p>
                       </div>
-                      <Badge variant='success'>Đang mở</Badge>
+                      <span className='inline-flex rounded-full bg-emerald-100 px-3 py-1 text-sm font-medium text-emerald-700'>
+                        {window.tagLabel}
+                      </span>
                     </div>
 
-                    {window.meetingTypeLabel ? (
-                      <div className='flex flex-wrap gap-2'>
-                        <Badge variant='muted'>{window.meetingTypeLabel}</Badge>
-                      </div>
-                    ) : (
-                      <p className='text-muted text-sm'>
-                        Backend availability hiện chưa trả hình thức dạy theo từng khung giờ.
-                      </p>
-                    )}
+                    <span className='inline-flex rounded-full bg-slate-100 px-3 py-1 text-sm font-medium text-slate-700'>
+                      Linh hoạt
+                    </span>
                   </CardContent>
                 </Card>
               ))}
             </div>
           )}
-        </WorkspacePanel>
+        </section>
 
-        <WorkspacePanel
-          title='Lưu ý khi mở lịch'
-          description='Giữ availability rõ ràng để phụ huynh và học viên hiểu đâu là khung giờ có thể đặt.'
-        >
-          <div className='space-y-3'>
-            {mentorScheduleNotes.map((note) => (
-              <Card className='rounded-2xl border-slate-200 bg-slate-50 shadow-none' key={note}>
-                <CardContent className='p-4 text-sm text-slate-700'>{note}</CardContent>
+        <aside>
+          <Card className='rounded-[22px] border-slate-200 shadow-none'>
+            <CardContent className='space-y-6 p-5'>
+              <h3 className='text-ink text-[1.9rem] leading-tight font-bold'>Lưu ý khi mở lịch</h3>
+              <div className='space-y-5'>
+                {scheduleTips.map((tip, index) => (
+                  <div className='flex gap-4' key={tip.title}>
+                    <div className='flex flex-col items-center'>
+                      <div className='flex h-11 w-11 items-center justify-center rounded-full bg-sky-50 text-sky-700'>
+                        <tip.icon size={20} />
+                      </div>
+                      {index < scheduleTips.length - 1 ? (
+                        <span className='mt-2 h-8 w-px bg-slate-200' />
+                      ) : null}
+                    </div>
+                    <div className='space-y-1 pt-1'>
+                      <p className='text-ink text-[1.02rem] font-semibold'>
+                        {tip.title}: <span className='font-normal'>{tip.description}</span>
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        </aside>
+      </div>
+
+      <section className='space-y-5'>
+        <h2 className='text-ink text-[2rem] font-bold tracking-tight'>
+          Khung giờ theo ngày cụ thể
+        </h2>
+
+        {specificDateAvailability.length === 0 ? (
+          <EmptyState
+            className='min-h-[160px] border-solid bg-slate-50'
+            description='Hiện chưa có khung giờ theo ngày cụ thể từ backend.'
+            title='Chưa có khung giờ cụ thể'
+          />
+        ) : (
+          <div className='grid gap-4 md:max-w-[66%] md:grid-cols-2'>
+            {specificDateAvailability.map((window) => (
+              <Card className='rounded-[18px] border-sky-200 shadow-none' key={window.id}>
+                <CardContent className='flex items-start justify-between gap-3 p-5'>
+                  <div className='flex gap-3'>
+                    <CalendarDays className='mt-0.5 text-slate-600' size={20} />
+                    <div className='space-y-1'>
+                      <p className='text-ink text-[1.02rem] font-semibold'>{window.title}</p>
+                      <p className='text-ink text-[0.98rem]'>{window.timeLabel}</p>
+                    </div>
+                  </div>
+                  <span className='inline-flex rounded-full bg-sky-100 px-3 py-1 text-sm font-medium text-sky-700'>
+                    Ngắn hạn
+                  </span>
+                </CardContent>
               </Card>
             ))}
           </div>
-        </WorkspacePanel>
-      </div>
+        )}
+      </section>
 
-      <div className='grid gap-6 xl:grid-cols-[1.1fr_1.3fr]'>
-        <WorkspacePanel
-          title='Khung giờ theo ngày cụ thể'
-          description='Dùng cho buổi tăng cường, thay đổi lịch ngắn hạn hoặc mở thêm ca trước kỳ kiểm tra.'
-        >
-          {specificDateAvailability.length === 0 ? (
-            <EmptyState
-              className='min-h-[220px] border-solid bg-slate-50'
-              description='Bạn chưa mở thêm khung giờ nào theo ngày cụ thể. Hãy thêm khi cần đổi lịch hoặc tăng cường ngắn hạn.'
-              icon={<Sparkles aria-hidden='true' size={24} />}
-              title='Chưa có availability theo ngày'
-            />
-          ) : (
-            <div className='space-y-4'>
-              {specificDateAvailability.map((window) => (
-                <Card className='rounded-2xl shadow-none' key={window.id}>
-                  <CardContent className='space-y-3 p-4'>
-                    <div className='flex flex-wrap items-center justify-between gap-3'>
-                      <div className='space-y-2'>
-                        <div className='flex items-center gap-2'>
-                          <CalendarDays aria-hidden='true' className='text-primary' size={16} />
-                          <p className='text-ink font-semibold'>{window.label}</p>
-                        </div>
-                        <p className='text-muted text-sm'>
-                          {formatTimeRange(window.startTime, window.endTime)}
+      <section className='space-y-5'>
+        <h2 className='text-ink text-[2rem] font-bold tracking-tight'>Buổi đã được đặt</h2>
+
+        {mentorBookingsQuery.isLoading && !mentorBookingsQuery.data ? (
+          <div className='space-y-3'>
+            {[1, 2].map((item) => (
+              <Card className='rounded-[18px] border-slate-200 shadow-none' key={item}>
+                <CardContent className='h-28 animate-pulse bg-slate-100/80' />
+              </Card>
+            ))}
+          </div>
+        ) : mentorBookingsQuery.isError ? (
+          <ScreenErrorState
+            description='Không thể tải danh sách buổi đã đặt. Vui lòng thử lại.'
+            onRetry={() => void mentorBookingsQuery.refetch()}
+            retryLabel='Tải lại'
+            title='Không tải được booking'
+          />
+        ) : bookedSessions.length === 0 ? (
+          <EmptyState
+            className='min-h-[180px] border-solid bg-slate-50'
+            description='Chưa có buổi học nào được đặt.'
+            title='Chưa có buổi đã được đặt'
+          />
+        ) : (
+          <div className='space-y-3'>
+            {bookedSessions.map((session) => (
+              <Card className='rounded-[18px] border-slate-300/90 shadow-none' key={session.id}>
+                <CardContent className='space-y-4 p-4 md:p-5'>
+                  <div className='flex flex-wrap items-start justify-between gap-4 border-b border-slate-200 pb-4'>
+                    <div className='space-y-2'>
+                      <p className='text-ink text-[1.04rem] font-semibold'>{session.learnerName}</p>
+                      <p className='text-muted text-[0.98rem]'>
+                        {session.subjectLabel || 'Môn học đang cập nhật'}
+                      </p>
+                    </div>
+
+                    <div className='flex items-center gap-3'>
+                      <Badge variant={session.bookingStatus === 'PENDING' ? 'warning' : 'success'}>
+                        {session.bookingStatus === 'PENDING' ? 'Chờ xác nhận' : 'Đã xác nhận'}
+                      </Badge>
+                      <Button
+                        className='h-10 rounded-xl px-4 text-sm font-medium'
+                        disabled
+                        variant='outline'
+                      >
+                        Từ chối buổi học
+                      </Button>
+                    </div>
+                  </div>
+
+                  <div className='grid gap-3 md:grid-cols-3'>
+                    <InfoFact
+                      icon={<CalendarDays size={16} />}
+                      label='Ngày học'
+                      value={session.dateLabel}
+                    />
+                    <InfoFact
+                      icon={<Clock3 size={16} />}
+                      label='Giờ học'
+                      value={session.timeLabel}
+                    />
+                    <InfoFact
+                      icon={<BookOpen size={16} />}
+                      label='Hình thức'
+                      value={session.meetingTypeLabel}
+                    />
+                  </div>
+
+                  <div className='rounded-2xl bg-slate-50 px-4 py-3'>
+                    <div className='flex items-start gap-3'>
+                      <span className='mt-0.5 text-slate-500'>
+                        <NotebookText size={17} />
+                      </span>
+                      <div className='space-y-1'>
+                        <p className='text-ink text-sm font-semibold'>Ghi chú từ học viên</p>
+                        <p className='text-[0.98rem] leading-relaxed text-slate-700'>
+                          {session.note}
                         </p>
                       </div>
-                      <Badge variant='info'>Ngắn hạn</Badge>
                     </div>
+                  </div>
 
-                    {window.meetingTypeLabel ? (
-                      <div className='flex flex-wrap gap-2'>
-                        <Badge variant='muted'>{window.meetingTypeLabel}</Badge>
-                      </div>
-                    ) : (
-                      <p className='text-muted text-sm'>
-                        Hình thức dạy theo từng availability chưa có trong contract backend hiện
-                        tại.
-                      </p>
-                    )}
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          )}
-        </WorkspacePanel>
-
-        <WorkspacePanel
-          title='Buổi đã được đặt'
-          description='Hiển thị riêng với availability để bạn biết buổi nào đã chốt với học viên.'
-        >
-          {mentorBookingsQuery.isLoading && !mentorBookingsQuery.data ? (
-            <div className='space-y-4'>
-              {[1, 2].map((item) => (
-                <Card className='rounded-2xl shadow-none' key={item}>
-                  <CardContent className='animate-pulse space-y-4 p-4'>
-                    <div className='h-6 w-48 rounded-xl bg-slate-100' />
-                    <div className='grid gap-3 md:grid-cols-2'>
-                      <div className='h-5 rounded-xl bg-slate-100' />
-                      <div className='h-5 rounded-xl bg-slate-100' />
-                    </div>
-                    <div className='h-16 rounded-2xl bg-slate-100' />
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          ) : mentorBookingsQuery.isError ? (
-            <ScreenErrorState
-              description='Không thể tải danh sách booking của mentor lúc này. Vui lòng thử lại để tiếp tục.'
-              onRetry={handleRetryBookings}
-              retryLabel='Tải lại booking'
-              title='Không tải được booking'
-            />
-          ) : bookedSessions.length === 0 ? (
-            <EmptyState
-              className='min-h-[220px] border-solid bg-slate-50'
-              description='Backend chưa trả về booking nào cho mentor hiện tại. Khi có học viên đặt lịch, các buổi sẽ xuất hiện riêng ở đây.'
-              icon={<Video aria-hidden='true' size={24} />}
-              title='Chưa có buổi đã được đặt'
-            />
-          ) : (
-            <div className='space-y-4'>
-              {bookedSessions.map((session) => {
-                const action = getBookedSessionAction(session)
-
-                return (
-                  <Card className='rounded-2xl shadow-none' key={session.id}>
-                    <CardContent className='flex flex-col gap-4 p-4 lg:flex-row lg:items-start lg:justify-between'>
-                      <div className='space-y-3'>
-                        <div className='flex flex-wrap items-center gap-2'>
-                          <p className='text-ink font-semibold'>
-                            {session.learnerName} ·{' '}
-                            {session.subjectLabel || 'Môn học đang cập nhật'}
-                          </p>
-                          <StatusBadge kind='booking' status={session.bookingStatus} />
-                        </div>
-                        <div className='text-muted grid gap-2 text-sm md:grid-cols-2 xl:grid-cols-3'>
-                          <p className='flex items-center gap-2'>
-                            <CalendarDays aria-hidden='true' className='text-primary' size={15} />
-                            {formatShortBookingDate(session.bookingDate)}
-                          </p>
-                          <p className='flex items-center gap-2'>
-                            <Clock3 aria-hidden='true' className='text-primary' size={15} />
-                            {formatTimeRange(session.startTime, session.endTime)}
-                          </p>
-                          <p className='flex items-center gap-2 break-all'>
-                            {action.href ? (
-                              <LinkIcon
-                                aria-hidden='true'
-                                className='text-primary shrink-0'
-                                size={15}
-                              />
-                            ) : (
-                              <MapPin
-                                aria-hidden='true'
-                                className='text-primary shrink-0'
-                                size={15}
-                              />
-                            )}
-                            {session.meetingDetail}
-                          </p>
-                        </div>
-                        <p className='text-muted text-sm'>{session.summary}</p>
-                      </div>
-
-                      {action.href ? (
-                        <a
-                          className={buttonVariants()}
-                          href={action.href}
-                          rel='noreferrer'
-                          target='_blank'
-                        >
-                          <Video aria-hidden='true' size={16} />
-                          {action.label}
-                        </a>
-                      ) : (
-                        <Button disabled>{action.label}</Button>
+                  {session.joinLink ? (
+                    <a
+                      className={cn(
+                        buttonVariants({ className: 'rounded-xl px-4 text-sm', variant: 'outline' })
                       )}
-                    </CardContent>
-                  </Card>
-                )
-              })}
-            </div>
-          )}
-        </WorkspacePanel>
-      </div>
-
-      <WorkspaceNotice
-        description='Availability và booking hiện đã dùng dữ liệu thật. Tạo hoặc chỉnh sửa khung giờ vẫn đang để view-only vì frontend service chưa có endpoint create/update availability.'
-        icon={CalendarDays}
-        title='Availability trước, booking sau'
-        tone='neutral'
-      />
+                      href={session.joinLink}
+                      rel='noreferrer'
+                      target='_blank'
+                    >
+                      <LinkIcon size={15} />
+                      Mở link học
+                    </a>
+                  ) : null}
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        )}
+      </section>
     </DashboardPage>
+  )
+}
+
+function InfoFact({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) {
+  return (
+    <div className='rounded-2xl border border-slate-200 bg-white px-4 py-3'>
+      <div className='flex items-start gap-3'>
+        <span className='mt-0.5 text-slate-500'>{icon}</span>
+        <div className='space-y-1'>
+          <p className='text-xs font-semibold tracking-[0.08em] text-slate-400 uppercase'>
+            {label}
+          </p>
+          <p className='text-[0.98rem] font-medium text-slate-900'>{value}</p>
+        </div>
+      </div>
+    </div>
   )
 }

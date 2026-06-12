@@ -5,7 +5,7 @@ export default [
   layout('layouts/MainLayout.tsx', [
     index('routes/HomeFesba.tsx'),
     route('discover', 'routes/Discover.tsx'),
-    route('mentor/:id', 'routes/MentorProfile.tsx')
+    route('mentor-profile/:id', 'routes/MentorProfile.tsx')
   ]),
 
   // User dashboard — /user/*
@@ -19,8 +19,8 @@ export default [
     ])
   ]),
 
-  // Mentor dashboard — /mentor-panel/* (avoids /mentor/:id public profile)
-  route('mentor-panel', 'routes/mentor-role-layout.tsx', [
+  // Mentor dashboard — /mentor/*
+  route('mentor', 'routes/mentor-role-layout.tsx', [
     layout('layouts/mentor-layout.tsx', [
       index('routes/mentor-panel/dashboard.tsx'),
       route('schedule', 'routes/mentor-panel/schedule.tsx'),

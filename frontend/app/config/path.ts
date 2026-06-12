@@ -4,7 +4,7 @@ export const path = {
   login: '/login',
 
   discover: '/discover',
-  mentorProfile: (id: string) => `/mentor/${id}`,
+  mentorProfile: (id: string) => `/mentor-profile/${id}`,
 
   user: {
     root: '/user',
@@ -15,11 +15,11 @@ export const path = {
   },
 
   mentorPanel: {
-    root: '/mentor-panel',
-    schedule: '/mentor-panel/schedule',
-    students: '/mentor-panel/students',
-    earnings: '/mentor-panel/earnings',
-    profile: '/mentor-panel/profile'
+    root: '/mentor',
+    schedule: '/mentor/schedule',
+    students: '/mentor/students',
+    earnings: '/mentor/earnings',
+    profile: '/mentor/profile'
   },
 
   admin: {
