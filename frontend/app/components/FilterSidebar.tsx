@@ -1,4 +1,4 @@
-import { CheckCircle2, RotateCcw, SlidersHorizontal, X } from 'lucide-react'
+import { RotateCcw, SlidersHorizontal, X } from 'lucide-react'
 
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -115,7 +115,7 @@ const FilterSidebar = ({
             <div>
               <h3 className='text-ink text-base font-semibold'>Thu hẹp danh sách mentor</h3>
               <p className='text-muted mt-1 text-sm leading-relaxed'>
-                Chọn theo nhu cầu học thực tế để danh sách dễ so sánh hơn ngay từ đầu.
+                Chọn thêm hình thức học, khu vực chi tiết hoặc giới tính.
               </p>
             </div>
           </div>
@@ -175,16 +175,6 @@ const FilterSidebar = ({
             </div>
           </div>
         ))}
-
-        <div className='rounded-2xl border border-emerald-100 bg-emerald-50 p-4 text-sm text-emerald-800'>
-          <div className='flex items-start gap-2'>
-            <CheckCircle2 className='mt-0.5 h-4 w-4 shrink-0' />
-            <p>
-              Bộ lọc hiện đồng bộ trực tiếp với dữ liệu API theo môn học, cấp lớp, khu vực, hình
-              thức học và giới tính để danh sách mentor phản ánh đúng tiêu chí đang chọn.
-            </p>
-          </div>
-        </div>
 
         <div className='mt-auto flex gap-3 border-t border-slate-200 pt-4'>
           <Button className='flex-1 rounded-xl' type='button' variant='outline' onClick={onReset}>

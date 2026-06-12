@@ -44,6 +44,8 @@ export function mapDiscoverMentorToCard(bundle: DiscoverMentorApiBundle): Mentor
   return {
     id: String(mentor.id),
     name: mentor.fullName,
+    avatarUrl: detail?.avatarUrl || mentor.avatarUrl,
+    experienceYears: detail?.experienceYears ?? mentor.experienceYears,
     headline:
       detail?.headline?.trim() ||
       [detail?.currentPosition, detail?.workplace].filter(Boolean).join(' · ') ||
