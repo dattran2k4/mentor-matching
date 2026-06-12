@@ -19,6 +19,8 @@ export type FilterOption = {
   label: string
   value: string
   helper?: string
+  disabled?: boolean
+  badgeLabel?: string
 }
 
 export type FilterGroup = {
@@ -138,7 +140,11 @@ const FilterSidebar = ({
               {group.items.map((item) => (
                 <label
                   key={item.value}
-                  className={`flex cursor-pointer items-start gap-3 rounded-xl border px-3 py-3 transition ${
+                  className={`flex items-start gap-3 rounded-xl border px-3 py-3 transition ${
+                    item.disabled
+                      ? 'cursor-not-allowed border-slate-200 bg-slate-50 opacity-70'
+                      : 'cursor-pointer'
+                  } ${
                     selectedValues.includes(item.value)
                       ? 'border-blue-200 bg-blue-50'
                       : 'border-slate-200/80 bg-white hover:border-slate-300 hover:bg-slate-50'
@@ -146,10 +152,18 @@ const FilterSidebar = ({
                 >
                   <Checkbox
                     checked={selectedValues.includes(item.value)}
+                    disabled={item.disabled}
                     onChange={() => onToggleValue?.(item.value)}
                   />
                   <span className='min-w-0'>
-                    <span className='block text-sm font-medium text-slate-700'>{item.label}</span>
+                    <span className='flex flex-wrap items-center gap-2 text-sm font-medium text-slate-700'>
+                      <span>{item.label}</span>
+                      {item.badgeLabel ? (
+                        <span className='rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-semibold tracking-[0.14em] text-slate-500 uppercase'>
+                          {item.badgeLabel}
+                        </span>
+                      ) : null}
+                    </span>
                     {item.helper ? (
                       <span className='mt-1 block text-xs leading-relaxed text-slate-500'>
                         {item.helper}
@@ -166,8 +180,8 @@ const FilterSidebar = ({
           <div className='flex items-start gap-2'>
             <CheckCircle2 className='mt-0.5 h-4 w-4 shrink-0' />
             <p>
-              Danh sách công khai hiện ưu tiên hồ sơ đã duyệt. Hãy dùng bộ lọc theo mục tiêu học,
-              rồi mới tinh chỉnh học phí hoặc lịch học để tránh bỏ sót mentor phù hợp.
+              Bộ lọc hiện đồng bộ trực tiếp với dữ liệu API theo môn học, cấp lớp, khu vực, hình
+              thức học và giới tính để danh sách mentor phản ánh đúng tiêu chí đang chọn.
             </p>
           </div>
         </div>
