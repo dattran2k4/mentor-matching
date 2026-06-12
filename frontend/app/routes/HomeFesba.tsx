@@ -1,19 +1,10 @@
-import {
-  ArrowRight,
-  ArrowUpRight,
-  CalendarDays,
-  CheckCircle2,
-  ShieldCheck,
-  Star,
-  Users
-} from 'lucide-react'
+import { ArrowRight, ArrowUpRight, CalendarDays, ShieldCheck, Search, Users } from 'lucide-react'
 import { motion } from 'framer-motion'
-import { useEffect, useMemo, useState, useTransition } from 'react'
+import { type ReactNode, useEffect, useMemo, useState, useTransition } from 'react'
 import { Link, useNavigate } from 'react-router'
 
 import { EmptyState } from '@/components/EmptyState'
 import MentorCard from '@/components/MentorCard'
-import SearchBar from '@/components/SearchBar'
 import { ScreenErrorState } from '@/components/ScreenErrorState'
 import SectionTitle from '@/components/SectionTitle'
 import SubjectCard from '@/components/SubjectCard'
@@ -58,24 +49,6 @@ const trustSteps = [
   {
     title: 'Đặt buổi học thực tế',
     description: 'Chọn môn học cụ thể, khung giờ phù hợp rồi gửi yêu cầu đặt lịch tới mentor.'
-  }
-] as const
-
-const decisionSignals = [
-  {
-    icon: <CheckCircle2 className='h-4 w-4 text-emerald-600' />,
-    title: 'Offering theo môn và cấp lớp',
-    description: 'Mỗi hồ sơ cho thấy rõ mentor dạy môn nào, cho cấp lớp nào và học phí tương ứng.'
-  },
-  {
-    icon: <Star className='h-4 w-4 text-amber-500' />,
-    title: 'Đánh giá bám sát buổi học thật',
-    description: 'Phản hồi từ học viên và phụ huynh giúp so sánh độ phù hợp trước khi gửi yêu cầu.'
-  },
-  {
-    icon: <CalendarDays className='h-4 w-4 text-blue-600' />,
-    title: 'Khung giờ dễ đối chiếu',
-    description: 'Lịch gần nhất và khung giờ lặp lại được giữ gần hành động đặt buổi để giảm mơ hồ.'
   }
 ] as const
 
@@ -192,70 +165,105 @@ const Home = () => {
 
   return (
     <div className='flex flex-col gap-16 py-8'>
-      <section className='grid gap-8 lg:grid-cols-[1.08fr_0.92fr] lg:items-start'>
+      <section className='relative -mx-4 -mt-8 overflow-hidden rounded-[2rem] bg-linear-to-br from-blue-50 via-sky-50 to-white px-4 py-14 sm:-mx-6 sm:px-8 lg:-mx-10 lg:grid lg:grid-cols-[1.08fr_0.92fr] lg:items-center lg:gap-12 lg:px-16 lg:py-20'>
+        <div className='pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_10%_10%,rgba(37,99,235,0.14),transparent_30%),radial-gradient(circle_at_80%_20%,rgba(14,165,233,0.12),transparent_28%)]' />
         <motion.div
           initial={{ opacity: 0, y: 24 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.45, ease: 'easeOut' }}
-          className='space-y-6'
+          className='relative space-y-6'
         >
-          <Badge className='gap-2 rounded-full px-4 py-2' variant='info'>
-            <ShieldCheck size={14} />
-            Mentor đã duyệt cho từng mục tiêu học tập
-          </Badge>
           <div className='space-y-4'>
-            <h1 className='text-ink max-w-3xl text-4xl leading-tight font-semibold tracking-tight md:text-5xl'>
-              Tìm mentor phù hợp để học đúng thứ, đúng nhịp và đúng mục tiêu.
+            <h1 className='text-ink max-w-3xl text-4xl leading-[1.05] font-black tracking-tight md:text-6xl'>
+              Tìm <span className='text-primary'>đúng Mentor.</span>
+              <br />
+              Học đúng lộ trình.
+              <br />
+              <span className='text-primary'>Đạt đúng mục tiêu.</span>
             </h1>
-            <p className='text-muted max-w-2xl text-base leading-relaxed md:text-lg'>
-              Mentor Matching giúp học viên và phụ huynh tìm mentor theo môn học, lớp, hình thức học
-              và ngân sách. Mỗi hồ sơ đều thể hiện học phí, đánh giá, cách dạy và trạng thái duyệt
-              rõ ràng.
+            <p className='max-w-2xl leading-relaxed text-slate-700 md:text-lg'>
+              Nền tảng kết nối học viên với mentor chất lượng, giúp xây dựng lộ trình học tập cá
+              nhân hóa và đạt kết quả mong muốn.
             </p>
           </div>
 
-          <SearchBar
-            buttonLabel='Tìm mentor'
-            contextPlaceholder='Lớp, khu vực hoặc online/offline'
-            contextSuggestions={citySuggestions}
-            contextSuggestionsEmptyText='Không tìm thấy thành phố phù hợp với từ khóa này.'
-            contextSuggestionsError={
-              citySuggestionsQuery.isError && shouldSearchCities
-                ? 'Không thể tải gợi ý thành phố lúc này. Vui lòng thử lại.'
-                : null
-            }
-            contextValue={context}
-            isContextSuggestionsLoading={citySuggestionsQuery.isLoading && shouldSearchCities}
-            isSubmitting={isSearchPending}
-            keywordValue={keyword}
-            onContextChange={handleContextChange}
-            onContextSuggestionSelect={handleCitySuggestionSelect}
-            onKeywordChange={setKeyword}
-            onQuickTagClick={handleQuickTagClick}
-            onSubmit={handleSubmitSearch}
-            quickTags={['Toán lớp 9', 'IELTS Foundation', 'Ôn thi lớp 10', 'Học cuối tuần']}
-          />
+          <form
+            className='max-w-3xl rounded-2xl border border-slate-200 bg-white p-3 shadow-xl shadow-blue-900/10'
+            onSubmit={(event) => {
+              event.preventDefault()
+              handleSubmitSearch()
+            }}
+          >
+            <div className='grid gap-3 md:grid-cols-[1fr_1fr_150px]'>
+              <label className='space-y-1'>
+                <span className='text-ink text-sm font-bold'>Môn học hoặc mục tiêu</span>
+                <input
+                  className='focus:border-primary focus:ring-primary/10 h-12 w-full rounded-xl border border-slate-200 px-4 text-sm outline-none focus:ring-4'
+                  placeholder='Ví dụ: Toán 10, IELTS...'
+                  value={keyword}
+                  onChange={(event) => setKeyword(event.target.value)}
+                />
+              </label>
+              <label className='space-y-1'>
+                <span className='text-ink text-sm font-bold'>Cấp lớp hoặc hình thức</span>
+                <input
+                  className='focus:border-primary focus:ring-primary/10 h-12 w-full rounded-xl border border-slate-200 px-4 text-sm outline-none focus:ring-4'
+                  placeholder='Ví dụ: Lớp 12, Online/Offline'
+                  value={context}
+                  onChange={(event) => handleContextChange(event.target.value)}
+                />
+              </label>
+              <button
+                className={cn(
+                  buttonVariants({ size: 'lg' }),
+                  'mt-auto h-12 rounded-xl shadow-lg shadow-blue-600/20'
+                )}
+                disabled={isSearchPending}
+                type='submit'
+              >
+                <Search size={17} />
+                Tìm ngay
+              </button>
+            </div>
+            {citySuggestions.length && shouldSearchCities ? (
+              <div className='mt-3 flex flex-wrap gap-2 border-t border-slate-100 pt-3'>
+                {citySuggestions.slice(0, 3).map((suggestion) => (
+                  <button
+                    key={suggestion.id}
+                    className='rounded-full border border-blue-100 bg-blue-50 px-3 py-1 text-xs font-semibold text-blue-700'
+                    type='button'
+                    onClick={() => handleCitySuggestionSelect(suggestion)}
+                  >
+                    {suggestion.label}
+                  </button>
+                ))}
+              </div>
+            ) : null}
+          </form>
 
-          <div className='flex flex-wrap gap-3'>
-            <Link className={cn(buttonVariants({ className: 'rounded-2xl' }))} to={path.discover}>
-              Khám phá mentor <ArrowRight size={16} />
-            </Link>
-            <Link
-              className={cn(buttonVariants({ className: 'rounded-2xl', variant: 'outline' }))}
-              to={path.mentorPanel.root}
-            >
-              Trở thành mentor
-            </Link>
+          <div className='flex flex-wrap items-center gap-2 text-sm text-slate-700'>
+            <span>Gợi ý:</span>
+            {['Toán lớp 10', 'IELTS', 'Ôn thi chuyển cấp'].map((tag) => (
+              <button
+                key={tag}
+                className='rounded-full border border-blue-200 bg-white/70 px-3 py-1 font-medium text-blue-700'
+                type='button'
+                onClick={() => handleQuickTagClick(tag)}
+              >
+                {tag}
+              </button>
+            ))}
           </div>
 
-          <div className='grid gap-3 sm:grid-cols-3'>
+          <div className='grid max-w-2xl overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-lg shadow-blue-900/10 sm:grid-cols-3'>
             {marketplaceStats.map((stat) => (
-              <Card key={stat.label} className='rounded-2xl border-slate-200/80 shadow-none'>
-                <CardContent className='p-4'>
-                  <p className='text-ink text-2xl font-semibold'>{stat.value}</p>
-                  <p className='text-muted mt-1 text-sm capitalize'>{stat.label}</p>
-                </CardContent>
-              </Card>
+              <div
+                key={stat.label}
+                className='border-b border-slate-200 p-5 last:border-b-0 sm:border-r sm:border-b-0 sm:last:border-r-0'
+              >
+                <p className='text-ink text-3xl font-black'>{stat.value}</p>
+                <p className='text-ink mt-1 text-sm capitalize'>{stat.label}</p>
+              </div>
             ))}
           </div>
         </motion.div>
@@ -264,72 +272,30 @@ const Home = () => {
           initial={{ opacity: 0, y: 28 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.55, ease: 'easeOut', delay: 0.05 }}
-          className='space-y-4'
+          className='relative mt-12 flex min-h-105 items-center justify-center lg:mt-0'
         >
-          <Card className='rounded-[28px] border-slate-200/80 bg-white'>
-            <CardContent className='p-6'>
-              <div className='flex flex-wrap items-start justify-between gap-3'>
-                <div>
-                  <p className='text-ink text-xl font-semibold'>Cách người học ra quyết định</p>
-                  <p className='text-muted mt-1 text-sm leading-relaxed'>
-                    Marketplace này ưu tiên thông tin đủ dùng để phụ huynh và học viên so sánh nhanh
-                    mà không phải đoán phần quan trọng nhất.
-                  </p>
-                </div>
-                <Badge variant='outline'>Tập trung vào so sánh thực tế</Badge>
-              </div>
-
-              <div className='mt-5 space-y-3'>
-                {decisionSignals.map((signal) => (
-                  <div
-                    key={signal.title}
-                    className='rounded-2xl border border-slate-200 bg-slate-50 p-4'
-                  >
-                    <div className='flex items-center gap-2'>
-                      {signal.icon}
-                      <p className='text-ink font-semibold'>{signal.title}</p>
-                    </div>
-                    <p className='text-muted mt-2 text-sm leading-relaxed'>{signal.description}</p>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className='rounded-[28px] border-slate-200/80 bg-slate-50'>
-            <CardContent className='p-5'>
-              <p className='text-ink text-sm font-semibold tracking-[0.16em] uppercase'>
-                Hành trình đặt buổi học
-              </p>
-              <div className='mt-4 space-y-4'>
-                {trustSteps.map((step, index) => (
-                  <div key={step.title} className='flex gap-4'>
-                    <div className='bg-primary text-primary-foreground flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-sm font-semibold text-white'>
-                      {index + 1}
-                    </div>
-                    <div>
-                      <p className='text-ink font-semibold'>{step.title}</p>
-                      <p className='text-muted mt-1 text-sm'>{step.description}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
+          <JourneyGraphic />
         </motion.div>
       </section>
 
       <section className='space-y-8'>
-        <div className='flex items-end justify-between gap-4'>
-          <SectionTitle
-            eyebrow='Mentor nổi bật'
-            size='md'
-            subtitle='Danh sách lấy từ mentor công khai đã sẵn sàng trên hệ thống và đang được sắp xếp theo hồ sơ mới nhất.'
-            title='Một số mentor công khai để bắt đầu so sánh'
-          />
+        <div className='flex flex-col gap-5 md:flex-row md:items-end md:justify-between'>
+          <div className='max-w-4xl'>
+            <p className='text-primary text-2xl font-bold uppercase'>Mentor nổi bật</p>
+            <h2 className='text-ink mt-3 max-w-3xl text-3xl leading-tight font-black tracking-tight md:text-5xl'>
+              Một số mentor công khai để bắt đầu so sánh
+            </h2>
+            <p className='text-muted mt-4 max-w-2xl leading-relaxed md:text-lg'>
+              Xem nhanh môn học, học phí và lịch gần nhất từ các mentor đang công khai trên hệ
+              thống.
+            </p>
+          </div>
           <Link
             className={cn(
-              buttonVariants({ className: 'hidden rounded-2xl md:inline-flex', variant: 'outline' })
+              buttonVariants({
+                className: 'w-fit rounded-2xl px-5 md:inline-flex',
+                variant: 'outline'
+              })
             )}
             to={path.discover}
           >
@@ -380,7 +346,7 @@ const Home = () => {
             {Array.from({ length: 8 }).map((_, index) => (
               <Card
                 key={`subject-skeleton-${index}`}
-                className='h-[220px] animate-pulse rounded-[28px] border-slate-200/80 bg-white'
+                className='h-55 animate-pulse rounded-[28px] border-slate-200/80 bg-white'
               />
             ))}
           </div>
@@ -480,6 +446,82 @@ const Home = () => {
           ))}
         </div>
       </section>
+    </div>
+  )
+}
+
+function JourneyGraphic() {
+  return (
+    <div className='relative w-full max-w-xl text-center'>
+      <h2 className='text-ink text-3xl leading-tight font-black tracking-tight md:text-5xl'>
+        Hành trình đặt lớp
+      </h2>
+      <div className='relative mx-auto mt-8 h-72 max-w-md'>
+        <svg
+          aria-hidden='true'
+          className='absolute inset-0 h-full w-full text-slate-400'
+          fill='none'
+          viewBox='0 0 420 270'
+        >
+          <path d='M105 80H295' stroke='currentColor' strokeLinecap='round' strokeWidth='2' />
+          <path
+            d='M280 68L296 80L280 92'
+            stroke='currentColor'
+            strokeLinecap='round'
+            strokeWidth='2'
+          />
+          <path
+            d='M105 118V145C105 157 115 167 127 167H182'
+            stroke='currentColor'
+            strokeLinecap='round'
+            strokeWidth='2'
+          />
+          <path
+            d='M238 167H300C312 167 322 157 322 145V118'
+            stroke='currentColor'
+            strokeLinecap='round'
+            strokeWidth='2'
+          />
+        </svg>
+
+        <JourneyNode
+          className='absolute top-0 left-10'
+          icon={<Search size={36} />}
+          label='1. Chọn Mentor'
+        />
+        <JourneyNode
+          className='absolute top-0 right-10'
+          icon={<CalendarDays size={34} />}
+          label='3. Đặt lịch ngay'
+        />
+        <JourneyNode
+          className='absolute top-28 left-1/2 -translate-x-1/2'
+          icon={<span className='text-5xl leading-none'>☆</span>}
+          label='2. Xem đánh giá'
+        />
+      </div>
+      <p className='text-muted -mt-2 text-base leading-relaxed md:text-lg'>
+        Quy trình 3 bước đơn giản, minh bạch.
+      </p>
+    </div>
+  )
+}
+
+function JourneyNode({
+  className,
+  icon,
+  label
+}: {
+  className?: string
+  icon: ReactNode
+  label: string
+}) {
+  return (
+    <div className={cn('flex w-32 flex-col items-center', className)}>
+      <div className='flex h-20 w-20 items-center justify-center rounded-full border-2 border-blue-200 bg-blue-100/70 text-blue-700 shadow-inner'>
+        {icon}
+      </div>
+      <p className='text-ink mt-3 text-sm font-semibold'>{label}</p>
     </div>
   )
 }

@@ -266,9 +266,6 @@ const Discover = () => {
   return (
     <div className='space-y-6'>
       <header>
-        <p className='text-muted text-sm font-medium'>
-          Khám phá mentor phù hợp với mục tiêu học tập
-        </p>
         <h1 className='text-ink mt-1 text-3xl font-bold tracking-tight md:text-4xl'>
           Tìm kiếm Mentor
         </h1>

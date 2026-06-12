@@ -1,8 +1,9 @@
-import { Bell, GraduationCap, LogOut, Menu, X } from 'lucide-react'
+import { Bell, LogOut, Menu, X } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import { Link, NavLink, useNavigate } from 'react-router'
 import { motion, AnimatePresence } from 'framer-motion'
 
+import { BrandLogo } from '@/components/BrandLogo'
 import { buttonVariants } from '@/components/ui/button'
 import { path } from '@/config/path'
 import { useDashboardPath } from '@/hooks/useDashboardPath'
@@ -93,17 +94,7 @@ const Navbar = () => {
         className={`page-container flex items-center justify-between transition-all duration-300 ${scrolled ? 'py-3' : 'py-5'}`}
       >
         <div className='flex items-center gap-8'>
-          <Link className='group flex items-center gap-2' to='/'>
-            <div className='bg-primary/10 text-primary group-hover:bg-primary rounded-xl p-2 transition-colors duration-300 group-hover:text-white'>
-              <GraduationCap
-                size={20}
-                className='transition-transform duration-300 group-hover:-translate-y-0.5'
-              />
-            </div>
-            <span className='text-ink group-hover:text-primary text-xl font-semibold tracking-tight transition-colors'>
-              Mentor Matching
-            </span>
-          </Link>
+          <BrandLogo />
           <div className='hidden items-center gap-6 md:flex'>{navLinks}</div>
         </div>
 
