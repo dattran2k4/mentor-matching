@@ -1,36 +1,28 @@
 import axios from 'axios'
-import { CalendarDays, CheckCircle2, Clock, ShieldCheck } from 'lucide-react'
-import { useMemo, useState } from 'react'
+import { CalendarDays, CheckCircle2 } from 'lucide-react'
+import { useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router'
 
-import { StatusBadge } from '@/components/StatusBadge'
 import { Badge } from '@/components/ui/badge'
 import { Button, buttonVariants } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
-import { Separator } from '@/components/ui/separator'
 import { path } from '@/config/path'
 import { useCurrentUserQuery } from '@/hooks/queries/auth/useCurrentUserQuery'
 import { useCreateBookingMutation } from '@/hooks/queries/booking/useCreateBookingMutation'
-import type { MentorProfileViewModel } from '@/routes/mentor-profile.presentation'
-import { formatMeetingTypeLabel, formatTimeLabel } from '@/routes/mentor-profile.presentation'
+import {
+  formatMeetingTypeLabel,
+  formatTimeLabel,
+  type MentorProfileViewModel
+} from '@/routes/mentor-profile.presentation'
 import { useAuthStore } from '@/store/auth-store'
 import type { ErrorResponse } from '@/types/api/common'
 import { cn } from '@/utils/cn'
 import { formatPrice } from '@/utils/format'
 
 interface BookingSidebarProps {
+  className?: string
   mentor: MentorProfileViewModel
   selectedOfferingId?: string
-  className?: string
-}
-
-function getBookingErrorMessage(error: unknown) {
-  if (axios.isAxiosError<ErrorResponse>(error)) {
-    if (!error.response) return 'Không kết nối được máy chủ để gửi booking.'
-    return error.response.data?.message || 'Không thể gửi booking lúc này.'
-  }
-
-  return 'Không thể gửi booking lúc này.'
 }
 
 const BookingSidebar = ({ className, mentor, selectedOfferingId }: BookingSidebarProps) => {
@@ -45,21 +37,16 @@ const BookingSidebar = ({ className, mentor, selectedOfferingId }: BookingSideba
     mentor.offerings.find((offering) => offering.id === selectedOfferingId) ??
     mentor.offerings.find((offering) => offering.active) ??
     mentor.offerings[0]
-  const nextWindows = mentor.specificDateAvailability.slice(0, 4)
-  const primaryMeetingType = mentor.meetingTypes[0]
-  const selectedSlotId = mentor.specificDateAvailability.some(
-    (window) => window.id === selectedSlotIdState
-  )
+  const visibleSlots = mentor.specificDateAvailability.slice(0, 3)
+  const selectedSlotId = visibleSlots.some((slot) => slot.id === selectedSlotIdState)
     ? selectedSlotIdState
-    : mentor.specificDateAvailability[0]?.id
-  const selectedSlot = mentor.specificDateAvailability.find(
-    (window) => window.id === selectedSlotId
-  )
-  const redirectTo = `${path.login}?redirectTo=${encodeURIComponent(`${location.pathname}${location.search}`)}`
-  const isLoggedIn = Boolean(accessToken)
+    : visibleSlots[0]?.id
+  const selectedSlot = visibleSlots.find((slot) => slot.id === selectedSlotId)
   const currentUser = currentUserQuery.data
   const isLearner = currentUser?.roles.includes('LEARNER') ?? false
-  const canSubmitBooking = Boolean(
+  const isLoggedIn = Boolean(accessToken)
+  const resolvedPrice = activeOffering?.pricePerHour ?? mentor.startingPrice
+  const canSubmit = Boolean(
     isLoggedIn &&
     isLearner &&
     activeOffering &&
@@ -67,53 +54,17 @@ const BookingSidebar = ({ className, mentor, selectedOfferingId }: BookingSideba
     mentor.bookableMeetingType &&
     !createBookingMutation.isPending
   )
-  const resolvedPrice = activeOffering?.pricePerHour ?? mentor.startingPrice
+  const redirectTo = `${path.login}?redirectTo=${encodeURIComponent(`${location.pathname}${location.search}`)}`
 
-  const bookingHelpText = useMemo(() => {
-    if (!activeOffering) {
-      return 'Mentor chưa có offering công khai để tạo booking từ màn này.'
-    }
-
-    if (!nextWindows.length) {
-      return 'Cần lịch theo ngày cụ thể từ backend để gửi booking trực tiếp từ hồ sơ mentor.'
-    }
-
-    if (!mentor.bookableMeetingType) {
-      return 'Contract booking hiện chỉ nhận ONLINE hoặc OFFLINE. Hồ sơ này đang trả về hình thức HYBRID nên mình giữ CTA ở trạng thái trung thực.'
-    }
-
-    if (!isLoggedIn) {
-      return 'Đăng nhập bằng tài khoản learner để gửi yêu cầu đặt lịch.'
-    }
-
-    if (currentUserQuery.isLoading) {
-      return 'Đang kiểm tra vai trò tài khoản trước khi gửi booking.'
-    }
-
-    if (!isLearner) {
-      return 'Tài khoản hiện tại không phải learner nên chưa thể gửi booking từ màn này.'
-    }
-
-    if (!selectedSlot) {
-      return 'Chọn một khung giờ cụ thể trước khi gửi yêu cầu đặt lịch.'
-    }
-
-    if (createBookingMutation.isSuccess) {
-      return `Yêu cầu đã được gửi với mã booking #${createBookingMutation.data.bookingId}.`
-    }
-
-    return 'Chọn offering và khung giờ trước khi gửi yêu cầu đặt lịch.'
-  }, [
-    activeOffering,
-    createBookingMutation.data,
-    createBookingMutation.isSuccess,
-    currentUserQuery.isLoading,
-    isLearner,
-    isLoggedIn,
-    mentor.bookableMeetingType,
-    nextWindows.length,
-    selectedSlot
-  ])
+  const actionHint = (() => {
+    if (!activeOffering) return 'Mentor chưa có môn học đang mở.'
+    if (!visibleSlots.length) return 'Mentor chưa mở lịch theo ngày cụ thể.'
+    if (!mentor.bookableMeetingType) return 'Hình thức học này chưa hỗ trợ đặt lịch trực tiếp.'
+    if (!isLoggedIn) return 'Đăng nhập bằng tài khoản học viên để gửi yêu cầu.'
+    if (!isLearner && !currentUserQuery.isLoading)
+      return 'Chỉ tài khoản học viên có thể gửi yêu cầu đặt lịch.'
+    return 'Bạn chỉ thanh toán sau khi mentor xác nhận yêu cầu.'
+  })()
 
   const handleCreateBooking = () => {
     if (!activeOffering || !selectedSlot || !mentor.bookableMeetingType) return
@@ -129,7 +80,7 @@ const BookingSidebar = ({ className, mentor, selectedOfferingId }: BookingSideba
       },
       {
         onSuccess: ({ bookingId }) => {
-          void navigate(`${path.user.bookings}?createdBookingId=${bookingId}&bookingCreated=1}`)
+          void navigate(`${path.user.bookings}?createdBookingId=${bookingId}&bookingCreated=1`)
         }
       }
     )
@@ -138,243 +89,163 @@ const BookingSidebar = ({ className, mentor, selectedOfferingId }: BookingSideba
   return (
     <Card
       className={cn(
-        'shadow-soft rounded-[28px] border-slate-200/80 lg:sticky lg:top-24',
+        'rounded-2xl border-slate-200 bg-white shadow-lg shadow-slate-900/5 lg:sticky lg:top-24',
         className
       )}
     >
       <CardContent className='p-5'>
-        <div className='flex items-start justify-between gap-3'>
-          <div>
-            <p className='text-muted text-sm'>Tóm tắt đặt buổi học</p>
-            <p className='text-ink mt-1 text-2xl font-semibold'>
-              {resolvedPrice !== null ? formatPrice(resolvedPrice) : 'Liên hệ'}
-            </p>
-            <p className='text-muted mt-1 text-xs'>mỗi buổi học 60 phút</p>
-          </div>
-          {mentor.approvalStatus ? (
-            <StatusBadge kind='approval' status={mentor.approvalStatus} />
-          ) : (
-            <Badge variant='muted'>Duyệt hồ sơ chưa công khai</Badge>
-          )}
-        </div>
+        <h2 className='text-ink text-lg font-bold'>Đặt lịch với {mentor.name}</h2>
 
-        <div className='mt-4 flex flex-wrap gap-2'>
-          {mentor.verificationStatus ? (
-            <StatusBadge kind='verification' status={mentor.verificationStatus} />
-          ) : (
-            <Badge variant='outline'>Xác minh chưa công khai</Badge>
-          )}
-          <Badge variant='muted'>
-            {mentor.rating !== null && mentor.reviewsCount !== null
-              ? `${mentor.rating.toFixed(1)} / 5 từ ${mentor.reviewsCount} đánh giá`
-              : 'Chưa có dữ liệu đánh giá công khai'}
-          </Badge>
-        </div>
-
-        <div className='mt-6 rounded-2xl border border-slate-200 bg-slate-50 p-4'>
-          <div className='flex items-center justify-between gap-3'>
-            <p className='text-ink text-sm font-semibold'>Môn học đang chọn</p>
-            <Badge variant='info'>1 buổi 60 phút</Badge>
-          </div>
-          <div className='mt-3 rounded-2xl border border-slate-200 bg-white p-3 text-sm'>
+        <div className='mt-4'>
+          <p className='text-muted text-[10px] font-bold tracking-[0.12em] uppercase'>
+            Môn học đã chọn
+          </p>
+          <div className='mt-2 rounded-xl border border-slate-200 bg-slate-50 p-3'>
             {activeOffering ? (
-              <div className='flex items-start justify-between gap-3'>
-                <div>
-                  <p className='text-ink font-semibold'>
+              <>
+                <div className='flex items-start justify-between gap-3'>
+                  <p className='text-ink text-sm font-bold'>
                     {activeOffering.subject} · {activeOffering.grade}
                   </p>
-                  <p className='text-muted mt-1 text-xs'>{activeOffering.teachingNote}</p>
-                  <div className='mt-2 flex flex-wrap gap-2'>
-                    <Badge variant='muted'>{activeOffering.proficiency}</Badge>
-                  </div>
+                  <span className='text-ink shrink-0 text-sm font-bold'>
+                    {formatPrice(activeOffering.pricePerHour)}
+                  </span>
                 </div>
-                <span className='text-ink text-sm font-semibold'>
-                  {formatPrice(activeOffering.pricePerHour)}
-                </span>
-              </div>
+                <p className='text-muted mt-1 line-clamp-2 text-xs'>
+                  {activeOffering.teachingNote}
+                </p>
+              </>
             ) : (
-              <p className='text-muted text-xs'>
-                Mentor chưa có offering công khai để gửi booking trực tiếp từ sidebar này.
-              </p>
-            )}
-          </div>
-          <div className='mt-4 flex flex-wrap gap-2'>
-            {mentor.meetingTypes.length ? (
-              mentor.meetingTypes.map((meetingType) => (
-                <Badge
-                  key={meetingType}
-                  variant={meetingType === primaryMeetingType ? 'info' : 'outline'}
-                >
-                  {formatMeetingTypeLabel(meetingType)}
-                </Badge>
-              ))
-            ) : (
-              <Badge variant='outline'>Hình thức học đang cập nhật</Badge>
+              <p className='text-muted text-sm'>Chưa có môn học để lựa chọn.</p>
             )}
           </div>
         </div>
 
-        <Separator className='my-6' />
-
-        <div className='mt-6'>
-          <div className='text-ink flex items-center gap-2 text-sm font-semibold'>
+        <div className='mt-5 border-t border-slate-200 pt-5'>
+          <div className='flex items-center gap-2 text-sm font-bold text-slate-900'>
             <CalendarDays size={16} />
-            Lịch gần nhất có thể gửi yêu cầu
+            Lịch gần nhất
           </div>
-          <div className='mt-3 space-y-2 text-sm'>
-            {nextWindows.length ? (
-              nextWindows.map((window) => {
-                const isSelected = window.id === selectedSlotId
+          <div className='mt-3 space-y-2'>
+            {visibleSlots.length ? (
+              visibleSlots.map((slot) => {
+                const selected = slot.id === selectedSlotId
 
                 return (
                   <button
-                    key={window.id}
+                    key={slot.id}
                     className={cn(
-                      'w-full rounded-2xl border px-3 py-3 text-left transition',
-                      isSelected
-                        ? 'border-blue-200 bg-blue-50'
-                        : 'border-slate-200 bg-slate-50 hover:border-slate-300'
+                      'w-full rounded-xl border px-3 py-2.5 text-left transition',
+                      selected
+                        ? 'border-blue-400 bg-blue-50 ring-2 ring-blue-100'
+                        : 'border-slate-200 hover:border-slate-300'
                     )}
-                    onClick={() => setSelectedSlotId(window.id)}
                     type='button'
+                    onClick={() => setSelectedSlotId(slot.id)}
                   >
-                    <div className='flex items-center justify-between gap-3'>
-                      <p className='text-ink font-semibold'>{window.dateLabel}</p>
-                      <span className='text-muted text-xs'>
-                        {window.meetingTypes.map(formatMeetingTypeLabel).join(' / ') ||
+                    <div className='flex justify-between gap-3'>
+                      <span className='text-ink text-sm font-bold'>{slot.dateLabel}</span>
+                      <Badge className='px-2 py-0 text-[10px]' variant='outline'>
+                        {slot.meetingTypes.map(formatMeetingTypeLabel).join(' / ') ||
                           'Đang cập nhật'}
-                      </span>
+                      </Badge>
                     </div>
                     <p className='text-muted mt-1 text-xs'>
-                      {formatTimeLabel(window.startTime)} - {formatTimeLabel(window.endTime)}
-                      {window.note ? ` · ${window.note}` : ''}
+                      {formatTimeLabel(slot.startTime)} - {formatTimeLabel(slot.endTime)}
                     </p>
                   </button>
                 )
               })
             ) : (
-              <div className='rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3 text-xs text-slate-600'>
-                Mentor hiện chưa có lịch theo ngày cụ thể để gửi booking trực tiếp. Tín hiệu khả
-                dụng hiện có: {mentor.availabilitySummary}.
-              </div>
+              <p className='rounded-xl bg-slate-50 px-3 py-3 text-xs text-slate-600'>
+                Chưa có lịch cụ thể để gửi yêu cầu.
+              </p>
             )}
           </div>
         </div>
 
-        <div className='mt-6'>
-          <div className='text-ink flex items-center gap-2 text-sm font-semibold'>
-            <Clock size={16} />
-            Khung giờ lặp lại hằng tuần
-          </div>
-          <div className='mt-3 space-y-2 text-xs'>
-            {mentor.recurringAvailability.length ? (
-              mentor.recurringAvailability.map((window) => (
-                <div
-                  key={window.id}
-                  className='flex items-center justify-between rounded-2xl border border-slate-200 px-3 py-2.5'
-                >
-                  <div>
-                    <p className='text-ink text-sm font-semibold'>{window.dayLabel}</p>
-                    <p className='text-muted mt-1'>
-                      {formatTimeLabel(window.startTime)} - {formatTimeLabel(window.endTime)}
-                    </p>
-                  </div>
-                  <Badge variant='muted'>
-                    {window.meetingTypes.map(formatMeetingTypeLabel).join(' / ') || 'Đang cập nhật'}
-                  </Badge>
-                </div>
-              ))
-            ) : (
-              <div className='rounded-2xl border border-dashed border-slate-200 px-3 py-3 text-slate-600'>
-                Mentor chưa công khai khung giờ lặp lại trên endpoint hiện tại.
-              </div>
-            )}
-          </div>
-        </div>
-
-        <div className='mt-6 rounded-2xl bg-slate-50 p-4 text-sm'>
-          <p className='text-ink mb-3 font-semibold'>Tóm tắt gửi yêu cầu</p>
-          <div className='text-muted flex items-center justify-between'>
-            <span>Buổi học dự kiến</span>
-            <span>{resolvedPrice !== null ? formatPrice(resolvedPrice) : 'Chưa có'}</span>
-          </div>
-          <div className='text-muted mt-2 flex items-center justify-between'>
-            <span>Môn học</span>
-            <span>
-              {activeOffering ? `${activeOffering.subject} · ${activeOffering.grade}` : 'Chưa có'}
-            </span>
-          </div>
-          <div className='text-muted mt-2 flex items-center justify-between'>
-            <span>Hình thức gửi booking</span>
-            <span>
-              {mentor.bookableMeetingType
-                ? formatMeetingTypeLabel(mentor.bookableMeetingType)
-                : 'Chưa hỗ trợ'}
-            </span>
-          </div>
-          <div className='text-muted mt-2 flex items-center justify-between'>
-            <span>Khung giờ đang chọn</span>
-            <span>
-              {selectedSlot
-                ? `${selectedSlot.dateLabel} · ${formatTimeLabel(selectedSlot.startTime)}-${formatTimeLabel(selectedSlot.endTime)}`
-                : 'Chưa chọn'}
-            </span>
-          </div>
-          <div className='text-ink mt-2 flex items-center justify-between font-semibold'>
-            <span>Tạm tính</span>
-            <span>{resolvedPrice !== null ? formatPrice(resolvedPrice) : 'Chưa có'}</span>
-          </div>
-        </div>
-
-        <div className='mt-4 rounded-2xl border border-slate-200 bg-white p-4 text-sm'>
-          <div className='flex items-start gap-2'>
-            <CheckCircle2 className='mt-0.5 h-4 w-4 shrink-0 text-emerald-600' />
-            <div>
-              <p className='text-ink font-semibold'>Điều gì xảy ra tiếp theo?</p>
-              <ul className='text-muted mt-2 space-y-2 leading-relaxed'>
-                <li>Chọn đúng offering theo môn học và cấp lớp.</li>
-                <li>Chọn một khung giờ cụ thể nếu backend đã trả về lịch theo ngày.</li>
-                <li>Gửi yêu cầu để mentor phản hồi theo quy trình booking hiện có của hệ thống.</li>
-              </ul>
+        <div className='mt-5 border-t border-slate-200 pt-5'>
+          <p className='text-ink text-sm font-bold'>Tóm tắt đặt lịch</p>
+          <dl className='mt-3 space-y-2.5 text-xs'>
+            <SummaryRow
+              label='Môn học'
+              value={
+                activeOffering ? `${activeOffering.subject} · ${activeOffering.grade}` : 'Chưa chọn'
+              }
+            />
+            <SummaryRow
+              label='Hình thức'
+              value={
+                mentor.bookableMeetingType
+                  ? formatMeetingTypeLabel(mentor.bookableMeetingType)
+                  : 'Chưa hỗ trợ'
+              }
+            />
+            <SummaryRow
+              label='Khung giờ'
+              value={
+                selectedSlot
+                  ? `${selectedSlot.dateLabel}, ${formatTimeLabel(selectedSlot.startTime)}-${formatTimeLabel(selectedSlot.endTime)}`
+                  : 'Chưa chọn'
+              }
+            />
+            <div className='flex items-center justify-between border-t border-slate-200 pt-3 text-sm font-bold'>
+              <dt>Tạm tính</dt>
+              <dd>{resolvedPrice !== null ? formatPrice(resolvedPrice) : 'Chưa có'}</dd>
             </div>
-          </div>
-        </div>
-
-        <div className='mt-6 rounded-2xl border border-blue-100 bg-blue-50 p-4 text-sm text-blue-800'>
-          <div className='flex items-start gap-2'>
-            <ShieldCheck className='mt-0.5 h-4 w-4 shrink-0' />
-            <p>{bookingHelpText}</p>
-          </div>
+          </dl>
         </div>
 
         {createBookingMutation.isError ? (
-          <div className='mt-4 rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-700'>
+          <p className='mt-4 rounded-xl border border-red-200 bg-red-50 p-3 text-xs text-red-700'>
             {getBookingErrorMessage(createBookingMutation.error)}
-          </div>
+          </p>
         ) : null}
 
         {!isLoggedIn ? (
           <Link
-            className={cn(buttonVariants({ className: 'mt-6 w-full rounded-2xl', size: 'lg' }))}
+            className={cn(buttonVariants({ size: 'lg' }), 'mt-5 w-full rounded-xl')}
             to={redirectTo}
           >
-            Đăng nhập để đặt buổi học
+            Đăng nhập để đặt lịch
           </Link>
         ) : (
           <Button
-            className='mt-6 w-full rounded-2xl'
-            disabled={!canSubmitBooking}
+            className='mt-5 w-full rounded-xl'
+            disabled={!canSubmit}
             isLoading={createBookingMutation.isPending}
-            onClick={handleCreateBooking}
             size='lg'
+            onClick={handleCreateBooking}
           >
             Gửi yêu cầu đặt lịch
           </Button>
         )}
-        <p className='text-muted mt-3 text-center text-xs'>{bookingHelpText}</p>
+
+        <p className='text-muted mt-3 flex items-start gap-2 text-xs leading-relaxed'>
+          <CheckCircle2 className='mt-0.5 shrink-0 text-emerald-600' size={14} />
+          {actionHint}
+        </p>
       </CardContent>
     </Card>
   )
+}
+
+function SummaryRow({ label, value }: { label: string; value: string }) {
+  return (
+    <div className='flex items-start justify-between gap-4'>
+      <dt className='text-muted'>{label}</dt>
+      <dd className='text-ink max-w-[60%] text-right font-medium'>{value}</dd>
+    </div>
+  )
+}
+
+function getBookingErrorMessage(error: unknown) {
+  if (axios.isAxiosError<ErrorResponse>(error)) {
+    if (!error.response) return 'Không kết nối được máy chủ để gửi yêu cầu.'
+    return error.response.data?.message || 'Không thể gửi yêu cầu lúc này.'
+  }
+
+  return 'Không thể gửi yêu cầu lúc này.'
 }
 
 export default BookingSidebar

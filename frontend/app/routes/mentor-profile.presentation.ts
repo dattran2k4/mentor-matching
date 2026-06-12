@@ -63,6 +63,7 @@ export type MentorProfileViewModel = {
   id: string
   mentorId: number
   name: string
+  avatarUrl: string | null
   headline: string
   approvalStatus: MentorApprovalStatusApiResponse | null
   verificationStatus: MentorVerificationStatusApiResponse | null
@@ -121,6 +122,7 @@ export function mapMentorProfileToViewModel(
     id: String(detail.id),
     mentorId: detail.id,
     name: detail.fullName,
+    avatarUrl: detail.avatarUrl || null,
     headline:
       detail.headline?.trim() ||
       [detail.currentPosition, detail.workplace].filter(Boolean).join(' · ') ||
