@@ -1,4 +1,4 @@
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import {
   BookOpen,
   CalendarDays,
@@ -12,6 +12,10 @@ import { Link } from 'react-router'
 
 import { DashboardPage } from '@/components/DashboardPage'
 import { EmptyState } from '@/components/EmptyState'
+import {
+  MentorRejectBookingModal,
+  type MentorRejectBookingModalSession
+} from '@/components/MentorRejectBookingModal'
 import { ScreenErrorState } from '@/components/ScreenErrorState'
 import { Badge } from '@/components/ui/badge'
 import { Button, buttonVariants } from '@/components/ui/button'
@@ -44,6 +48,7 @@ type BookedSessionItem = {
   meetingTypeLabel: string
   note: string
   bookingStatus: BookingApiResponse['status']
+  bookingStatusLabel: string
   joinLink: string | null
 }
 
@@ -137,6 +142,11 @@ function getMeetingTypeLabel(booking: BookingApiResponse) {
   return 'Offline'
 }
 
+function getBookingStatusLabel(status: BookingApiResponse['status']) {
+  if (status === 'PENDING') return 'Chờ xác nhận'
+  return 'Đã xác nhận'
+}
+
 function getBookingNote(booking: BookingApiResponse) {
   if (booking.note?.trim()) return booking.note.trim()
   if (booking.cancelReason?.trim()) return booking.cancelReason.trim()
@@ -184,6 +194,9 @@ export function meta() {
 }
 
 export default function MentorSchedulePage() {
+  const [rejectingSession, setRejectingSession] = useState<MentorRejectBookingModalSession | null>(
+    null
+  )
   const mentorScheduleQuery = useCurrentMentorScheduleQuery()
   const mentorBookingsQuery = useCurrentMentorBookingsQuery(
     Boolean(mentorScheduleQuery.data?.currentMentor)
@@ -221,6 +234,7 @@ export default function MentorSchedulePage() {
           meetingTypeLabel: getMeetingTypeLabel(booking),
           note: getBookingNote(booking),
           bookingStatus: booking.status,
+          bookingStatusLabel: getBookingStatusLabel(booking.status),
           joinLink: booking.meetingType === 'ONLINE' ? booking.meetingLink : null
         })),
     [mentorBookingsQuery.data]
@@ -278,7 +292,7 @@ export default function MentorSchedulePage() {
               title='Chưa có khung giờ lặp lại'
             />
           ) : (
-            <div className='grid gap-4 md:grid-cols-3'>
+            <div className='grid gap-4 md:grid-cols-2'>
               {recurringAvailability.map((window) => (
                 <Card className='rounded-[18px] border-sky-200 shadow-none' key={window.id}>
                   <CardContent className='space-y-5 p-5'>
@@ -330,7 +344,7 @@ export default function MentorSchedulePage() {
         </aside>
       </div>
 
-      <section className='space-y-5'>
+      <section className='space-y-5 mt-5'>
         <h2 className='text-ink text-[2rem] font-bold tracking-tight'>
           Khung giờ theo ngày cụ thể
         </h2>
@@ -363,7 +377,7 @@ export default function MentorSchedulePage() {
         )}
       </section>
 
-      <section className='space-y-5'>
+      <section className='space-y-5 mt-5'>
         <h2 className='text-ink text-[2rem] font-bold tracking-tight'>Buổi đã được đặt</h2>
 
         {mentorBookingsQuery.isLoading && !mentorBookingsQuery.data ? (
@@ -402,11 +416,19 @@ export default function MentorSchedulePage() {
 
                     <div className='flex items-center gap-3'>
                       <Badge variant={session.bookingStatus === 'PENDING' ? 'warning' : 'success'}>
-                        {session.bookingStatus === 'PENDING' ? 'Chờ xác nhận' : 'Đã xác nhận'}
+                        {session.bookingStatusLabel}
                       </Badge>
                       <Button
-                        className='h-10 rounded-xl px-4 text-sm font-medium'
-                        disabled
+                        className='h-10 rounded-xl border-red-200 bg-red-50 px-4 text-sm font-medium text-red-700 hover:border-red-300 hover:bg-red-100 hover:text-red-800'
+                        onClick={() =>
+                          setRejectingSession({
+                            learnerName: session.learnerName,
+                            subjectLabel: session.subjectLabel || 'Buổi học đang cập nhật',
+                            dateLabel: session.dateLabel,
+                            timeLabel: session.timeLabel,
+                            bookingStatusLabel: session.bookingStatusLabel
+                          })
+                        }
                         variant='outline'
                       >
                         Từ chối buổi học
@@ -465,6 +487,16 @@ export default function MentorSchedulePage() {
           </div>
         )}
       </section>
+
+      <MentorRejectBookingModal
+        onOpenChange={(open) => {
+          if (!open) {
+            setRejectingSession(null)
+          }
+        }}
+        open={Boolean(rejectingSession)}
+        session={rejectingSession}
+      />
     </DashboardPage>
   )
 }
