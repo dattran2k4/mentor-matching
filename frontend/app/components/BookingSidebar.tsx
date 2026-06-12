@@ -1,198 +1,251 @@
-import { CalendarDays, CheckCircle2, Clock, ShieldCheck } from 'lucide-react'
+import axios from 'axios'
+import { CalendarDays, CheckCircle2 } from 'lucide-react'
+import { useState } from 'react'
+import { Link, useLocation, useNavigate } from 'react-router'
 
-import { StatusBadge } from '@/components/StatusBadge'
 import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
+import { Button, buttonVariants } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
-import { Separator } from '@/components/ui/separator'
-import type { Mentor } from '@/types/models/mentor'
+import { path } from '@/config/path'
+import { useCurrentUserQuery } from '@/hooks/queries/auth/useCurrentUserQuery'
+import { useCreateBookingMutation } from '@/hooks/queries/booking/useCreateBookingMutation'
+import {
+  formatMeetingTypeLabel,
+  formatTimeLabel,
+  type MentorProfileViewModel
+} from '@/routes/mentor-profile.presentation'
+import { useAuthStore } from '@/store/auth-store'
+import type { ErrorResponse } from '@/types/api/common'
 import { cn } from '@/utils/cn'
 import { formatPrice } from '@/utils/format'
 
 interface BookingSidebarProps {
-  mentor: Mentor
-  selectedOfferingId?: string
   className?: string
+  mentor: MentorProfileViewModel
+  selectedOfferingId?: string
 }
 
 const BookingSidebar = ({ className, mentor, selectedOfferingId }: BookingSidebarProps) => {
+  const location = useLocation()
+  const navigate = useNavigate()
+  const accessToken = useAuthStore((state) => state.accessToken)
+  const currentUserQuery = useCurrentUserQuery()
+  const createBookingMutation = useCreateBookingMutation()
+  const [selectedSlotIdState, setSelectedSlotId] = useState<string>()
+
   const activeOffering =
     mentor.offerings.find((offering) => offering.id === selectedOfferingId) ??
     mentor.offerings.find((offering) => offering.active) ??
     mentor.offerings[0]
-  const nextWindows = mentor.specificDateAvailability.slice(0, 2)
-  const primaryMeetingType = mentor.meetingTypes[0]
+  const visibleSlots = mentor.specificDateAvailability.slice(0, 3)
+  const selectedSlotId = visibleSlots.some((slot) => slot.id === selectedSlotIdState)
+    ? selectedSlotIdState
+    : visibleSlots[0]?.id
+  const selectedSlot = visibleSlots.find((slot) => slot.id === selectedSlotId)
+  const currentUser = currentUserQuery.data
+  const isLearner = currentUser?.roles.includes('LEARNER') ?? false
+  const isLoggedIn = Boolean(accessToken)
+  const resolvedPrice = activeOffering?.pricePerHour ?? mentor.startingPrice
+  const canSubmit = Boolean(
+    isLoggedIn &&
+    isLearner &&
+    activeOffering &&
+    selectedSlot &&
+    mentor.bookableMeetingType &&
+    !createBookingMutation.isPending
+  )
+  const redirectTo = `${path.login}?redirectTo=${encodeURIComponent(`${location.pathname}${location.search}`)}`
+
+  const actionHint = (() => {
+    if (!activeOffering) return 'Mentor chưa có môn học đang mở.'
+    if (!visibleSlots.length) return 'Mentor chưa mở lịch theo ngày cụ thể.'
+    if (!mentor.bookableMeetingType) return 'Hình thức học này chưa hỗ trợ đặt lịch trực tiếp.'
+    if (!isLoggedIn) return 'Đăng nhập bằng tài khoản học viên để gửi yêu cầu.'
+    if (!isLearner && !currentUserQuery.isLoading)
+      return 'Chỉ tài khoản học viên có thể gửi yêu cầu đặt lịch.'
+    return 'Bạn chỉ thanh toán sau khi mentor xác nhận yêu cầu.'
+  })()
+
+  const handleCreateBooking = () => {
+    if (!activeOffering || !selectedSlot || !mentor.bookableMeetingType) return
+
+    createBookingMutation.mutate(
+      {
+        mentorId: mentor.mentorId,
+        mentorSubjectId: activeOffering.mentorSubjectId,
+        bookingDate: selectedSlot.bookingDate,
+        startTime: selectedSlot.startTime,
+        endTime: selectedSlot.endTime,
+        meetingType: mentor.bookableMeetingType
+      },
+      {
+        onSuccess: ({ bookingId }) => {
+          void navigate(`${path.user.bookings}?createdBookingId=${bookingId}&bookingCreated=1`)
+        }
+      }
+    )
+  }
 
   return (
     <Card
       className={cn(
-        'shadow-soft rounded-[28px] border-slate-200/80 lg:sticky lg:top-24',
+        'rounded-2xl border-slate-200 bg-white shadow-lg shadow-slate-900/5 lg:sticky lg:top-24',
         className
       )}
     >
       <CardContent className='p-5'>
-        <div className='flex items-start justify-between gap-3'>
-          <div>
-            <p className='text-muted text-sm'>Tóm tắt đặt buổi học</p>
-            <p className='text-ink mt-1 text-2xl font-semibold'>
-              {formatPrice(activeOffering?.pricePerHour ?? mentor.startingPrice)}
-            </p>
-            <p className='text-muted mt-1 text-xs'>mỗi buổi học 60 phút</p>
-          </div>
-          <StatusBadge kind='approval' status={mentor.approvalStatus} />
-        </div>
+        <h2 className='text-ink text-lg font-bold'>Đặt lịch với {mentor.name}</h2>
 
-        <div className='mt-4 flex flex-wrap gap-2'>
-          <StatusBadge kind='verification' status={mentor.verificationStatus} />
-          <Badge variant='muted'>
-            {mentor.rating} / 5 từ {mentor.reviewsCount} đánh giá
-          </Badge>
-        </div>
-
-        <div className='mt-6 rounded-2xl border border-slate-200 bg-slate-50 p-4'>
-          <div className='flex items-center justify-between gap-3'>
-            <p className='text-ink text-sm font-semibold'>Môn học đang chọn</p>
-            <Badge variant='info'>1 buổi 60 phút</Badge>
-          </div>
-          <div className='mt-3 rounded-2xl border border-slate-200 bg-white p-3 text-sm'>
-            <div className='flex items-start justify-between gap-3'>
-              <div>
-                <p className='text-ink font-semibold'>
-                  {activeOffering?.subject} · {activeOffering?.grade}
-                </p>
-                <p className='text-muted mt-1 text-xs'>{activeOffering?.teachingNote}</p>
-                <div className='mt-2 flex flex-wrap gap-2'>
-                  <Badge variant='muted'>{activeOffering?.proficiency}</Badge>
-                </div>
-              </div>
-              <span className='text-ink text-sm font-semibold'>
-                {formatPrice(activeOffering?.pricePerHour ?? mentor.startingPrice)}
-              </span>
-            </div>
-          </div>
-          <div className='mt-4 flex flex-wrap gap-2'>
-            {mentor.meetingTypes.map((meetingType) => (
-              <Badge
-                key={meetingType}
-                variant={meetingType === primaryMeetingType ? 'info' : 'outline'}
-              >
-                {meetingType}
-              </Badge>
-            ))}
-          </div>
-        </div>
-
-        <Separator className='my-6' />
-
-        <div className='mt-6'>
-          <div className='text-ink flex items-center gap-2 text-sm font-semibold'>
-            <CalendarDays size={16} />
-            Lịch gần nhất có thể gửi yêu cầu
-          </div>
-          <div className='mt-3 space-y-2 text-sm'>
-            {nextWindows.length ? (
-              nextWindows.map((window) => (
-                <div
-                  key={`${window.dateLabel}-${window.startTime}`}
-                  className='rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3'
-                >
-                  <div className='flex items-center justify-between gap-3'>
-                    <p className='text-ink font-semibold'>{window.dateLabel}</p>
-                    <span className='text-muted text-xs'>{window.meetingTypes.join(' / ')}</span>
-                  </div>
-                  <p className='text-muted mt-1 text-xs'>
-                    {window.startTime} - {window.endTime}
-                    {window.note ? ` · ${window.note}` : ''}
+        <div className='mt-4'>
+          <p className='text-muted text-[10px] font-bold tracking-[0.12em] uppercase'>
+            Môn học đã chọn
+          </p>
+          <div className='mt-2 rounded-xl border border-slate-200 bg-slate-50 p-3'>
+            {activeOffering ? (
+              <>
+                <div className='flex items-start justify-between gap-3'>
+                  <p className='text-ink text-sm font-bold'>
+                    {activeOffering.subject} · {activeOffering.grade}
                   </p>
+                  <span className='text-ink shrink-0 text-sm font-bold'>
+                    {formatPrice(activeOffering.pricePerHour)}
+                  </span>
                 </div>
-              ))
+                <p className='text-muted mt-1 line-clamp-2 text-xs'>
+                  {activeOffering.teachingNote}
+                </p>
+              </>
             ) : (
-              <div className='rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3 text-xs text-slate-600'>
-                Mentor hiện ưu tiên nhận lịch theo khung giờ lặp lại hằng tuần:{' '}
-                {mentor.availabilitySummary}.
-              </div>
+              <p className='text-muted text-sm'>Chưa có môn học để lựa chọn.</p>
             )}
           </div>
         </div>
 
-        <div className='mt-6'>
-          <div className='text-ink flex items-center gap-2 text-sm font-semibold'>
-            <Clock size={16} />
-            Khung giờ lặp lại hằng tuần
+        <div className='mt-5 border-t border-slate-200 pt-5'>
+          <div className='flex items-center gap-2 text-sm font-bold text-slate-900'>
+            <CalendarDays size={16} />
+            Lịch gần nhất
           </div>
-          <div className='mt-3 space-y-2 text-xs'>
-            {mentor.recurringAvailability.map((window) => (
-              <div
-                key={`${window.dayLabel}-${window.startTime}`}
-                className='flex items-center justify-between rounded-2xl border border-slate-200 px-3 py-2.5'
-              >
-                <div>
-                  <p className='text-ink text-sm font-semibold'>{window.dayLabel}</p>
-                  <p className='text-muted mt-1'>
-                    {window.startTime} - {window.endTime}
-                  </p>
-                </div>
-                <Badge variant='muted'>{window.meetingTypes.join(' / ')}</Badge>
-              </div>
-            ))}
+          <div className='mt-3 space-y-2'>
+            {visibleSlots.length ? (
+              visibleSlots.map((slot) => {
+                const selected = slot.id === selectedSlotId
+
+                return (
+                  <button
+                    key={slot.id}
+                    className={cn(
+                      'w-full rounded-xl border px-3 py-2.5 text-left transition',
+                      selected
+                        ? 'border-blue-400 bg-blue-50 ring-2 ring-blue-100'
+                        : 'border-slate-200 hover:border-slate-300'
+                    )}
+                    type='button'
+                    onClick={() => setSelectedSlotId(slot.id)}
+                  >
+                    <div className='flex justify-between gap-3'>
+                      <span className='text-ink text-sm font-bold'>{slot.dateLabel}</span>
+                      <Badge className='px-2 py-0 text-[10px]' variant='outline'>
+                        {slot.meetingTypes.map(formatMeetingTypeLabel).join(' / ') ||
+                          'Đang cập nhật'}
+                      </Badge>
+                    </div>
+                    <p className='text-muted mt-1 text-xs'>
+                      {formatTimeLabel(slot.startTime)} - {formatTimeLabel(slot.endTime)}
+                    </p>
+                  </button>
+                )
+              })
+            ) : (
+              <p className='rounded-xl bg-slate-50 px-3 py-3 text-xs text-slate-600'>
+                Chưa có lịch cụ thể để gửi yêu cầu.
+              </p>
+            )}
           </div>
         </div>
 
-        <div className='mt-6 rounded-2xl bg-slate-50 p-4 text-sm'>
-          <p className='text-ink mb-3 font-semibold'>Tóm tắt gửi yêu cầu</p>
-          <div className='text-muted flex items-center justify-between'>
-            <span>Buổi học dự kiến</span>
-            <span>{formatPrice(activeOffering?.pricePerHour ?? mentor.startingPrice)}</span>
-          </div>
-          <div className='text-muted mt-2 flex items-center justify-between'>
-            <span>Môn học</span>
-            <span>
-              {activeOffering?.subject} · {activeOffering?.grade}
-            </span>
-          </div>
-          <div className='text-muted mt-2 flex items-center justify-between'>
-            <span>Hình thức ưu tiên</span>
-            <span>{primaryMeetingType}</span>
-          </div>
-          <div className='text-ink mt-2 flex items-center justify-between font-semibold'>
-            <span>Tạm tính</span>
-            <span>{formatPrice(activeOffering?.pricePerHour ?? mentor.startingPrice)}</span>
-          </div>
-        </div>
-
-        <div className='mt-4 rounded-2xl border border-slate-200 bg-white p-4 text-sm'>
-          <div className='flex items-start gap-2'>
-            <CheckCircle2 className='mt-0.5 h-4 w-4 shrink-0 text-emerald-600' />
-            <div>
-              <p className='text-ink font-semibold'>Điều gì xảy ra tiếp theo?</p>
-              <ul className='text-muted mt-2 space-y-2 leading-relaxed'>
-                <li>Chọn đúng offering theo môn học và cấp lớp.</li>
-                <li>Tham chiếu lịch gần nhất hoặc khung giờ lặp lại phù hợp.</li>
-                <li>Gửi yêu cầu để mentor phản hồi theo tốc độ hiển thị trên hồ sơ.</li>
-              </ul>
+        <div className='mt-5 border-t border-slate-200 pt-5'>
+          <p className='text-ink text-sm font-bold'>Tóm tắt đặt lịch</p>
+          <dl className='mt-3 space-y-2.5 text-xs'>
+            <SummaryRow
+              label='Môn học'
+              value={
+                activeOffering ? `${activeOffering.subject} · ${activeOffering.grade}` : 'Chưa chọn'
+              }
+            />
+            <SummaryRow
+              label='Hình thức'
+              value={
+                mentor.bookableMeetingType
+                  ? formatMeetingTypeLabel(mentor.bookableMeetingType)
+                  : 'Chưa hỗ trợ'
+              }
+            />
+            <SummaryRow
+              label='Khung giờ'
+              value={
+                selectedSlot
+                  ? `${selectedSlot.dateLabel}, ${formatTimeLabel(selectedSlot.startTime)}-${formatTimeLabel(selectedSlot.endTime)}`
+                  : 'Chưa chọn'
+              }
+            />
+            <div className='flex items-center justify-between border-t border-slate-200 pt-3 text-sm font-bold'>
+              <dt>Tạm tính</dt>
+              <dd>{resolvedPrice !== null ? formatPrice(resolvedPrice) : 'Chưa có'}</dd>
             </div>
-          </div>
+          </dl>
         </div>
 
-        <div className='mt-6 rounded-2xl border border-blue-100 bg-blue-50 p-4 text-sm text-blue-800'>
-          <div className='flex items-start gap-2'>
-            <ShieldCheck className='mt-0.5 h-4 w-4 shrink-0' />
-            <p>
-              Gửi yêu cầu đặt lịch sau khi chọn môn học và thời gian phù hợp. Mentor sẽ phản hồi
-              theo tốc độ hiển thị trên hồ sơ.
-            </p>
-          </div>
-        </div>
+        {createBookingMutation.isError ? (
+          <p className='mt-4 rounded-xl border border-red-200 bg-red-50 p-3 text-xs text-red-700'>
+            {getBookingErrorMessage(createBookingMutation.error)}
+          </p>
+        ) : null}
 
-        <Button className='mt-6 w-full rounded-2xl' size='lg'>
-          Đặt buổi học
-        </Button>
-        <p className='text-muted mt-3 text-center text-xs'>
-          Chọn môn học và khung giờ trước khi gửi yêu cầu đặt lịch.
+        {!isLoggedIn ? (
+          <Link
+            className={cn(buttonVariants({ size: 'lg' }), 'mt-5 w-full rounded-xl')}
+            to={redirectTo}
+          >
+            Đăng nhập để đặt lịch
+          </Link>
+        ) : (
+          <Button
+            className='mt-5 w-full rounded-xl'
+            disabled={!canSubmit}
+            isLoading={createBookingMutation.isPending}
+            size='lg'
+            onClick={handleCreateBooking}
+          >
+            Gửi yêu cầu đặt lịch
+          </Button>
+        )}
+
+        <p className='text-muted mt-3 flex items-start gap-2 text-xs leading-relaxed'>
+          <CheckCircle2 className='mt-0.5 shrink-0 text-emerald-600' size={14} />
+          {actionHint}
         </p>
       </CardContent>
     </Card>
   )
+}
+
+function SummaryRow({ label, value }: { label: string; value: string }) {
+  return (
+    <div className='flex items-start justify-between gap-4'>
+      <dt className='text-muted'>{label}</dt>
+      <dd className='text-ink max-w-[60%] text-right font-medium'>{value}</dd>
+    </div>
+  )
+}
+
+function getBookingErrorMessage(error: unknown) {
+  if (axios.isAxiosError<ErrorResponse>(error)) {
+    if (!error.response) return 'Không kết nối được máy chủ để gửi yêu cầu.'
+    return error.response.data?.message || 'Không thể gửi yêu cầu lúc này.'
+  }
+
+  return 'Không thể gửi yêu cầu lúc này.'
 }
 
 export default BookingSidebar

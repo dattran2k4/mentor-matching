@@ -1,4 +1,4 @@
-import { CheckCircle2, RotateCcw, SlidersHorizontal, X } from 'lucide-react'
+import { RotateCcw, SlidersHorizontal, X } from 'lucide-react'
 
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -19,6 +19,8 @@ export type FilterOption = {
   label: string
   value: string
   helper?: string
+  disabled?: boolean
+  badgeLabel?: string
 }
 
 export type FilterGroup = {
@@ -113,7 +115,7 @@ const FilterSidebar = ({
             <div>
               <h3 className='text-ink text-base font-semibold'>Thu hẹp danh sách mentor</h3>
               <p className='text-muted mt-1 text-sm leading-relaxed'>
-                Chọn theo nhu cầu học thực tế để danh sách dễ so sánh hơn ngay từ đầu.
+                Chọn thêm hình thức học, khu vực chi tiết hoặc giới tính.
               </p>
             </div>
           </div>
@@ -138,7 +140,11 @@ const FilterSidebar = ({
               {group.items.map((item) => (
                 <label
                   key={item.value}
-                  className={`flex cursor-pointer items-start gap-3 rounded-xl border px-3 py-3 transition ${
+                  className={`flex items-start gap-3 rounded-xl border px-3 py-3 transition ${
+                    item.disabled
+                      ? 'cursor-not-allowed border-slate-200 bg-slate-50 opacity-70'
+                      : 'cursor-pointer'
+                  } ${
                     selectedValues.includes(item.value)
                       ? 'border-blue-200 bg-blue-50'
                       : 'border-slate-200/80 bg-white hover:border-slate-300 hover:bg-slate-50'
@@ -146,10 +152,18 @@ const FilterSidebar = ({
                 >
                   <Checkbox
                     checked={selectedValues.includes(item.value)}
+                    disabled={item.disabled}
                     onChange={() => onToggleValue?.(item.value)}
                   />
                   <span className='min-w-0'>
-                    <span className='block text-sm font-medium text-slate-700'>{item.label}</span>
+                    <span className='flex flex-wrap items-center gap-2 text-sm font-medium text-slate-700'>
+                      <span>{item.label}</span>
+                      {item.badgeLabel ? (
+                        <span className='rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-semibold tracking-[0.14em] text-slate-500 uppercase'>
+                          {item.badgeLabel}
+                        </span>
+                      ) : null}
+                    </span>
                     {item.helper ? (
                       <span className='mt-1 block text-xs leading-relaxed text-slate-500'>
                         {item.helper}
@@ -161,16 +175,6 @@ const FilterSidebar = ({
             </div>
           </div>
         ))}
-
-        <div className='rounded-2xl border border-emerald-100 bg-emerald-50 p-4 text-sm text-emerald-800'>
-          <div className='flex items-start gap-2'>
-            <CheckCircle2 className='mt-0.5 h-4 w-4 shrink-0' />
-            <p>
-              Danh sách công khai hiện ưu tiên hồ sơ đã duyệt. Hãy dùng bộ lọc theo mục tiêu học,
-              rồi mới tinh chỉnh học phí hoặc lịch học để tránh bỏ sót mentor phù hợp.
-            </p>
-          </div>
-        </div>
 
         <div className='mt-auto flex gap-3 border-t border-slate-200 pt-4'>
           <Button className='flex-1 rounded-xl' type='button' variant='outline' onClick={onReset}>

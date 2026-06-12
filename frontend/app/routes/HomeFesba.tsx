@@ -8,10 +8,13 @@ import {
   Users
 } from 'lucide-react'
 import { motion } from 'framer-motion'
-import { Link } from 'react-router'
+import { useEffect, useMemo, useState, useTransition } from 'react'
+import { Link, useNavigate } from 'react-router'
 
+import { EmptyState } from '@/components/EmptyState'
 import MentorCard from '@/components/MentorCard'
 import SearchBar from '@/components/SearchBar'
+import { ScreenErrorState } from '@/components/ScreenErrorState'
 import SectionTitle from '@/components/SectionTitle'
 import SubjectCard from '@/components/SubjectCard'
 import TestimonialCard from '@/components/TestimonialCard'
@@ -20,18 +23,28 @@ import { buttonVariants } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Separator } from '@/components/ui/separator'
 import { path } from '@/config/path'
-import { mentors } from '@/constants/mentors'
-import { subjects } from '@/constants/subjects'
 import { testimonials } from '@/constants/testimonials'
+import { useCatalogOptionsQuery } from '@/hooks/queries/catalog/useCatalogOptionsQuery'
+import { useCitiesQuery } from '@/hooks/queries/location/useCitiesQuery'
+import { useFeaturedMentorsQuery } from '@/hooks/queries/mentor/useFeaturedMentorsQuery'
+import {
+  mapCatalogSubjectToHomeCard,
+  mapFeaturedMentorToCard
+} from '@/routes/home-fesba.presentation'
 import { cn } from '@/utils/cn'
-
-const featuredMentors = mentors.filter((mentor) => mentor.approvalStatus === 'APPROVED').slice(0, 3)
 
 const marketplaceStats = [
   { value: '240+', label: 'mentor đã duyệt' },
   { value: '8,500+', label: 'buổi học đã đặt' },
   { value: '40+', label: 'môn học và cấp lớp' }
 ] as const
+
+const FEATURED_MENTOR_PARAMS = {
+  page: 1,
+  size: 3,
+  sortBy: 'createdAt',
+  sortDir: 'desc'
+} as const
 
 const trustSteps = [
   {
@@ -84,6 +97,99 @@ const marketplaceTracks = [
 ] as const
 
 const Home = () => {
+  const navigate = useNavigate()
+  const [keyword, setKeyword] = useState('')
+  const [context, setContext] = useState('')
+  const [debouncedContext, setDebouncedContext] = useState('')
+  const [selectedCityId, setSelectedCityId] = useState<number | null>(null)
+  const [selectedCityName, setSelectedCityName] = useState<string | null>(null)
+  const [isSearchPending, startSearchTransition] = useTransition()
+
+  const catalogOptionsQuery = useCatalogOptionsQuery()
+  const featuredMentorsQuery = useFeaturedMentorsQuery(FEATURED_MENTOR_PARAMS)
+  const shouldSearchCities =
+    debouncedContext.length >= 2 && (!selectedCityName || selectedCityName !== debouncedContext)
+  const citySuggestionsQuery = useCitiesQuery(debouncedContext, shouldSearchCities)
+
+  useEffect(() => {
+    const timeoutId = window.setTimeout(() => {
+      setDebouncedContext(context.trim())
+    }, 300)
+
+    return () => window.clearTimeout(timeoutId)
+  }, [context])
+
+  const subjectCards = useMemo(
+    () =>
+      (catalogOptionsQuery.data?.subjects ?? [])
+        .slice(0, 8)
+        .map((subject) => mapCatalogSubjectToHomeCard(subject, catalogOptionsQuery.data!)),
+    [catalogOptionsQuery.data]
+  )
+
+  const featuredMentorCards = useMemo(
+    () => (featuredMentorsQuery.data ?? []).map(mapFeaturedMentorToCard),
+    [featuredMentorsQuery.data]
+  )
+
+  const citySuggestions = useMemo(
+    () =>
+      (citySuggestionsQuery.data ?? []).map((city) => ({
+        id: String(city.id),
+        label: city.name,
+        description: `Thành phố · ${city.code}`
+      })),
+    [citySuggestionsQuery.data]
+  )
+
+  const handleContextChange = (value: string) => {
+    setContext(value)
+
+    if (selectedCityName && value.trim() !== selectedCityName) {
+      setSelectedCityId(null)
+      setSelectedCityName(null)
+    }
+  }
+
+  const handleQuickTagClick = (tag: string) => {
+    if (tag === 'Học cuối tuần') {
+      setContext('Cuối tuần')
+      setSelectedCityId(null)
+      setSelectedCityName(null)
+      return
+    }
+
+    setKeyword(tag)
+  }
+
+  const handleCitySuggestionSelect = (suggestion: { id: string; label: string }) => {
+    setSelectedCityId(Number(suggestion.id))
+    setSelectedCityName(suggestion.label)
+    setContext(suggestion.label)
+  }
+
+  const handleSubmitSearch = () => {
+    const params = new URLSearchParams()
+    const trimmedKeyword = keyword.trim()
+    const trimmedContext = context.trim()
+
+    if (trimmedKeyword) {
+      params.set('search', trimmedKeyword)
+    }
+
+    if (selectedCityId) {
+      params.set('cityId', String(selectedCityId))
+    } else if (trimmedContext) {
+      params.set('context', trimmedContext)
+    }
+
+    const destination = params.size ? `${path.discover}?${params.toString()}` : path.discover
+
+    startSearchTransition(() => {
+      navigate(destination)
+    })
+  }
+
   return (
     <div className='flex flex-col gap-16 py-8'>
       <section className='grid gap-8 lg:grid-cols-[1.08fr_0.92fr] lg:items-start'>
@@ -111,6 +217,22 @@ const Home = () => {
           <SearchBar
             buttonLabel='Tìm mentor'
             contextPlaceholder='Lớp, khu vực hoặc online/offline'
+            contextSuggestions={citySuggestions}
+            contextSuggestionsEmptyText='Không tìm thấy thành phố phù hợp với từ khóa này.'
+            contextSuggestionsError={
+              citySuggestionsQuery.isError && shouldSearchCities
+                ? 'Không thể tải gợi ý thành phố lúc này. Vui lòng thử lại.'
+                : null
+            }
+            contextValue={context}
+            isContextSuggestionsLoading={citySuggestionsQuery.isLoading && shouldSearchCities}
+            isSubmitting={isSearchPending}
+            keywordValue={keyword}
+            onContextChange={handleContextChange}
+            onContextSuggestionSelect={handleCitySuggestionSelect}
+            onKeywordChange={setKeyword}
+            onQuickTagClick={handleQuickTagClick}
+            onSubmit={handleSubmitSearch}
             quickTags={['Toán lớp 9', 'IELTS Foundation', 'Ôn thi lớp 10', 'Học cuối tuần']}
           />
 
@@ -202,8 +324,8 @@ const Home = () => {
           <SectionTitle
             eyebrow='Mentor nổi bật'
             size='md'
-            subtitle='So sánh học phí, môn học, trạng thái duyệt và lịch trống từ những hồ sơ được chọn lọc.'
-            title='Mentor đang được phụ huynh và học viên quan tâm'
+            subtitle='Danh sách lấy từ mentor công khai đã sẵn sàng trên hệ thống và đang được sắp xếp theo hồ sơ mới nhất.'
+            title='Một số mentor công khai để bắt đầu so sánh'
           />
           <Link
             className={cn(
@@ -214,11 +336,36 @@ const Home = () => {
             Xem tất cả <ArrowUpRight size={16} />
           </Link>
         </div>
-        <div className='grid gap-6 md:grid-cols-2 xl:grid-cols-3'>
-          {featuredMentors.map((mentor) => (
-            <MentorCard key={mentor.id} mentor={mentor} />
-          ))}
-        </div>
+        {featuredMentorsQuery.isLoading ? (
+          <div className='grid gap-6 md:grid-cols-2 xl:grid-cols-3'>
+            {Array.from({ length: 3 }).map((_, index) => (
+              <Card
+                key={`featured-mentor-skeleton-${index}`}
+                className='h-[620px] animate-pulse rounded-3xl border-slate-200 bg-white shadow-sm'
+              />
+            ))}
+          </div>
+        ) : featuredMentorsQuery.isError ? (
+          <ScreenErrorState
+            description='Không thể tải danh sách mentor nổi bật lúc này. Nội dung giới thiệu khác trên trang vẫn khả dụng.'
+            onRetry={() => {
+              void featuredMentorsQuery.refetch()
+            }}
+            title='Chưa tải được mentor nổi bật'
+          />
+        ) : featuredMentorCards.length ? (
+          <div className='grid gap-6 md:grid-cols-2 xl:grid-cols-3'>
+            {featuredMentorCards.map((mentor) => (
+              <MentorCard key={mentor.id} mentor={mentor} />
+            ))}
+          </div>
+        ) : (
+          <EmptyState
+            className='min-h-0'
+            description='Khi có mentor công khai phù hợp, khu vực này sẽ hiển thị để bạn bắt đầu so sánh.'
+            title='Chưa có mentor nổi bật để hiển thị'
+          />
+        )}
       </section>
 
       <section className='space-y-8'>
@@ -228,11 +375,36 @@ const Home = () => {
           subtitle='Bắt đầu từ nhu cầu học tập thực tế để lọc ra mentor phù hợp nhanh hơn.'
           title='Khám phá theo môn học, cấp lớp và mục tiêu'
         />
-        <div className='grid gap-4 sm:grid-cols-2 xl:grid-cols-4'>
-          {subjects.slice(0, 8).map((subject) => (
-            <SubjectCard key={subject.id} subject={subject} />
-          ))}
-        </div>
+        {catalogOptionsQuery.isLoading ? (
+          <div className='grid gap-4 sm:grid-cols-2 xl:grid-cols-4'>
+            {Array.from({ length: 8 }).map((_, index) => (
+              <Card
+                key={`subject-skeleton-${index}`}
+                className='h-[220px] animate-pulse rounded-[28px] border-slate-200/80 bg-white'
+              />
+            ))}
+          </div>
+        ) : catalogOptionsQuery.isError ? (
+          <ScreenErrorState
+            description='Không thể tải danh mục môn học lúc này. Bạn vẫn có thể tiếp tục khám phá mentor từ các CTA khác trên trang.'
+            onRetry={() => {
+              void catalogOptionsQuery.refetch()
+            }}
+            title='Chưa tải được danh mục môn học'
+          />
+        ) : subjectCards.length ? (
+          <div className='grid gap-4 sm:grid-cols-2 xl:grid-cols-4'>
+            {subjectCards.map((subject) => (
+              <SubjectCard key={subject.id} subject={subject} />
+            ))}
+          </div>
+        ) : (
+          <EmptyState
+            className='min-h-0'
+            description='Danh mục môn học công khai đang được cập nhật và sẽ hiển thị lại khi có dữ liệu.'
+            title='Chưa có môn học để hiển thị'
+          />
+        )}
       </section>
 
       <section className='grid gap-6 lg:grid-cols-[1.1fr_0.9fr]'>

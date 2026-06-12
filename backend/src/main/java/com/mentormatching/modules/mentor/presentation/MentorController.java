@@ -5,6 +5,7 @@ import static com.mentormatching.shared.response.PageQueryDefaults.DEFAULT_SIZE;
 import static com.mentormatching.shared.response.PageQueryDefaults.DEFAULT_SORT_BY;
 import static com.mentormatching.shared.response.PageQueryDefaults.DEFAULT_SORT_DIR;
 
+import java.util.Collections;
 import java.util.List;
 
 import lombok.RequiredArgsConstructor;

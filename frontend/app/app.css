@@ -2,8 +2,8 @@
 
 @theme {
   --font-sans:
-    'Public Sans', 'Inter', 'Outfit', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
-    'Segoe UI Symbol', 'Noto Color Emoji';
+    'Public Sans', 'Inter', 'Outfit', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji',
+    'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
 
   --color-primary: #3b82f6; /* Modern Blue */
   --color-primary-dark: #2563eb;
