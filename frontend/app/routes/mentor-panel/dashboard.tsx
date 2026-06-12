@@ -1,193 +1,249 @@
+import { ChevronRight } from 'lucide-react'
 import { Link } from 'react-router'
-import {
-  ArrowRight,
-  CalendarDays,
-  CircleDollarSign,
-  Clock3,
-  FileText,
-  UserRoundCheck,
-  Users
-} from 'lucide-react'
 
 import { DashboardPage } from '@/components/DashboardPage'
-import { StatusBadge } from '@/components/StatusBadge'
-import { WorkspaceActionCard } from '@/components/WorkspaceActionCard'
-import { WorkspaceMetricCard } from '@/components/WorkspaceMetricCard'
-import { WorkspaceNotice } from '@/components/WorkspaceNotice'
-import { WorkspacePanel } from '@/components/WorkspacePanel'
-import { Button, buttonVariants } from '@/components/ui/button'
+import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
-import { path } from '@/config/path'
 import {
-  mentorUpcomingSessions,
-  mentorWorkspaceProfile,
-  mentorWorkspaceSummary
-} from '@/mocks/mentor-workspace'
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow
+} from '@/components/ui/table'
+import { path } from '@/config/path'
 import { cn } from '@/utils/cn'
-import { formatShortBookingDate, formatTimeRange } from '@/utils/format'
-
-const quickActions = [
-  {
-    title: 'Cập nhật lịch dạy',
-    description: 'Mở thêm khung giờ lặp lại hoặc thêm buổi tăng cường theo ngày cụ thể.',
-    href: path.mentorPanel.schedule,
-    icon: CalendarDays
-  },
-  {
-    title: 'Rà soát hồ sơ công khai',
-    description: 'Giữ offerings, giới thiệu và trạng thái duyệt rõ ràng trước khi nhận lịch mới.',
-    href: path.mentorPanel.profile,
-    icon: FileText
-  },
-  {
-    title: 'Theo dõi học viên',
-    description: 'Xem ai đang học đều, ai mới đặt buổi đầu và ai cần chốt lịch tiếp theo.',
-    href: path.mentorPanel.students,
-    icon: Users
-  }
-] as const
-
-const weeklySignals = [
-  {
-    label: 'Buổi cần chuẩn bị tài liệu',
-    value: '2',
-    helper: 'Một buổi ôn kiểm tra và một buổi đầu tiên cần gửi checklist trước.',
-    icon: Clock3
-  },
-  {
-    label: 'Học viên mới trong tuần',
-    value: '1',
-    helper: 'Gia Hân vừa đặt buổi đầu tiên, hiện vẫn đang chờ thanh toán giữ chỗ.',
-    icon: UserRoundCheck
-  },
-  {
-    label: 'Thu nhập chờ đối soát',
-    value: '4,2 triệu',
-    helper: 'Theo dõi riêng với thu nhập đã về để không nhầm availability với doanh thu thực nhận.',
-    icon: CircleDollarSign
-  }
-] as const
+import { getInitials } from '@/utils/format'
 
 export function meta() {
   return [{ title: 'Tổng quan | Mentor' }]
 }
 
+type MentorDashboardStat = {
+  label: string
+  value: string
+  helper?: string
+  helperClassName?: string
+  href?: string
+}
+
+const statCards: MentorDashboardStat[] = [
+  {
+    label: 'Tổng thu nhập',
+    value: '12.500.000đ',
+    helper: '+1.2tr tháng này',
+    helperClassName: 'text-emerald-700'
+  },
+  {
+    label: 'Học viên',
+    value: '12',
+    helper: 'View list',
+    helperClassName: 'text-blue-700',
+    href: path.mentorPanel.students
+  },
+  {
+    label: 'Buổi dạy sắp tới',
+    value: '4'
+  }
+]
+
+const upcomingRows = [
+  {
+    id: 'row-1',
+    studentName: 'Minh Khôi',
+    subjectLabel: 'Toán 10',
+    timeLabel: '19:30 - 21:00',
+    dayLabel: 'Hôm nay',
+    statusLabel: 'Paid/Confirmed',
+    actionLabel: 'Vào lớp học',
+    actionVariant: 'default' as const
+  },
+  {
+    id: 'row-2',
+    studentName: 'Ngọc Linh',
+    subjectLabel: 'Toán 10',
+    timeLabel: '19:30 - 21:00',
+    dayLabel: 'Hôm nay',
+    statusLabel: 'Paid/Confirmed',
+    actionLabel: 'Vào lớp học',
+    actionVariant: 'default' as const
+  },
+  {
+    id: 'row-3',
+    studentName: 'Gia Hân',
+    subjectLabel: 'Toán 10',
+    timeLabel: '19:30 - 21:00',
+    dayLabel: 'Hôm nay',
+    statusLabel: 'Paid/Confirmed',
+    actionLabel: 'Vào lớp học',
+    actionVariant: 'default' as const
+  },
+  {
+    id: 'row-4',
+    studentName: 'Nguyễn Minh',
+    subjectLabel: 'Toán 10',
+    timeLabel: '19:30 - 21:00',
+    dayLabel: 'Hôm nay',
+    statusLabel: 'Paid/Confirmed',
+    actionLabel: 'Vào lớp học',
+    actionVariant: 'default' as const
+  }
+]
+
+const studentRows = [
+  {
+    name: 'Minh Khôi',
+    lessonLabel: 'Toán 10',
+    startDate: '07/07/2022',
+    lastSession: '07/07/2023'
+  },
+  {
+    name: 'Ngọc Linh',
+    lessonLabel: 'Toán 8',
+    startDate: '07/07/2022',
+    lastSession: '07/07/2023'
+  },
+  {
+    name: 'Nguyễn Minh Anh',
+    lessonLabel: 'Toán 5',
+    startDate: '07/07/2022',
+    lastSession: '07/07/2023'
+  },
+  {
+    name: 'Gia Hân',
+    lessonLabel: 'Toán 10',
+    startDate: '07/07/2022',
+    lastSession: '07/07/2023'
+  }
+]
+
 export default function MentorDashboardPage() {
   return (
-    <DashboardPage
-      description='Theo dõi lịch dạy, trạng thái học viên, duyệt hồ sơ và các đầu việc cần xử lý trong tuần.'
-      title='Tổng quan'
-    >
-      <div className='grid gap-4 xl:grid-cols-3'>
-        {mentorWorkspaceSummary.map((item, index) => {
-          const icons = [CalendarDays, Users, CircleDollarSign] as const
-
-          return (
-            <WorkspaceMetricCard
-              helper={item.helper}
-              icon={icons[index]}
-              key={item.label}
-              label={item.label}
-              value={item.value}
-            />
-          )
-        })}
-      </div>
-
-      <div className='grid gap-6 xl:grid-cols-[1.45fr_1fr]'>
-        <WorkspacePanel
-          title='Buổi dạy sắp tới'
-          description='Tách rõ trạng thái booking và thanh toán để biết buổi nào đã chốt, buổi nào mới chỉ đang giữ chỗ.'
-          action={
-            <Link
-              className={cn(buttonVariants({ size: 'sm', variant: 'link' }), 'h-auto px-0')}
-              to={path.mentorPanel.schedule}
-            >
-              Mở lịch dạy
-              <ArrowRight aria-hidden='true' size={14} />
-            </Link>
-          }
-        >
-          <div className='space-y-4'>
-            {mentorUpcomingSessions.map((session) => (
-              <Card className='rounded-2xl shadow-none' key={session.id}>
-                <CardContent className='flex flex-col gap-4 p-4 lg:flex-row lg:items-start lg:justify-between'>
-                  <div className='space-y-3'>
-                    <div className='flex flex-wrap items-center gap-2'>
-                      <p className='text-ink font-semibold'>
-                        {session.subject} · {session.grade}
-                      </p>
-                      <StatusBadge kind='booking' status={session.bookingStatus} />
-                      <StatusBadge kind='payment' status={session.paymentStatus} />
-                    </div>
-                    <p className='text-muted text-sm'>
-                      Học viên <span className='text-ink font-medium'>{session.studentName}</span>
-                    </p>
-                    <div className='text-muted grid gap-2 text-sm md:grid-cols-2'>
-                      <p className='flex items-center gap-2'>
-                        <CalendarDays aria-hidden='true' className='text-primary' size={15} />
-                        {formatShortBookingDate(session.bookingDate)}
-                      </p>
-                      <p className='flex items-center gap-2'>
-                        <Clock3 aria-hidden='true' className='text-primary' size={15} />
-                        {formatTimeRange(session.startTime, session.endTime)}
-                      </p>
-                    </div>
-                    <p className='text-muted text-sm'>{session.prepNote}</p>
-                  </div>
-
-                  <Button variant={session.action.variant === 'primary' ? 'default' : 'outline'}>
-                    {session.action.label}
-                  </Button>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </WorkspacePanel>
-
-        <div className='space-y-6'>
-          <WorkspacePanel
-            title='Tín hiệu vận hành'
-            description='Các nhắc việc ngắn để mentor ưu tiên đúng phần: lịch, học viên và doanh thu.'
-          >
-            <div className='grid gap-3'>
-              {weeklySignals.map((item) => (
-                <WorkspaceMetricCard
-                  helper={item.helper}
-                  icon={item.icon}
-                  key={item.label}
-                  label={item.label}
-                  value={item.value}
-                />
-              ))}
-            </div>
-          </WorkspacePanel>
-
-          <WorkspaceNotice
-            description='Hồ sơ hiện đang đủ điều kiện nhận lịch công khai. Vẫn nên rà soát offerings và ghi chú dạy học trước mỗi tuần cao điểm.'
-            icon={FileText}
-            title={`${mentorWorkspaceProfile.name} · hồ sơ đang sẵn sàng`}
-            tone='info'
-          />
+    <DashboardPage className='space-y-8 md:space-y-10' title=''>
+      <div className='space-y-6'>
+        <div className='flex flex-wrap items-center gap-2 text-sm text-slate-500'>
+          <Link className='hover:text-primary transition' to={path.home}>
+            Home
+          </Link>
+          <ChevronRight size={14} />
+          <span className='text-ink font-medium'>Mentor Dashboard</span>
         </div>
+
+        <section className='grid gap-4 xl:grid-cols-3'>
+          {statCards.map((card) => (
+            <Card className='rounded-[18px] border-slate-300/90 shadow-none' key={card.label}>
+              <CardContent className='flex min-h-[128px] flex-col justify-between p-4'>
+                <p className='text-ink text-[0.95rem] font-medium'>{card.label}</p>
+                <p className='text-ink text-[2.2rem] leading-none font-bold md:text-[2.45rem]'>
+                  {card.value}
+                </p>
+                {card.href && card.helper ? (
+                  <Link
+                    className={cn(
+                      'inline-flex text-[0.95rem] font-medium transition hover:underline',
+                      card.helperClassName
+                    )}
+                    to={card.href}
+                  >
+                    {card.helper}
+                  </Link>
+                ) : card.helper ? (
+                  <p className={cn('text-[0.95rem] font-medium', card.helperClassName)}>
+                    {card.helper}
+                  </p>
+                ) : (
+                  <span className='h-5' />
+                )}
+              </CardContent>
+            </Card>
+          ))}
+        </section>
       </div>
 
-      <WorkspacePanel
-        title='Hành động nhanh'
-        description='Đi thẳng vào phần mentor thường phải cập nhật nhất trong giai đoạn giao diện tĩnh.'
-      >
-        <div className='grid gap-3 lg:grid-cols-3'>
-          {quickActions.map((action) => (
-            <WorkspaceActionCard
-              description={action.description}
-              icon={action.icon}
-              key={action.title}
-              title={action.title}
-              to={action.href}
-            />
+      <section className='space-y-4'>
+        <h2 className='text-ink text-[1.95rem] font-bold tracking-tight'>Buổi dạy sắp tới</h2>
+
+        <div className='space-y-2.5'>
+          {upcomingRows.map((row) => (
+            <Card className='rounded-[14px] border-slate-300/90 shadow-none' key={row.id}>
+              <CardContent className='grid items-center gap-4 px-4 py-2.5 md:grid-cols-[1.1fr_0.85fr_1fr_0.95fr_auto]'>
+                <div className='flex items-center gap-3'>
+                  <div className='flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-slate-100 text-sm font-bold text-slate-700'>
+                    {getInitials(row.studentName)}
+                  </div>
+                  <p className='text-ink truncate text-[0.98rem] font-medium'>{row.studentName}</p>
+                </div>
+
+                <p className='text-ink text-[0.98rem] font-medium'>{row.subjectLabel}</p>
+
+                <div>
+                  <p className='text-ink text-[0.98rem] font-medium'>{row.timeLabel}</p>
+                  <p className='text-muted text-[0.92rem]'>{row.dayLabel}</p>
+                </div>
+
+                <span className='inline-flex w-fit rounded-full bg-emerald-100 px-3 py-1 text-[0.95rem] font-semibold text-emerald-700'>
+                  {row.statusLabel}
+                </span>
+
+                <div className='md:justify-self-end'>
+                  <Button
+                    className='h-9 rounded-lg px-4 text-sm font-medium'
+                    variant={row.actionVariant}
+                  >
+                    {row.actionLabel}
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
           ))}
         </div>
-      </WorkspacePanel>
+      </section>
+
+      <section className='space-y-4'>
+        <h2 className='text-ink text-[1.95rem] font-bold tracking-tight'>Học viên đang theo học</h2>
+
+        <Card className='overflow-hidden rounded-[14px] border-slate-300/90 shadow-none'>
+          <CardContent className='p-0'>
+            <Table>
+              <TableHeader>
+                <TableRow className='bg-slate-50/40'>
+                  <TableHead className='h-12 px-4 text-[0.95rem] font-medium tracking-normal text-slate-800 normal-case'>
+                    Học viên
+                  </TableHead>
+                  <TableHead className='h-12 text-[0.95rem] font-medium tracking-normal text-slate-800 normal-case'>
+                    Buổi lọt
+                  </TableHead>
+                  <TableHead className='h-12 text-[0.95rem] font-medium tracking-normal text-slate-800 normal-case'>
+                    Start từ đầu
+                  </TableHead>
+                  <TableHead className='h-12 text-[0.95rem] font-medium tracking-normal text-slate-800 normal-case'>
+                    Last session
+                  </TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {studentRows.map((row) => (
+                  <TableRow className='align-middle' key={row.name}>
+                    <TableCell className='px-4 py-3 text-[0.98rem] font-medium text-slate-900'>
+                      {row.name}
+                    </TableCell>
+                    <TableCell className='py-3 text-[0.98rem] text-slate-900'>
+                      {row.lessonLabel}
+                    </TableCell>
+                    <TableCell className='py-3 text-[0.98rem] text-slate-900'>
+                      {row.startDate}
+                    </TableCell>
+                    <TableCell className='py-3 text-[0.98rem] text-slate-900'>
+                      {row.lastSession}
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </CardContent>
+        </Card>
+      </section>
     </DashboardPage>
   )
 }

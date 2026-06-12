@@ -20,12 +20,16 @@ export function DashboardPage({ title, description, children, className }: Dashb
       transition={{ duration: 0.4, ease: 'easeOut' }}
       className={cn('relative space-y-6 md:space-y-8', className)}
     >
-      <div className='relative z-10 flex flex-col gap-2'>
-        <h1 className='text-ink text-2xl font-semibold tracking-tight md:text-3xl'>{title}</h1>
-        {description ? (
-          <p className='text-muted max-w-3xl text-sm md:text-base'>{description}</p>
-        ) : null}
-      </div>
+      {title || description ? (
+        <div className='relative z-10 flex flex-col gap-2'>
+          {title ? (
+            <h1 className='text-ink text-2xl font-semibold tracking-tight md:text-3xl'>{title}</h1>
+          ) : null}
+          {description ? (
+            <p className='text-muted max-w-3xl text-sm md:text-base'>{description}</p>
+          ) : null}
+        </div>
+      ) : null}
 
       <div className='relative z-10'>
         {children ?? (

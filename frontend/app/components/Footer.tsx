@@ -73,7 +73,7 @@ const Footer = () => {
             </p>
             <div className='mt-4 space-y-3'>
               <Link
-                className={cn(buttonVariants({ className: 'block rounded-2xl text-center' }))}
+                className={cn(buttonVariants({ className: 'w-full rounded-2xl text-center' }))}
                 to={path.discover}
               >
                 Tìm mentor ngay
@@ -81,7 +81,7 @@ const Footer = () => {
               <Link
                 className={cn(
                   buttonVariants({
-                    className: 'block rounded-2xl text-center',
+                    className: 'w-full rounded-2xl text-center',
                     variant: 'outline'
                   })
                 )}
