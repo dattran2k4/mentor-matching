@@ -3,7 +3,11 @@ import { type FormEvent, useMemo, useState } from 'react'
 import { useSearchParams } from 'react-router'
 
 import { EmptyState } from '@/components/EmptyState'
-import FilterSidebar, { type FilterGroup } from '@/components/FilterSidebar'
+import {
+  AdvancedMentorFiltersDrawer,
+  type AdvancedMentorFilterOption
+} from '@/components/AdvancedMentorFiltersDrawer'
+import type { FilterGroup } from '@/components/FilterSidebar'
 import MentorCard from '@/components/MentorCard'
 import { ScreenErrorState } from '@/components/ScreenErrorState'
 import { Badge } from '@/components/ui/badge'
@@ -27,8 +31,6 @@ import type {
 } from '@/types/api/mentor'
 
 const DISCOVER_PAGE_SIZE = 9
-const filterParamKeys = ['meetingType', 'cityId', 'districtId', 'subjectId', 'gradeId', 'gender']
-
 const meetingTypeOptions: Array<{
   label: string
   value: MentorMeetingTypeApiResponse
@@ -146,6 +148,15 @@ const Discover = () => {
       selectedSubjectId
     ]
   )
+  const selectedAdvancedFilterValues = useMemo(
+    () =>
+      [
+        selectedMeetingType ? `meeting:${selectedMeetingType}` : null,
+        selectedDistrictId ? `district:${selectedDistrictId}` : null,
+        selectedGender ? `gender:${selectedGender}` : null
+      ].filter((value): value is string => Boolean(value)),
+    [selectedDistrictId, selectedGender, selectedMeetingType]
+  )
   const activeFilterDetails = selectedFilterValues
     .map((value) => filterDetails.get(value))
     .filter((detail): detail is FilterDetail => Boolean(detail))
@@ -200,11 +211,23 @@ const Discover = () => {
     setSearchParams(nextParams)
   }
 
-  const handleResetFilters = () => {
+  const handleAdvancedFiltersApply = (values: string[]) => {
     const nextParams = new URLSearchParams(searchParams)
-    filterParamKeys.forEach((key) => nextParams.delete(key))
+
+    nextParams.delete('meetingType')
+    nextParams.delete('districtId')
+    nextParams.delete('gender')
+
+    values.forEach((value) => {
+      const [group, rawValue] = value.split(':')
+      if (group === 'meeting') nextParams.set('meetingType', rawValue)
+      if (group === 'district' && selectedCityId) nextParams.set('districtId', rawValue)
+      if (group === 'gender') nextParams.set('gender', rawValue)
+    })
+
     nextParams.delete('page')
     setSearchParams(nextParams)
+    setFiltersOpen(false)
   }
 
   const handleResetAll = () => {
@@ -302,9 +325,9 @@ const Discover = () => {
               >
                 <SlidersHorizontal size={16} />
                 Bộ lọc khác
-                {selectedFilterValues.length > 3 ? (
+                {selectedAdvancedFilterValues.length ? (
                   <Badge className='ml-1' variant='info'>
-                    {selectedFilterValues.length - 3}
+                    {selectedAdvancedFilterValues.length}
                   </Badge>
                 ) : null}
               </Button>
@@ -465,55 +488,32 @@ const Discover = () => {
       </section>
 
       {filtersOpen ? (
-        <div className='fixed inset-0 z-50 overflow-y-auto bg-slate-950/45 p-4 backdrop-blur-[2px]'>
-          <div className='mx-auto max-w-md'>
-            {filterMetadataError ? (
-              <ScreenErrorState
-                description='Không thể tải dữ liệu bộ lọc lúc này.'
-                onRetry={() => {
-                  void catalogOptionsQuery.refetch()
-                  void citiesQuery.refetch()
-                  if (selectedCityId) void districtsQuery.refetch()
-                }}
-                retryLabel='Tải lại bộ lọc'
-                title='Bộ lọc chưa sẵn sàng'
-              />
-            ) : filtersLoading ? (
-              <FilterSidebarSkeleton />
-            ) : (
-              <FilterSidebar
-                groups={filterGroups}
-                onApply={() => setFiltersOpen(false)}
-                onClose={() => setFiltersOpen(false)}
-                onReset={handleResetFilters}
-                onToggleValue={handleFilterToggle}
-                selectedValues={selectedFilterValues}
-              />
-            )}
-          </div>
-        </div>
+        <AdvancedMentorFiltersDrawer
+          cityName={cities.find((city) => city.id === selectedCityId)?.name}
+          districtOptions={districts.map<AdvancedMentorFilterOption>((district) => ({
+            label: district.name,
+            value: `district:${district.id}`
+          }))}
+          genderOptions={genderOptions.map<AdvancedMentorFilterOption>((option) => ({
+            label: option.label,
+            value: `gender:${option.value}`
+          }))}
+          isDistrictLoading={districtsQuery.isLoading}
+          meetingTypeOptions={meetingTypeOptions.map<AdvancedMentorFilterOption>((option) => ({
+            helper: option.helper,
+            label: option.label,
+            value: `meeting:${option.value}`
+          }))}
+          selectedValues={selectedAdvancedFilterValues}
+          onApply={handleAdvancedFiltersApply}
+          onClose={() => setFiltersOpen(false)}
+        />
       ) : null}
     </div>
   )
 }
 
 export default Discover
-
-function FilterSidebarSkeleton() {
-  return (
-    <Card className='rounded-3xl border-slate-200 bg-white shadow-sm'>
-      <CardContent className='space-y-5 p-5'>
-        <div className='h-7 w-48 animate-pulse rounded-full bg-slate-200' />
-        {Array.from({ length: 4 }).map((_, index) => (
-          <div key={index} className='space-y-3'>
-            <div className='h-4 w-24 animate-pulse rounded-full bg-slate-200' />
-            <div className='h-28 animate-pulse rounded-2xl bg-slate-50' />
-          </div>
-        ))}
-      </CardContent>
-    </Card>
-  )
-}
 
 function MentorGridSkeleton() {
   return (
