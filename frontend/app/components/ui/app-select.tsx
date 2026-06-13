@@ -101,7 +101,7 @@ export function AppSelect({
         aria-haspopup='listbox'
         aria-label={ariaLabel}
         className={cn(
-          'focus-visible:ring-primary/15 flex h-10 w-full items-center justify-between gap-3 rounded-xl border bg-white px-3 text-sm transition outline-none',
+          'focus-visible:ring-primary/15 flex h-10 w-full items-center justify-between gap-3 rounded-xl border bg-white px-3 text-sm text-slate-900 transition outline-none',
           open
             ? 'border-primary/40 ring-primary/10 ring-4'
             : 'border-slate-200 hover:border-slate-300',
@@ -115,7 +115,7 @@ export function AppSelect({
         }}
         onKeyDown={handleKeyDown}
       >
-        <span className={cn('truncate', selectedOption ? 'text-slate-800' : 'text-slate-600')}>
+        <span className={cn('truncate', selectedOption ? 'text-slate-900' : 'text-slate-600')}>
           {selectedOption?.label ?? placeholder}
         </span>
         <ChevronDown
@@ -129,7 +129,7 @@ export function AppSelect({
         <div
           id={listboxId}
           aria-label={ariaLabel}
-          className='absolute top-full left-0 z-40 mt-2 max-h-72 min-w-full overflow-y-auto rounded-xl border border-slate-200 bg-white p-1.5 shadow-xl shadow-slate-900/10'
+          className='absolute top-full left-0 z-[110] mt-2 max-h-72 min-w-full overflow-y-auto rounded-xl border border-slate-200 bg-white p-1.5 shadow-xl shadow-slate-900/10'
           role='listbox'
         >
           {selectableOptions.map((option, index) => {
@@ -154,7 +154,7 @@ export function AppSelect({
                 }}
                 onMouseEnter={() => setActiveIndex(index)}
               >
-                <span className='whitespace-nowrap'>{option.label}</span>
+                <span className='whitespace-nowrap text-inherit'>{option.label}</span>
                 {selected ? <Check aria-hidden='true' className='text-blue-600' size={15} /> : null}
               </button>
             )

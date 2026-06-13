@@ -12,6 +12,7 @@ import { Link } from 'react-router'
 
 import { DashboardPage } from '@/components/DashboardPage'
 import { EmptyState } from '@/components/EmptyState'
+import { MentorAvailabilityModal } from '@/components/MentorAvailabilityModal'
 import {
   MentorRejectBookingModal,
   type MentorRejectBookingModalSession
@@ -194,6 +195,7 @@ export function meta() {
 }
 
 export default function MentorSchedulePage() {
+  const [availabilityModalOpen, setAvailabilityModalOpen] = useState(false)
   const [rejectingSession, setRejectingSession] = useState<MentorRejectBookingModalSession | null>(
     null
   )
@@ -279,7 +281,10 @@ export default function MentorSchedulePage() {
             <h2 className='text-ink text-[2rem] font-bold tracking-tight'>
               Khung giờ lặp lại hằng tuần
             </h2>
-            <Button className='h-11 rounded-xl px-5 text-sm font-medium' disabled>
+            <Button
+              className='h-11 rounded-xl px-5 text-sm font-medium'
+              onClick={() => setAvailabilityModalOpen(true)}
+            >
               <Plus size={16} />
               Thêm khung giờ
             </Button>
@@ -344,7 +349,7 @@ export default function MentorSchedulePage() {
         </aside>
       </div>
 
-      <section className='space-y-5 mt-5'>
+      <section className='mt-5 space-y-5'>
         <h2 className='text-ink text-[2rem] font-bold tracking-tight'>
           Khung giờ theo ngày cụ thể
         </h2>
@@ -377,7 +382,7 @@ export default function MentorSchedulePage() {
         )}
       </section>
 
-      <section className='space-y-5 mt-5'>
+      <section className='mt-5 space-y-5'>
         <h2 className='text-ink text-[2rem] font-bold tracking-tight'>Buổi đã được đặt</h2>
 
         {mentorBookingsQuery.isLoading && !mentorBookingsQuery.data ? (
@@ -496,6 +501,10 @@ export default function MentorSchedulePage() {
         }}
         open={Boolean(rejectingSession)}
         session={rejectingSession}
+      />
+      <MentorAvailabilityModal
+        onOpenChange={setAvailabilityModalOpen}
+        open={availabilityModalOpen}
       />
     </DashboardPage>
   )
