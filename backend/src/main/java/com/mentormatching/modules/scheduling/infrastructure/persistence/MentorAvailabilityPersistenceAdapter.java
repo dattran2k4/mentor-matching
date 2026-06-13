@@ -36,7 +36,8 @@ public class MentorAvailabilityPersistenceAdapter implements MentorAvailabilityR
 
     @Override
     public List<MentorAvailability> findByMentorId(Long mentorId) {
-        return mentorAvailabilityJpaRepository.findByMentorId(mentorId).stream()
+        return mentorAvailabilityJpaRepository
+                .findByMentorIdOrderByAvailabilityTypeAscDayOfWeekAscAvailableDateAscStartTimeAsc(mentorId).stream()
                 .map(mentorAvailabilityPersistenceMapper::toDomain)
                 .toList();
     }
