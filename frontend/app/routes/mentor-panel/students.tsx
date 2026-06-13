@@ -106,7 +106,7 @@ export default function MentorStudentsPage() {
 
   return (
     <DashboardPage className='space-y-6 md:space-y-7' title='Học viên'>
-      <div className='grid gap-4 xl:grid-cols-2 mb-10'>
+      <div className='mb-10 grid gap-4 xl:grid-cols-2'>
         <WorkspaceMetricCard
           className='rounded-[24px]'
           helper='Tổng số học viên hiện tại'
