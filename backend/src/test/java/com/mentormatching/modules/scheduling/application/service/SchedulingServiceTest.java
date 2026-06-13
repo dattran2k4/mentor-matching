@@ -3,6 +3,7 @@ package com.mentormatching.modules.scheduling.application.service;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.time.LocalDate;
@@ -156,6 +157,60 @@ class SchedulingServiceTest {
 
         ResourceNotFoundException exception = assertThrows(ResourceNotFoundException.class,
                 () -> schedulingService.updateCurrentMentorAvailability(command));
+
+        assertEquals("Mentor profile not found", exception.getMessage());
+    }
+
+    @Test
+    void deleteCurrentMentorAvailabilityDeletesOwnedAvailability() {
+        MentorProfile mentorProfile = mentorProfile();
+        MentorAvailability existing = MentorAvailability.restore(new MentorAvailabilityRestoreData(100L, 10L,
+                AvailabilityType.RECURRING, 1, null, LocalTime.of(9, 0), LocalTime.of(11, 0),
+                LocalDateTime.parse("2026-06-13T10:00:00"), LocalDateTime.parse("2026-06-13T10:00:00")));
+
+        when(mentorProfileRepositoryPort.findByUserId(20L)).thenReturn(Optional.of(mentorProfile));
+        when(mentorAvailabilityRepositoryPort.findById(100L)).thenReturn(Optional.of(existing));
+
+        schedulingService.deleteCurrentMentorAvailability(20L, 100L);
+
+        verify(mentorAvailabilityRepositoryPort).delete(existing);
+    }
+
+    @Test
+    void deleteCurrentMentorAvailabilityThrowsWhenAvailabilityDoesNotBelongToMentor() {
+        MentorProfile mentorProfile = mentorProfile();
+        MentorAvailability existing = MentorAvailability.restore(new MentorAvailabilityRestoreData(100L, 99L,
+                AvailabilityType.RECURRING, 1, null, LocalTime.of(9, 0), LocalTime.of(11, 0),
+                LocalDateTime.parse("2026-06-13T10:00:00"), LocalDateTime.parse("2026-06-13T10:00:00")));
+
+        when(mentorProfileRepositoryPort.findByUserId(20L)).thenReturn(Optional.of(mentorProfile));
+        when(mentorAvailabilityRepositoryPort.findById(100L)).thenReturn(Optional.of(existing));
+
+        ResourceNotFoundException exception = assertThrows(ResourceNotFoundException.class,
+                () -> schedulingService.deleteCurrentMentorAvailability(20L, 100L));
+
+        assertEquals("Mentor availability not found", exception.getMessage());
+    }
+
+    @Test
+    void deleteCurrentMentorAvailabilityThrowsWhenAvailabilityDoesNotExist() {
+        MentorProfile mentorProfile = mentorProfile();
+
+        when(mentorProfileRepositoryPort.findByUserId(20L)).thenReturn(Optional.of(mentorProfile));
+        when(mentorAvailabilityRepositoryPort.findById(100L)).thenReturn(Optional.empty());
+
+        ResourceNotFoundException exception = assertThrows(ResourceNotFoundException.class,
+                () -> schedulingService.deleteCurrentMentorAvailability(20L, 100L));
+
+        assertEquals("Mentor availability not found", exception.getMessage());
+    }
+
+    @Test
+    void deleteCurrentMentorAvailabilityThrowsWhenMentorProfileDoesNotExist() {
+        when(mentorProfileRepositoryPort.findByUserId(99L)).thenReturn(Optional.empty());
+
+        ResourceNotFoundException exception = assertThrows(ResourceNotFoundException.class,
+                () -> schedulingService.deleteCurrentMentorAvailability(99L, 100L));
 
         assertEquals("Mentor profile not found", exception.getMessage());
     }

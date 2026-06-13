@@ -10,6 +10,8 @@ public interface MentorAvailabilityRepositoryPort {
 
     MentorAvailability save(MentorAvailability mentorAvailability);
 
+    void delete(MentorAvailability mentorAvailability);
+
     Optional<MentorAvailability> findById(Long id);
 
     List<MentorAvailability> findByMentorId(Long mentorId);
