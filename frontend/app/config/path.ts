@@ -19,7 +19,8 @@ export const path = {
     schedule: '/mentor/schedule',
     students: '/mentor/students',
     earnings: '/mentor/earnings',
-    profile: '/mentor/profile'
+    profile: '/mentor/profile',
+    verification: '/mentor/verification'
   },
 
   admin: {

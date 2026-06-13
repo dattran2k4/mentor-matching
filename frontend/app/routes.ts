@@ -26,7 +26,8 @@ export default [
       route('schedule', 'routes/mentor-panel/schedule.tsx'),
       route('students', 'routes/mentor-panel/students.tsx'),
       route('earnings', 'routes/mentor-panel/earnings.tsx'),
-      route('profile', 'routes/mentor-panel/profile.tsx')
+      route('profile', 'routes/mentor-panel/profile.tsx'),
+      route('verification', 'routes/mentor-panel/verification.tsx')
     ])
   ]),
 
