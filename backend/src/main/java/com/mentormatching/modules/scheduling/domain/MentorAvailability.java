@@ -42,6 +42,17 @@ public class MentorAvailability {
                 availableDate, startTime, endTime, now, now));
     }
 
+    public void update(AvailabilityType availabilityType, Integer dayOfWeek, LocalDate availableDate,
+                       LocalTime startTime, LocalTime endTime) {
+        validateCreateData(mentorId, availabilityType, dayOfWeek, availableDate, startTime, endTime);
+        this.availabilityType = availabilityType;
+        this.dayOfWeek = dayOfWeek;
+        this.availableDate = availableDate;
+        this.startTime = startTime;
+        this.endTime = endTime;
+        this.updatedAt = LocalDateTime.now();
+    }
+
     public Long getId() {
         return id;
     }

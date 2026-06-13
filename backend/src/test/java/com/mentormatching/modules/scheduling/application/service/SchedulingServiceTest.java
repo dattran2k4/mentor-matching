@@ -20,6 +20,7 @@ import com.mentormatching.modules.mentor.domain.MentorApprovalStatus;
 import com.mentormatching.modules.mentor.domain.MentorProfile;
 import com.mentormatching.modules.mentor.domain.MentorProfileRestoreData;
 import com.mentormatching.modules.scheduling.application.dto.CreateCurrentMentorAvailabilityCommand;
+import com.mentormatching.modules.scheduling.application.dto.UpdateCurrentMentorAvailabilityCommand;
 import com.mentormatching.modules.scheduling.application.port.out.MentorAvailabilityRepositoryPort;
 import com.mentormatching.modules.scheduling.domain.AvailabilityType;
 import com.mentormatching.modules.scheduling.domain.MentorAvailability;
@@ -86,6 +87,75 @@ class SchedulingServiceTest {
 
         ResourceNotFoundException exception = assertThrows(ResourceNotFoundException.class,
                 () -> schedulingService.createCurrentMentorAvailability(command));
+
+        assertEquals("Mentor profile not found", exception.getMessage());
+    }
+
+    @Test
+    void updateCurrentMentorAvailabilityUpdatesOwnedAvailability() {
+        MentorProfile mentorProfile = mentorProfile();
+        MentorAvailability existing = MentorAvailability.restore(new MentorAvailabilityRestoreData(100L, 10L,
+                AvailabilityType.RECURRING, 1, null, LocalTime.of(9, 0), LocalTime.of(11, 0),
+                LocalDateTime.parse("2026-06-13T10:00:00"), LocalDateTime.parse("2026-06-13T10:00:00")));
+        UpdateCurrentMentorAvailabilityCommand command = new UpdateCurrentMentorAvailabilityCommand(20L, 100L,
+                AvailabilityType.SPECIFIC_DATE, null, LocalDate.parse("2026-06-21"), LocalTime.of(14, 0),
+                LocalTime.of(16, 0));
+
+        when(mentorProfileRepositoryPort.findByUserId(20L)).thenReturn(Optional.of(mentorProfile));
+        when(mentorAvailabilityRepositoryPort.findById(100L)).thenReturn(Optional.of(existing));
+        when(mentorAvailabilityRepositoryPort.save(existing)).thenReturn(existing);
+
+        schedulingService.updateCurrentMentorAvailability(command);
+
+        assertEquals(AvailabilityType.SPECIFIC_DATE, existing.getAvailabilityType());
+        assertEquals(null, existing.getDayOfWeek());
+        assertEquals(LocalDate.parse("2026-06-21"), existing.getAvailableDate());
+        assertEquals(LocalTime.of(14, 0), existing.getStartTime());
+        assertEquals(LocalTime.of(16, 0), existing.getEndTime());
+    }
+
+    @Test
+    void updateCurrentMentorAvailabilityThrowsWhenAvailabilityDoesNotBelongToMentor() {
+        MentorProfile mentorProfile = mentorProfile();
+        MentorAvailability existing = MentorAvailability.restore(new MentorAvailabilityRestoreData(100L, 99L,
+                AvailabilityType.RECURRING, 1, null, LocalTime.of(9, 0), LocalTime.of(11, 0),
+                LocalDateTime.parse("2026-06-13T10:00:00"), LocalDateTime.parse("2026-06-13T10:00:00")));
+        UpdateCurrentMentorAvailabilityCommand command = new UpdateCurrentMentorAvailabilityCommand(20L, 100L,
+                AvailabilityType.RECURRING, 2, null, LocalTime.of(10, 0), LocalTime.of(12, 0));
+
+        when(mentorProfileRepositoryPort.findByUserId(20L)).thenReturn(Optional.of(mentorProfile));
+        when(mentorAvailabilityRepositoryPort.findById(100L)).thenReturn(Optional.of(existing));
+
+        ResourceNotFoundException exception = assertThrows(ResourceNotFoundException.class,
+                () -> schedulingService.updateCurrentMentorAvailability(command));
+
+        assertEquals("Mentor availability not found", exception.getMessage());
+    }
+
+    @Test
+    void updateCurrentMentorAvailabilityThrowsWhenAvailabilityDoesNotExist() {
+        MentorProfile mentorProfile = mentorProfile();
+        UpdateCurrentMentorAvailabilityCommand command = new UpdateCurrentMentorAvailabilityCommand(20L, 100L,
+                AvailabilityType.RECURRING, 2, null, LocalTime.of(10, 0), LocalTime.of(12, 0));
+
+        when(mentorProfileRepositoryPort.findByUserId(20L)).thenReturn(Optional.of(mentorProfile));
+        when(mentorAvailabilityRepositoryPort.findById(100L)).thenReturn(Optional.empty());
+
+        ResourceNotFoundException exception = assertThrows(ResourceNotFoundException.class,
+                () -> schedulingService.updateCurrentMentorAvailability(command));
+
+        assertEquals("Mentor availability not found", exception.getMessage());
+    }
+
+    @Test
+    void updateCurrentMentorAvailabilityThrowsWhenMentorProfileDoesNotExist() {
+        UpdateCurrentMentorAvailabilityCommand command = new UpdateCurrentMentorAvailabilityCommand(99L, 100L,
+                AvailabilityType.RECURRING, 2, null, LocalTime.of(10, 0), LocalTime.of(12, 0));
+
+        when(mentorProfileRepositoryPort.findByUserId(99L)).thenReturn(Optional.empty());
+
+        ResourceNotFoundException exception = assertThrows(ResourceNotFoundException.class,
+                () -> schedulingService.updateCurrentMentorAvailability(command));
 
         assertEquals("Mentor profile not found", exception.getMessage());
     }
