@@ -87,6 +87,22 @@ public class Booking {
         touch();
     }
 
+    public void reject(Long mentorUserId, String cancelReason) {
+        if (status != BookingStatus.PENDING) {
+            throw new InvalidDataException("Only pending booking can be rejected");
+        }
+        if (mentorUserId == null) {
+            throw new InvalidDataException("Mentor user id is required when rejecting booking");
+        }
+        if (cancelReason == null || cancelReason.isBlank()) {
+            throw new InvalidDataException("Cancel reason is required when rejecting booking");
+        }
+        this.status = BookingStatus.REJECTED;
+        this.cancelledBy = mentorUserId;
+        this.cancelReason = cancelReason.trim();
+        touch();
+    }
+
     public Long getId() {
         return id;
     }
