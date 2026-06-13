@@ -77,9 +77,7 @@ class HttpClient {
             this.refreshTokenRequest = this.refreshTokenRequest
               ? this.refreshTokenRequest
               : this.handleRefreshToken().finally(() => {
-                  setTimeout(() => {
-                    this.refreshTokenRequest = null
-                  }, 10000)
+                  this.refreshTokenRequest = null
                 })
 
             return this.refreshTokenRequest.then((accessToken) => {
@@ -93,7 +91,7 @@ class HttpClient {
             })
           }
 
-          useAuthStore.getState().logout()
+          this.logoutAndRedirect()
         }
 
         return Promise.reject(error)
@@ -101,8 +99,19 @@ class HttpClient {
     )
   }
 
+  private redirectToLogin() {
+    if (window.location.pathname !== path.login) {
+      window.location.assign(path.login)
+    }
+  }
+
+  private logoutAndRedirect() {
+    useAuthStore.getState().logout()
+    this.redirectToLogin()
+  }
+
   private handleRefreshToken() {
-    const { setAccessToken, logout } = useAuthStore.getState()
+    const { setAccessToken } = useAuthStore.getState()
 
     return this.instance
       .post<ApiResponse<AuthApiResponse>>(REFRESH_TOKEN_URL, {})
@@ -112,7 +121,7 @@ class HttpClient {
         return accessToken
       })
       .catch((error) => {
-        logout()
+        this.logoutAndRedirect()
         throw error
       })
   }
