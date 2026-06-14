@@ -1,3 +1,4 @@
+import { useQueryClient } from '@tanstack/react-query'
 import {
   Check,
   CheckCircle2,
@@ -7,6 +8,7 @@ import {
   HelpCircle,
   Receipt
 } from 'lucide-react'
+import { useEffect } from 'react'
 import { Link, useSearchParams } from 'react-router'
 
 import { EmptyState } from '@/components/EmptyState'
@@ -16,6 +18,7 @@ import { Button, buttonVariants } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Spinner } from '@/components/ui/spinner'
 import { path } from '@/config/path'
+import { QUERY_KEYS } from '@/constants/query-keys'
 import { useCurrentUserBookingsQuery } from '@/hooks/queries/booking/useCurrentUserBookingsQuery'
 import { usePaymentDetailQuery } from '@/hooks/queries/payment/usePaymentDetailQuery'
 import type { BookingApiResponse } from '@/types/api/booking'
@@ -121,6 +124,7 @@ export function meta() {
 }
 
 export default function PaymentSuccessPage() {
+  const queryClient = useQueryClient()
   const [searchParams] = useSearchParams()
   const sessionId = searchParams.get('session_id')
   const paymentIdParam = searchParams.get('payment_id')
@@ -136,6 +140,15 @@ export default function PaymentSuccessPage() {
     bookingId !== null
       ? (bookingsQuery.data?.data.find((booking) => booking.id === bookingId) ?? null)
       : null
+
+  useEffect(() => {
+    if (!paymentDetailQuery.data) return
+
+    void queryClient.invalidateQueries({
+      queryKey: QUERY_KEYS.booking.me,
+      exact: false
+    })
+  }, [paymentDetailQuery.data, queryClient])
 
   if (paymentIdParam && paymentId === null) {
     return (

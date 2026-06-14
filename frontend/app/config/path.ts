@@ -3,6 +3,7 @@ export const path = {
   forbidden: '/forbidden',
   login: '/login',
   paymentSuccess: '/payment/success',
+  paymentCancel: '/payment/cancel',
 
   discover: '/discover',
   mentorProfile: (id: string) => `/mentor-profile/${id}`,

@@ -38,6 +38,7 @@ export function useCurrentUserBookingsQuery(params?: GetMyBookingsQueryParams) {
 
   return useQuery({
     ...getCurrentUserBookingsQueryOptions(params),
-    enabled: Boolean(accessToken)
+    enabled: Boolean(accessToken),
+    refetchOnWindowFocus: true
   })
 }
