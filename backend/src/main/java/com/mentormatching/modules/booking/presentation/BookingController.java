@@ -24,6 +24,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.mentormatching.modules.booking.application.dto.GetBookingsQuery;
 import com.mentormatching.modules.booking.application.dto.GetMentorBookingsQuery;
 import com.mentormatching.modules.booking.application.dto.GetMyBookingsQuery;
+import com.mentormatching.modules.booking.application.port.in.CompleteBookingByMentorUseCase;
 import com.mentormatching.modules.booking.application.port.in.CreateBookingUseCase;
 import com.mentormatching.modules.booking.application.port.in.GetBookingsUseCase;
 import com.mentormatching.modules.booking.application.port.in.GetMentorBookingsUseCase;
@@ -56,6 +57,7 @@ public class BookingController {
     private final GetMyBookingsUseCase getMyBookingsUseCase;
     private final GetMentorBookingsUseCase getMentorBookingsUseCase;
     private final RejectBookingByMentorUseCase rejectBookingByMentorUseCase;
+    private final CompleteBookingByMentorUseCase completeBookingByMentorUseCase;
     private final ApiResponseFactory apiResponseFactory;
 
     @PostMapping
@@ -120,5 +122,13 @@ public class BookingController {
                                                    @Valid @RequestBody RejectBookingRequest request) {
         rejectBookingByMentorUseCase.rejectBookingByMentor(request.toCommand(principal, bookingId));
         return apiResponseFactory.success(null, "Reject booking successfully");
+    }
+
+    @PatchMapping("/{bookingId}/complete")
+    @PreAuthorize("hasRole('MENTOR')")
+    public ApiResponse<Void> completeBookingByMentor(@AuthenticationPrincipal AuthenticatedPrincipal principal,
+                                                     @PathVariable Long bookingId) {
+        completeBookingByMentorUseCase.completeBookingByMentor(principal.getId(), bookingId);
+        return apiResponseFactory.success(null, "Complete booking successfully");
     }
 }

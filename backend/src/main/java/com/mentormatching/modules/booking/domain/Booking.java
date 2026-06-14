@@ -103,6 +103,19 @@ public class Booking {
         touch();
     }
 
+    public void complete(LocalDateTime currentTime) {
+        requireNotNull(currentTime, "Current time is required when completing booking");
+        if (status != BookingStatus.CONFIRMED) {
+            throw new InvalidDataException("Only confirmed booking can be completed");
+        }
+        LocalDateTime bookingEndAt = LocalDateTime.of(bookingDate, endTime);
+        if (!currentTime.isAfter(bookingEndAt)) {
+            throw new InvalidDataException("Booking can only be completed after the session end time");
+        }
+        this.status = BookingStatus.COMPLETED;
+        touch();
+    }
+
     public Long getId() {
         return id;
     }

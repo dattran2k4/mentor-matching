@@ -130,6 +130,66 @@ class BookingServiceTest {
         verify(bookingRepositoryPort, never()).save(booking);
     }
 
+    @Test
+    void completeBookingByMentorCompletesConfirmedBookingAfterSessionEnd() {
+        Booking booking = confirmedPastBooking(10L);
+
+        when(bookingMentorLookupPort.getMentorSnapshotByUserId(20L)).thenReturn(new BookingMentorSnapshot(10L, 20L,
+                "Mentor A", MeetingType.HYBRID));
+        when(bookingRepositoryPort.findById(100L)).thenReturn(Optional.of(booking));
+        when(bookingRepositoryPort.save(booking)).thenReturn(booking);
+
+        bookingService.completeBookingByMentor(20L, 100L);
+
+        assertEquals(BookingStatus.COMPLETED, booking.getStatus());
+        verify(bookingRepositoryPort).save(booking);
+    }
+
+    @Test
+    void completeBookingByMentorThrowsWhenBookingDoesNotBelongToMentor() {
+        Booking booking = confirmedPastBooking(99L);
+
+        when(bookingMentorLookupPort.getMentorSnapshotByUserId(20L)).thenReturn(new BookingMentorSnapshot(10L, 20L,
+                "Mentor A", MeetingType.HYBRID));
+        when(bookingRepositoryPort.findById(100L)).thenReturn(Optional.of(booking));
+
+        ResourceNotFoundException exception = assertThrows(ResourceNotFoundException.class,
+                () -> bookingService.completeBookingByMentor(20L, 100L));
+
+        assertEquals("Booking not found", exception.getMessage());
+        verify(bookingRepositoryPort, never()).save(booking);
+    }
+
+    @Test
+    void completeBookingByMentorThrowsWhenBookingIsNotConfirmed() {
+        Booking booking = pendingPastBooking(10L);
+
+        when(bookingMentorLookupPort.getMentorSnapshotByUserId(20L)).thenReturn(new BookingMentorSnapshot(10L, 20L,
+                "Mentor A", MeetingType.HYBRID));
+        when(bookingRepositoryPort.findById(100L)).thenReturn(Optional.of(booking));
+
+        InvalidDataException exception = assertThrows(InvalidDataException.class,
+                () -> bookingService.completeBookingByMentor(20L, 100L));
+
+        assertEquals("Only confirmed booking can be completed", exception.getMessage());
+        verify(bookingRepositoryPort, never()).save(booking);
+    }
+
+    @Test
+    void completeBookingByMentorThrowsWhenSessionHasNotEndedYet() {
+        Booking booking = confirmedFutureBooking(10L);
+
+        when(bookingMentorLookupPort.getMentorSnapshotByUserId(20L)).thenReturn(new BookingMentorSnapshot(10L, 20L,
+                "Mentor A", MeetingType.HYBRID));
+        when(bookingRepositoryPort.findById(100L)).thenReturn(Optional.of(booking));
+
+        InvalidDataException exception = assertThrows(InvalidDataException.class,
+                () -> bookingService.completeBookingByMentor(20L, 100L));
+
+        assertEquals("Booking can only be completed after the session end time", exception.getMessage());
+        verify(bookingRepositoryPort, never()).save(booking);
+    }
+
     private Booking pendingBooking(Long mentorId) {
         return Booking.restore(new BookingRestoreData(100L, 30L, "Student A", mentorId, "Mentor A", 200L, "Math",
                 "Grade 9", LocalDate.now().plusDays(2), LocalTime.of(9, 0), LocalTime.of(10, 0),
@@ -144,6 +204,30 @@ class BookingServiceTest {
                 new BigDecimal("250000"), new BigDecimal("250000"), BookingMeetingType.ONLINE, null, null,
                 BookingStatus.REJECTED, "Need help", 20L, "Already rejected",
                 LocalDateTime.parse("2026-06-12T10:00:00"), LocalDateTime.parse("2026-06-12T11:00:00")));
+    }
+
+    private Booking confirmedPastBooking(Long mentorId) {
+        return Booking.restore(new BookingRestoreData(100L, 30L, "Student A", mentorId, "Mentor A", 200L, "Math",
+                "Grade 9", LocalDate.now().minusDays(1), LocalTime.of(9, 0), LocalTime.of(10, 0),
+                new BigDecimal("250000"), new BigDecimal("250000"), BookingMeetingType.ONLINE, null, null,
+                BookingStatus.CONFIRMED, "Need help", null, null, LocalDateTime.parse("2026-06-12T10:00:00"),
+                LocalDateTime.parse("2026-06-12T10:00:00")));
+    }
+
+    private Booking pendingPastBooking(Long mentorId) {
+        return Booking.restore(new BookingRestoreData(100L, 30L, "Student A", mentorId, "Mentor A", 200L, "Math",
+                "Grade 9", LocalDate.now().minusDays(1), LocalTime.of(9, 0), LocalTime.of(10, 0),
+                new BigDecimal("250000"), new BigDecimal("250000"), BookingMeetingType.ONLINE, null, null,
+                BookingStatus.PENDING, "Need help", null, null, LocalDateTime.parse("2026-06-12T10:00:00"),
+                LocalDateTime.parse("2026-06-12T10:00:00")));
+    }
+
+    private Booking confirmedFutureBooking(Long mentorId) {
+        return Booking.restore(new BookingRestoreData(100L, 30L, "Student A", mentorId, "Mentor A", 200L, "Math",
+                "Grade 9", LocalDate.now().plusDays(1), LocalTime.of(9, 0), LocalTime.of(10, 0),
+                new BigDecimal("250000"), new BigDecimal("250000"), BookingMeetingType.ONLINE, null, null,
+                BookingStatus.CONFIRMED, "Need help", null, null, LocalDateTime.parse("2026-06-12T10:00:00"),
+                LocalDateTime.parse("2026-06-12T10:00:00")));
     }
 
     private Payment paidPayment(Long bookingId) {

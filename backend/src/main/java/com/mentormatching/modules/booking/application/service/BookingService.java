@@ -1,6 +1,7 @@
 package com.mentormatching.modules.booking.application.service;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
@@ -15,6 +16,7 @@ import com.mentormatching.modules.booking.application.dto.CreateBookingCommand;
 import com.mentormatching.modules.booking.application.dto.GetBookingsQuery;
 import com.mentormatching.modules.booking.application.dto.GetMentorBookingsQuery;
 import com.mentormatching.modules.booking.application.dto.GetMyBookingsQuery;
+import com.mentormatching.modules.booking.application.port.in.CompleteBookingByMentorUseCase;
 import com.mentormatching.modules.booking.application.port.in.CreateBookingUseCase;
 import com.mentormatching.modules.booking.application.port.in.GetBookingPaymentSummaryUseCase;
 import com.mentormatching.modules.booking.application.port.in.GetBookingsUseCase;
@@ -40,7 +42,8 @@ import com.mentormatching.shared.response.PageResponse;
 
 @Service
 public class BookingService implements CreateBookingUseCase, GetBookingPaymentSummaryUseCase, GetBookingsUseCase,
-        GetMyBookingsUseCase, GetMentorBookingsUseCase, RejectBookingByMentorUseCase {
+        GetMyBookingsUseCase, GetMentorBookingsUseCase, RejectBookingByMentorUseCase,
+        CompleteBookingByMentorUseCase {
 
     private static final List<BookingStatus> SCHEDULE_BLOCKING_STATUSES = List.of(BookingStatus.PENDING,
             BookingStatus.CONFIRMED);
@@ -127,6 +130,16 @@ public class BookingService implements CreateBookingUseCase, GetBookingPaymentSu
         ensureBookingBelongsToMentor(mentor.mentorId(), booking);
         ensureBookingHasNoPaidPayment(booking.getId());
         booking.reject(command.mentorUserId(), command.cancelReason());
+        bookingRepositoryPort.save(booking);
+    }
+
+    @Override
+    @Transactional
+    public void completeBookingByMentor(Long mentorUserId, Long bookingId) {
+        BookingMentorSnapshot mentor = bookingMentorLookupPort.getMentorSnapshotByUserId(mentorUserId);
+        Booking booking = bookingRepositoryPort.findById(bookingId).orElseThrow(() -> new ResourceNotFoundException("Booking not found"));
+        ensureBookingBelongsToMentor(mentor.mentorId(), booking);
+        booking.complete(LocalDateTime.now());
         bookingRepositoryPort.save(booking);
     }
 
