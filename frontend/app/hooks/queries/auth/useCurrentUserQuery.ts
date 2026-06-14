@@ -2,7 +2,7 @@ import { queryOptions, useQuery } from '@tanstack/react-query'
 
 import { QUERY_KEYS } from '@/constants/query-keys'
 import { userApi } from '@/services/user.api'
-import { useAuthStore } from '@/store/auth-store'
+import { useAuthStore } from '@/stores/auth-store'
 import type { CurrentUserApiResponse } from '@/types/api/user'
 import type { CurrentUser } from '@/types/models/user'
 

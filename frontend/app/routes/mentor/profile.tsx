@@ -41,7 +41,7 @@ import { useDeleteCurrentMentorAchievementMutation } from '@/hooks/queries/mento
 import { useUpdateCurrentMentorMutation } from '@/hooks/queries/mentor/useUpdateCurrentMentorMutation'
 import { useUpdateCurrentMentorAchievementMutation } from '@/hooks/queries/mentor/useUpdateCurrentMentorAchievementMutation'
 import { useUpdateCurrentMentorTraitsMutation } from '@/hooks/queries/mentor/useUpdateCurrentMentorTraitsMutation'
-import { formatMeetingTypeLabel } from '@/routes/mentor-profile.presentation'
+import { formatMeetingTypeLabel } from '@/features/mentor-profile/mentor-profile.mapper'
 import type { ErrorResponse } from '@/types/api/common'
 import type {
   CurrentMentorApiResponse,

@@ -1,5 +1,5 @@
 import { env } from '@/config/env'
-import http from '@/lib/http'
+import http from '@/libs/http'
 import { mockUserApi } from '@/services/mock/user.mock.api'
 import type { ApiResponse } from '@/types/api/common'
 import type {

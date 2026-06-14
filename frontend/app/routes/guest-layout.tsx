@@ -2,7 +2,7 @@ import { Navigate, Outlet, useSearchParams } from 'react-router'
 
 import { path } from '@/config/path'
 import { useCurrentUserQuery } from '@/hooks/queries/auth/useCurrentUserQuery'
-import { useAuthStore } from '@/store/auth-store'
+import { useAuthStore } from '@/stores/auth-store'
 import { getDashboardPath } from '@/utils/get-dashboard-path'
 
 export default function GuestLayout() {

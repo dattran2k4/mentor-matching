@@ -1,7 +1,7 @@
 import { useMutation } from '@tanstack/react-query'
 
 import { authApi } from '@/services/auth.api'
-import { useAuthStore } from '@/store/auth-store'
+import { useAuthStore } from '@/stores/auth-store'
 import type { LoginRequest } from '@/types/form/auth'
 
 export function useLoginMutation() {

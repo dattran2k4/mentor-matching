@@ -1,4 +1,4 @@
-import RatingStars from './RatingStars'
+import RatingStars from '../RatingStars'
 import { getInitials } from '@/utils/format'
 import type { Testimonial } from '@/types/models/testimonial'
 

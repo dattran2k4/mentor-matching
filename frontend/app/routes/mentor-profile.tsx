@@ -31,7 +31,7 @@ import {
   mapMentorProfileToViewModel,
   type MentorProfileOffering,
   type MentorProfileViewModel
-} from '@/routes/mentor-profile.presentation'
+} from '@/features/mentor-profile/mentor-profile.mapper'
 import type { ErrorResponse } from '@/types/api/common'
 import { cn } from '@/utils/cn'
 import { formatPrice, getInitials } from '@/utils/format'

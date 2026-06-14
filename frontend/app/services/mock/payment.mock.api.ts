@@ -1,4 +1,4 @@
-import { useAuthStore } from '@/store/auth-store'
+import { useAuthStore } from '@/stores/auth-store'
 import { getMockEmailFromToken, mockUsers } from '@/services/mock/auth.mock.api'
 import { mockBookingApi } from '@/services/mock/booking.mock.api'
 import type { ApiResponse } from '@/types/api/common'

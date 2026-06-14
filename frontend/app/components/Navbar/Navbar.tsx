@@ -7,7 +7,7 @@ import { BrandLogo } from '@/components/BrandLogo'
 import { buttonVariants } from '@/components/ui/button'
 import { path } from '@/config/path'
 import { useDashboardPath } from '@/hooks/useDashboardPath'
-import { useAuthStore } from '@/store/auth-store'
+import { useAuthStore } from '@/stores/auth-store'
 import { cn } from '@/utils/cn'
 
 const Navbar = () => {

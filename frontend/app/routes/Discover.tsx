@@ -19,7 +19,7 @@ import { useCatalogOptionsQuery } from '@/hooks/queries/catalog/useCatalogOption
 import { useCitiesQuery } from '@/hooks/queries/location/useCitiesQuery'
 import { useDistrictsByCityQuery } from '@/hooks/queries/location/useDistrictsByCityQuery'
 import { useDiscoverMentorsQuery } from '@/hooks/queries/mentor/useDiscoverMentorsQuery'
-import { mapDiscoverMentorToCard } from '@/routes/discover.presentation'
+import { mapDiscoverMentorToCard } from '@/features/discover/discover.mapper'
 import type { CatalogGradeApiResponse, CatalogOptionsApiResponse } from '@/types/api/catalog'
 import type { SortDirection } from '@/types/api/common'
 import type { CityApiResponse, DistrictApiResponse } from '@/types/api/location'

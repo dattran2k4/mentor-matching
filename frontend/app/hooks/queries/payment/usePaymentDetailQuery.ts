@@ -2,7 +2,7 @@ import { queryOptions, useQuery } from '@tanstack/react-query'
 
 import { QUERY_KEYS } from '@/constants/query-keys'
 import { paymentApi } from '@/services/payment.api'
-import { useAuthStore } from '@/store/auth-store'
+import { useAuthStore } from '@/stores/auth-store'
 import type { PaymentDetailApiResponse } from '@/types/api/payment'
 
 const MINIMUM_PAYMENT_DETAIL_DELAY_MS = 1000

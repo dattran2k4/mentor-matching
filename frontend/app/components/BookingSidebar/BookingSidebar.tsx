@@ -13,8 +13,8 @@ import {
   formatMeetingTypeLabel,
   formatTimeLabel,
   type MentorProfileViewModel
-} from '@/routes/mentor-profile.presentation'
-import { useAuthStore } from '@/store/auth-store'
+} from '@/features/mentor-profile/mentor-profile.mapper'
+import { useAuthStore } from '@/stores/auth-store'
 import type { ErrorResponse } from '@/types/api/common'
 import { cn } from '@/utils/cn'
 import { formatPrice } from '@/utils/format'

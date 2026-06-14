@@ -2,7 +2,7 @@ import { queryOptions, useQuery } from '@tanstack/react-query'
 
 import { QUERY_KEYS } from '@/constants/query-keys'
 import { bookingApi } from '@/services/booking.api'
-import { useAuthStore } from '@/store/auth-store'
+import { useAuthStore } from '@/stores/auth-store'
 import type { BookingListPageApiResponse, GetMyBookingsQueryParams } from '@/types/api/booking'
 
 const defaultParams: GetMyBookingsQueryParams = {

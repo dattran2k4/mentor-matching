@@ -4,7 +4,7 @@ import { Award, ShieldCheck, Sparkles } from 'lucide-react'
 import { StatusBadge } from '@/components/StatusBadge'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent } from '@/components/ui/card'
-import type { MentorProfileViewModel } from '@/routes/mentor-profile.presentation'
+import type { MentorProfileViewModel } from '@/features/mentor-profile/mentor-profile.mapper'
 import { cn } from '@/utils/cn'
 
 type MentorTrustBlockProps = {

@@ -4,7 +4,7 @@ import { Navigate, Outlet, useLocation } from 'react-router'
 import { path } from '@/config/path'
 import type { Role } from '@/constants/roles'
 import { useCurrentUserQuery } from '@/hooks/queries/auth/useCurrentUserQuery'
-import { useAuthStore } from '@/store/auth-store'
+import { useAuthStore } from '@/stores/auth-store'
 
 type RoleGuardProps = {
   role: Role

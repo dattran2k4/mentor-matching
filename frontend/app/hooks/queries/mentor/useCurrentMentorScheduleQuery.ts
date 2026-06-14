@@ -2,7 +2,7 @@ import { queryOptions, useQuery } from '@tanstack/react-query'
 
 import { QUERY_KEYS } from '@/constants/query-keys'
 import { mentorApi } from '@/services/mentor.api'
-import { useAuthStore } from '@/store/auth-store'
+import { useAuthStore } from '@/stores/auth-store'
 import type {
   CurrentMentorApiResponse,
   MentorAvailabilityDetailApiResponse
