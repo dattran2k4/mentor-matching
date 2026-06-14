@@ -21,6 +21,7 @@ import { path } from '@/config/path'
 import { QUERY_KEYS } from '@/constants/query-keys'
 import { useCurrentUserBookingsQuery } from '@/hooks/queries/booking/useCurrentUserBookingsQuery'
 import { usePaymentDetailQuery } from '@/hooks/queries/payment/usePaymentDetailQuery'
+import { useAuthStore } from '@/store/auth-store'
 import type { BookingApiResponse } from '@/types/api/booking'
 import type { PaymentDetailApiResponse } from '@/types/api/payment'
 import { cn } from '@/utils/cn'
@@ -139,6 +140,7 @@ export function meta() {
 export default function PaymentCancelPage() {
   const queryClient = useQueryClient()
   const [searchParams] = useSearchParams()
+  const hasHydrated = useAuthStore((state) => state.hasHydrated)
   const sessionId = searchParams.get('session_id')
   const paymentIdParam = searchParams.get('payment_id')
   const parsedPaymentId = paymentIdParam ? Number(paymentIdParam) : Number.NaN
@@ -211,7 +213,9 @@ export default function PaymentCancelPage() {
     )
   }
 
-  if (paymentDetailQuery.isLoading) {
+  const shouldShowLoading = paymentId !== null && (!hasHydrated || paymentDetailQuery.isLoading)
+
+  if (shouldShowLoading) {
     return (
       <section className='relative overflow-hidden py-16 sm:py-24'>
         <div className='absolute inset-0 -z-10 bg-[radial-gradient(circle_at_top,rgba(251,191,36,0.12),transparent_28%),radial-gradient(circle_at_bottom,rgba(59,130,246,0.08),transparent_32%)]' />

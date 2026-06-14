@@ -29,10 +29,12 @@ export function getPaymentDetailQueryOptions(paymentId: number) {
 
 export function usePaymentDetailQuery(paymentId: number | null) {
   const accessToken = useAuthStore((state) => state.accessToken)
+  const hasHydrated = useAuthStore((state) => state.hasHydrated)
 
   return useQuery({
     queryKey: QUERY_KEYS.payment.detail(paymentId ?? 0),
     queryFn: () => fetchPaymentDetail(paymentId ?? 0),
-    enabled: Boolean(accessToken) && Number.isInteger(paymentId) && Number(paymentId) > 0
+    enabled:
+      hasHydrated && Boolean(accessToken) && Number.isInteger(paymentId) && Number(paymentId) > 0
   })
 }

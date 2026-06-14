@@ -35,10 +35,11 @@ export function getCurrentUserBookingsQueryOptions(params?: GetMyBookingsQueryPa
 
 export function useCurrentUserBookingsQuery(params?: GetMyBookingsQueryParams) {
   const accessToken = useAuthStore((state) => state.accessToken)
+  const hasHydrated = useAuthStore((state) => state.hasHydrated)
 
   return useQuery({
     ...getCurrentUserBookingsQueryOptions(params),
-    enabled: Boolean(accessToken),
+    enabled: hasHydrated && Boolean(accessToken),
     refetchOnWindowFocus: true
   })
 }
