@@ -12,8 +12,10 @@ import com.mentormatching.modules.payment.application.dto.CreatePaymentCommand;
 import com.mentormatching.modules.payment.application.dto.CheckoutSessionResult;
 import com.mentormatching.modules.payment.application.dto.HandleStripeWebhookCommand;
 import com.mentormatching.modules.payment.application.dto.PaymentBookingSnapshot;
+import com.mentormatching.modules.payment.application.dto.PaymentDetail;
 import com.mentormatching.modules.payment.application.dto.PaymentResult;
 import com.mentormatching.modules.payment.application.port.in.CreatePaymentUseCase;
+import com.mentormatching.modules.payment.application.port.in.GetPaymentDetailUseCase;
 import com.mentormatching.modules.payment.application.port.in.HandleStripeWebhookUseCase;
 import com.mentormatching.modules.payment.application.port.out.BookingConfirmationPort;
 import com.mentormatching.modules.payment.application.port.out.PaymentBookingLookupPort;
@@ -27,7 +29,7 @@ import com.mentormatching.shared.exception.InvalidDataException;
 import com.mentormatching.shared.exception.ResourceNotFoundException;
 
 @Service
-public class PaymentService implements CreatePaymentUseCase, HandleStripeWebhookUseCase {
+public class PaymentService implements CreatePaymentUseCase, HandleStripeWebhookUseCase, GetPaymentDetailUseCase {
 
     private static final Logger log = LoggerFactory.getLogger(PaymentService.class);
 
@@ -74,6 +76,22 @@ public class PaymentService implements CreatePaymentUseCase, HandleStripeWebhook
 
         log.info("event=STRIPE_WEBHOOK_IGNORED stripeEventId={} stripeEventType={}", command.eventId(),
                 command.eventType());
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public PaymentDetail getPaymentDetail(Long payerUserId, Long paymentId) {
+        Payment payment = paymentRepositoryPort.findById(paymentId).orElseThrow(() -> new ResourceNotFoundException("Payment not found"));
+
+        if (!payment.getPayerUserId().equals(payerUserId)) {
+            throw new ResourceNotFoundException("Payment not found");
+        }
+
+        PaymentBookingSnapshot booking = paymentBookingLookupPort.getBookingSnapshot(payment.getBookingId());
+        return new PaymentDetail(payment.getId(), payment.getBookingId(), payment.getAmount(), payment.getStatus(),
+                booking.status(), payment.getProviderReferenceId(), payment.getProviderTransactionId(),
+                payment.getPaidAt(), payment.getExpiresAt(), payment.getFailureReason(), payment.getCreatedAt(),
+                payment.getUpdatedAt());
     }
 
     private void validateBookingCanBePaid(CreatePaymentCommand command, PaymentBookingSnapshot booking) {
