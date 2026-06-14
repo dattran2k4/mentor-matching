@@ -29,6 +29,9 @@ export const QUERY_KEYS = {
     featured: (params: { page: number; size: number; sortBy: string; sortDir: string }) =>
       ['mentor', 'featured', params] as const
   },
+  payment: {
+    detail: (paymentId: number) => ['payment', 'detail', paymentId] as const
+  },
   booking: {
     me: ['booking', 'me'] as const,
     my: (params: {

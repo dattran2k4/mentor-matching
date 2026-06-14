@@ -5,7 +5,8 @@ export default [
   layout('layouts/MainLayout.tsx', [
     index('routes/HomeFesba.tsx'),
     route('discover', 'routes/Discover.tsx'),
-    route('mentor-profile/:id', 'routes/MentorProfile.tsx')
+    route('mentor-profile/:id', 'routes/MentorProfile.tsx'),
+    route('payment/success', 'routes/payment/success.tsx')
   ]),
 
   // User dashboard — /user/*

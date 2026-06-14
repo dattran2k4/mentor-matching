@@ -19,3 +19,18 @@ export type PaymentApiResponse = {
   checkoutUrl: string | null
   expiresAt: string | null
 }
+
+export type PaymentDetailApiResponse = {
+  id: number
+  bookingId: number
+  amount: number
+  status: PaymentStatus
+  bookingStatus: import('@/types/models/booking').BookingStatus
+  providerReferenceId: string | null
+  providerTransactionId: string | null
+  paidAt: string | null
+  expiresAt: string | null
+  failureReason: string | null
+  createdAt: string | null
+  updatedAt: string | null
+}
