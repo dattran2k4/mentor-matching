@@ -1,4 +1,3 @@
-import type { BookingMeetingTypeApiResponse } from '@/types/api/booking'
 import type { MentorCalendarApiResponse } from '@/types/api/mentor-calendar'
 
 export type MentorCalendarSlotViewModel = {
@@ -6,7 +5,6 @@ export type MentorCalendarSlotViewModel = {
   date: string
   startTime: string
   endTime: string
-  meetingType: BookingMeetingTypeApiResponse | null
   isBookable: boolean
   isNearestBookable: boolean
 }
@@ -25,8 +23,7 @@ export type MentorCalendarViewModel = {
 }
 
 export function mapMentorCalendarToViewModel(
-  calendar: MentorCalendarApiResponse,
-  meetingType: BookingMeetingTypeApiResponse | null
+  calendar: MentorCalendarApiResponse
 ): MentorCalendarViewModel {
   const slots = calendar.dates
     .flatMap((date) =>
@@ -35,7 +32,6 @@ export function mapMentorCalendarToViewModel(
         date: date.date,
         startTime: window.startTime,
         endTime: window.endTime,
-        meetingType,
         isBookable: true,
         isNearestBookable: false
       }))

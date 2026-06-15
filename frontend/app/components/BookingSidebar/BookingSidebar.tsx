@@ -1,5 +1,6 @@
 import axios from 'axios'
 import { CalendarDays, CheckCircle2 } from 'lucide-react'
+import { useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router'
 
 import { Badge } from '@/components/ui/badge'
@@ -8,6 +9,7 @@ import { Card, CardContent } from '@/components/ui/card'
 import { path } from '@/config/path'
 import { useCurrentUserQuery } from '@/hooks/queries/auth/useCurrentUserQuery'
 import { useCreateBookingMutation } from '@/hooks/queries/booking/useCreateBookingMutation'
+import type { BookingMeetingTypeApiResponse } from '@/types/api/booking'
 import {
   formatMeetingTypeLabel,
   formatTimeLabel,
@@ -59,12 +61,18 @@ const BookingSidebar = ({
   const isLearner = currentUser?.roles.includes('LEARNER') ?? false
   const isLoggedIn = Boolean(accessToken)
   const resolvedPrice = activeOffering?.pricePerHour ?? mentor.startingPrice
+  const [selectedMeetingTypeState, setSelectedMeetingType] =
+    useState<BookingMeetingTypeApiResponse | null>(null)
+  const selectedMeetingType = mentor.bookableMeetingType ?? selectedMeetingTypeState
+  const requiresMeetingTypeSelection =
+    mentor.bookableMeetingType === null && mentor.meetingTypes.includes('HYBRID')
+
   const canSubmit = Boolean(
     isLoggedIn &&
     isLearner &&
     activeOffering &&
     selectedSlot &&
-    selectedSlot.meetingType &&
+    selectedMeetingType &&
     !createBookingMutation.isPending
   )
   const redirectTo = `${path.login}?redirectTo=${encodeURIComponent(`${location.pathname}${location.search}`)}`
@@ -73,7 +81,10 @@ const BookingSidebar = ({
     if (!activeOffering) return 'Mentor chưa có môn học đang mở.'
     if (isCalendarLoading) return 'Đang tải lịch trống của mentor.'
     if (!visibleSlots.length) return 'Mentor chưa mở lịch trong tuần này.'
-    if (!selectedSlot?.meetingType) return 'Hình thức học này chưa hỗ trợ đặt lịch trực tiếp.'
+    if (!selectedMeetingType)
+      return requiresMeetingTypeSelection
+        ? 'Chọn hình thức học trước khi gửi yêu cầu đặt lịch.'
+        : 'Hình thức học này chưa hỗ trợ đặt lịch trực tiếp.'
     if (!isLoggedIn) return 'Đăng nhập bằng tài khoản học viên để gửi yêu cầu.'
     if (!isLearner && !currentUserQuery.isLoading)
       return 'Chỉ tài khoản học viên có thể gửi yêu cầu đặt lịch.'
@@ -81,7 +92,7 @@ const BookingSidebar = ({
   })()
 
   const handleCreateBooking = () => {
-    if (!activeOffering || !selectedSlot?.meetingType) return
+    if (!activeOffering || !selectedSlot || !selectedMeetingType) return
 
     createBookingMutation.mutate(
       {
@@ -90,7 +101,7 @@ const BookingSidebar = ({
         bookingDate: selectedSlot.date,
         startTime: selectedSlot.startTime,
         endTime: selectedSlot.endTime,
-        meetingType: selectedSlot.meetingType
+        meetingType: selectedMeetingType
       },
       {
         onSuccess: ({ bookingId }) => {
@@ -136,6 +147,13 @@ const BookingSidebar = ({
         </div>
 
         <div className='mt-5 border-t border-slate-200 pt-5'>
+          <p className='text-ink text-sm font-bold'>Hình thức học</p>
+          <div className='mt-3 flex gap-2'>
+            {renderMeetingTypeOptions(mentor, selectedMeetingType, setSelectedMeetingType)}
+          </div>
+        </div>
+
+        <div className='mt-5 border-t border-slate-200 pt-5'>
           <div className='flex items-center gap-2 text-sm font-bold text-slate-900'>
             <CalendarDays size={16} />
             Lịch gần nhất
@@ -165,11 +183,6 @@ const BookingSidebar = ({
                       <span className='text-ink text-sm font-bold'>
                         {formatCalendarDateLabel(slot.date)}
                       </span>
-                      <Badge className='px-2 py-0 text-[10px]' variant='outline'>
-                        {slot.meetingType
-                          ? formatMeetingTypeLabel(slot.meetingType)
-                          : 'Đang cập nhật'}
-                      </Badge>
                     </div>
                     <p className='text-muted mt-1 text-xs'>
                       {formatTimeLabel(slot.startTime)} - {formatTimeLabel(slot.endTime)}
@@ -197,9 +210,7 @@ const BookingSidebar = ({
             <SummaryRow
               label='Hình thức'
               value={
-                selectedSlot?.meetingType
-                  ? formatMeetingTypeLabel(selectedSlot.meetingType)
-                  : 'Chưa hỗ trợ'
+                selectedMeetingType ? formatMeetingTypeLabel(selectedMeetingType) : 'Chưa chọn'
               }
             />
             <SummaryRow
@@ -261,6 +272,54 @@ function formatCalendarDateLabel(value: string) {
         day: '2-digit',
         month: '2-digit'
       }).format(date)
+}
+
+function renderMeetingTypeOptions(
+  mentor: MentorProfileViewModel,
+  selectedMeetingType: BookingMeetingTypeApiResponse | null,
+  onSelectMeetingType: (meetingType: BookingMeetingTypeApiResponse) => void
+) {
+  const selectableMeetingTypes = getSelectableMeetingTypes(mentor)
+
+  if (!selectableMeetingTypes.length) {
+    return (
+      <p className='rounded-xl bg-slate-50 px-3 py-2 text-xs text-slate-600'>
+        Mentor chưa mở hình thức học để đặt lịch trực tiếp.
+      </p>
+    )
+  }
+
+  return selectableMeetingTypes.map((meetingType) => {
+    const selected = selectedMeetingType === meetingType
+    const isFixedOption =
+      mentor.bookableMeetingType !== null && mentor.bookableMeetingType === meetingType
+
+    return (
+      <button
+        key={meetingType}
+        className={cn(
+          'flex-1 rounded-xl border px-3 py-2 text-sm font-semibold transition',
+          selected
+            ? 'border-blue-400 bg-blue-50 text-blue-700 ring-2 ring-blue-100'
+            : 'border-slate-200 bg-white text-slate-700 hover:border-slate-300',
+          isFixedOption && 'cursor-default'
+        )}
+        type='button'
+        onClick={() => onSelectMeetingType(meetingType)}
+      >
+        {formatMeetingTypeLabel(meetingType)}
+      </button>
+    )
+  })
+}
+
+function getSelectableMeetingTypes(
+  mentor: MentorProfileViewModel
+): BookingMeetingTypeApiResponse[] {
+  if (mentor.bookableMeetingType) return [mentor.bookableMeetingType]
+  if (mentor.meetingTypes.includes('HYBRID')) return ['ONLINE', 'OFFLINE']
+
+  return []
 }
 
 function SummaryRow({ label, value }: { label: string; value: string }) {

@@ -32,7 +32,6 @@ const MentorProfile = () => {
   )
   const [selectedOfferingIdState, setSelectedOfferingId] = useState<string>()
   const mentorCalendar = useMentorProfileCalendar({
-    meetingType: mentor?.bookableMeetingType ?? null,
     mentorId
   })
   const selectedOfferingId = mentor?.offerings.some(

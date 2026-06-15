@@ -22,8 +22,7 @@ describe('mentor calendar mapper', () => {
             availableWindows: [{ startTime: '10:00:00', endTime: '12:00:00' }]
           }
         ]
-      },
-      'ONLINE'
+      }
     )
 
     expect(calendar.slots.map((slot) => slot.date)).toEqual(['2026-06-15', '2026-06-16'])
@@ -46,8 +45,7 @@ describe('mentor calendar mapper', () => {
             ]
           }
         ]
-      },
-      'ONLINE'
+      }
     )
     const userSelectedSlot = calendar.slots[1]
 
@@ -68,8 +66,7 @@ describe('mentor calendar mapper', () => {
             availableWindows: [{ startTime: '09:00:00', endTime: '11:00:00' }]
           }
         ]
-      },
-      'ONLINE'
+      }
     )
 
     expect(resolveSelectedCalendarSlot(calendar.slots, 'slot-from-another-week')?.id).toBe(

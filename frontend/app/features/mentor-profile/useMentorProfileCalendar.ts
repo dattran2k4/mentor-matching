@@ -14,10 +14,8 @@ import {
   getWeekStartIso
 } from '@/features/mentor-profile/mentor-profile-calendar.utils'
 import { useMentorCalendarQuery } from '@/hooks/queries/mentor/useMentorCalendarQuery'
-import type { BookingMeetingTypeApiResponse } from '@/types/api/booking'
 
 type UseMentorProfileCalendarParams = {
-  meetingType: BookingMeetingTypeApiResponse | null
   mentorId: number | null
 }
 
@@ -33,7 +31,6 @@ type UseMentorProfileCalendarResult = {
 }
 
 export function useMentorProfileCalendar({
-  meetingType,
   mentorId
 }: UseMentorProfileCalendarParams): UseMentorProfileCalendarResult {
   const [initialWeekStart] = useState(() => getWeekStartIso(new Date()))
@@ -45,10 +42,8 @@ export function useMentorProfileCalendar({
   const mentorCalendarQuery = useMentorCalendarQuery(mentorId, calendarRange.from, calendarRange.to)
   const queriedCalendar = useMemo(
     () =>
-      mentorCalendarQuery.data
-        ? mapMentorCalendarToViewModel(mentorCalendarQuery.data, meetingType)
-        : null,
-    [meetingType, mentorCalendarQuery.data]
+      mentorCalendarQuery.data ? mapMentorCalendarToViewModel(mentorCalendarQuery.data) : null,
+    [mentorCalendarQuery.data]
   )
   const displayWeekStart =
     requestedWeekStart ??
