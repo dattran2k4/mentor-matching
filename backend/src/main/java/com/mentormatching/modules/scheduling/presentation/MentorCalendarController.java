@@ -2,6 +2,7 @@ package com.mentormatching.modules.scheduling.presentation;
 
 import java.time.LocalDate;
 
+import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -24,8 +25,8 @@ public class MentorCalendarController {
     private final GetMentorCalendarUseCase getMentorCalendarUseCase;
     private final ApiResponseFactory apiResponseFactory;
 
-    @GetMapping("/{mentorId}/calendar")
-    public ApiResponse<MentorCalendarResponse> getMentorCalendar(@PathVariable Long mentorId,
+    @GetMapping("/{mentorId}/calendar-booking")
+    public ApiResponse<MentorCalendarResponse> getMentorCalendar(@Min(1) @PathVariable Long mentorId,
                                                                  @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
                                                                  @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to) {
         return apiResponseFactory.success(MentorCalendarResponse.from(
