@@ -1,6 +1,5 @@
 import axios from 'axios'
 import { CalendarDays, CheckCircle2 } from 'lucide-react'
-import { useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router'
 
 import { Badge } from '@/components/ui/badge'
@@ -14,34 +13,48 @@ import {
   formatTimeLabel,
   type MentorProfileViewModel
 } from '@/features/mentor-profile/mentor-profile.mapper'
+import type { MentorCalendarSlotViewModel } from '@/features/mentor-profile/mentor-calendar.mapper'
 import { useAuthStore } from '@/stores/auth-store'
 import type { ErrorResponse } from '@/types/api/common'
 import { cn } from '@/utils/cn'
 import { formatPrice } from '@/utils/format'
 
 interface BookingSidebarProps {
+  calendarSlots: MentorCalendarSlotViewModel[]
   className?: string
+  isCalendarLoading?: boolean
   mentor: MentorProfileViewModel
+  onSelectSlot: (slotId: string) => void
   selectedOfferingId?: string
+  selectedSlotId?: string
 }
 
-const BookingSidebar = ({ className, mentor, selectedOfferingId }: BookingSidebarProps) => {
+const BookingSidebar = ({
+  calendarSlots,
+  className,
+  isCalendarLoading = false,
+  mentor,
+  onSelectSlot,
+  selectedOfferingId,
+  selectedSlotId
+}: BookingSidebarProps) => {
   const location = useLocation()
   const navigate = useNavigate()
   const accessToken = useAuthStore((state) => state.accessToken)
   const currentUserQuery = useCurrentUserQuery()
   const createBookingMutation = useCreateBookingMutation()
-  const [selectedSlotIdState, setSelectedSlotId] = useState<string>()
 
   const activeOffering =
     mentor.offerings.find((offering) => offering.id === selectedOfferingId) ??
     mentor.offerings.find((offering) => offering.active) ??
     mentor.offerings[0]
-  const visibleSlots = mentor.specificDateAvailability.slice(0, 3)
-  const selectedSlotId = visibleSlots.some((slot) => slot.id === selectedSlotIdState)
-    ? selectedSlotIdState
-    : visibleSlots[0]?.id
-  const selectedSlot = visibleSlots.find((slot) => slot.id === selectedSlotId)
+  const availableSlots = calendarSlots.filter((slot) => slot.status === 'AVAILABLE')
+  const selectedSlot = availableSlots.find((slot) => slot.id === selectedSlotId)
+  const nearestSlots = availableSlots.slice(0, 3)
+  const visibleSlots =
+    selectedSlot && !nearestSlots.some((slot) => slot.id === selectedSlot.id)
+      ? [selectedSlot, ...nearestSlots.slice(0, 2)]
+      : nearestSlots
   const currentUser = currentUserQuery.data
   const isLearner = currentUser?.roles.includes('LEARNER') ?? false
   const isLoggedIn = Boolean(accessToken)
@@ -51,15 +64,16 @@ const BookingSidebar = ({ className, mentor, selectedOfferingId }: BookingSideba
     isLearner &&
     activeOffering &&
     selectedSlot &&
-    mentor.bookableMeetingType &&
+    selectedSlot.meetingType &&
     !createBookingMutation.isPending
   )
   const redirectTo = `${path.login}?redirectTo=${encodeURIComponent(`${location.pathname}${location.search}`)}`
 
   const actionHint = (() => {
     if (!activeOffering) return 'Mentor chưa có môn học đang mở.'
-    if (!visibleSlots.length) return 'Mentor chưa mở lịch theo ngày cụ thể.'
-    if (!mentor.bookableMeetingType) return 'Hình thức học này chưa hỗ trợ đặt lịch trực tiếp.'
+    if (isCalendarLoading) return 'Đang tải lịch trống của mentor.'
+    if (!visibleSlots.length) return 'Mentor chưa mở lịch trong tuần này.'
+    if (!selectedSlot?.meetingType) return 'Hình thức học này chưa hỗ trợ đặt lịch trực tiếp.'
     if (!isLoggedIn) return 'Đăng nhập bằng tài khoản học viên để gửi yêu cầu.'
     if (!isLearner && !currentUserQuery.isLoading)
       return 'Chỉ tài khoản học viên có thể gửi yêu cầu đặt lịch.'
@@ -67,16 +81,16 @@ const BookingSidebar = ({ className, mentor, selectedOfferingId }: BookingSideba
   })()
 
   const handleCreateBooking = () => {
-    if (!activeOffering || !selectedSlot || !mentor.bookableMeetingType) return
+    if (!activeOffering || !selectedSlot?.meetingType) return
 
     createBookingMutation.mutate(
       {
         mentorId: mentor.mentorId,
         mentorSubjectId: activeOffering.mentorSubjectId,
-        bookingDate: selectedSlot.bookingDate,
+        bookingDate: selectedSlot.date,
         startTime: selectedSlot.startTime,
         endTime: selectedSlot.endTime,
-        meetingType: mentor.bookableMeetingType
+        meetingType: selectedSlot.meetingType
       },
       {
         onSuccess: ({ bookingId }) => {
@@ -127,7 +141,11 @@ const BookingSidebar = ({ className, mentor, selectedOfferingId }: BookingSideba
             Lịch gần nhất
           </div>
           <div className='mt-3 space-y-2'>
-            {visibleSlots.length ? (
+            {isCalendarLoading ? (
+              <p className='rounded-xl bg-slate-50 px-3 py-3 text-xs text-slate-600'>
+                Đang tải lịch gần nhất...
+              </p>
+            ) : visibleSlots.length ? (
               visibleSlots.map((slot) => {
                 const selected = slot.id === selectedSlotId
 
@@ -141,13 +159,16 @@ const BookingSidebar = ({ className, mentor, selectedOfferingId }: BookingSideba
                         : 'border-slate-200 hover:border-slate-300'
                     )}
                     type='button'
-                    onClick={() => setSelectedSlotId(slot.id)}
+                    onClick={() => onSelectSlot(slot.id)}
                   >
                     <div className='flex justify-between gap-3'>
-                      <span className='text-ink text-sm font-bold'>{slot.dateLabel}</span>
+                      <span className='text-ink text-sm font-bold'>
+                        {formatCalendarDateLabel(slot.date)}
+                      </span>
                       <Badge className='px-2 py-0 text-[10px]' variant='outline'>
-                        {slot.meetingTypes.map(formatMeetingTypeLabel).join(' / ') ||
-                          'Đang cập nhật'}
+                        {slot.meetingType
+                          ? formatMeetingTypeLabel(slot.meetingType)
+                          : 'Đang cập nhật'}
                       </Badge>
                     </div>
                     <p className='text-muted mt-1 text-xs'>
@@ -176,8 +197,8 @@ const BookingSidebar = ({ className, mentor, selectedOfferingId }: BookingSideba
             <SummaryRow
               label='Hình thức'
               value={
-                mentor.bookableMeetingType
-                  ? formatMeetingTypeLabel(mentor.bookableMeetingType)
+                selectedSlot?.meetingType
+                  ? formatMeetingTypeLabel(selectedSlot.meetingType)
                   : 'Chưa hỗ trợ'
               }
             />
@@ -185,7 +206,7 @@ const BookingSidebar = ({ className, mentor, selectedOfferingId }: BookingSideba
               label='Khung giờ'
               value={
                 selectedSlot
-                  ? `${selectedSlot.dateLabel}, ${formatTimeLabel(selectedSlot.startTime)}-${formatTimeLabel(selectedSlot.endTime)}`
+                  ? `${formatCalendarDateLabel(selectedSlot.date)}, ${formatTimeLabel(selectedSlot.startTime)}-${formatTimeLabel(selectedSlot.endTime)}`
                   : 'Chưa chọn'
               }
             />
@@ -228,6 +249,18 @@ const BookingSidebar = ({ className, mentor, selectedOfferingId }: BookingSideba
       </CardContent>
     </Card>
   )
+}
+
+function formatCalendarDateLabel(value: string) {
+  const date = new Date(`${value}T00:00:00`)
+
+  return Number.isNaN(date.getTime())
+    ? value
+    : new Intl.DateTimeFormat('vi-VN', {
+        weekday: 'short',
+        day: '2-digit',
+        month: '2-digit'
+      }).format(date)
 }
 
 function SummaryRow({ label, value }: { label: string; value: string }) {

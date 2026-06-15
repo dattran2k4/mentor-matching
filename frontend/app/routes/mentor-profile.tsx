@@ -5,6 +5,8 @@ import {
   BookOpen,
   BriefcaseBusiness,
   CalendarDays,
+  ChevronLeft,
+  ChevronRight,
   CheckCircle2,
   GraduationCap,
   MessageSquareText,
@@ -24,7 +26,14 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { path } from '@/config/path'
+import {
+  mapMentorCalendarToViewModel,
+  resolveSelectedCalendarSlot,
+  type MentorCalendarSlotViewModel,
+  type MentorCalendarViewModel
+} from '@/features/mentor-profile/mentor-calendar.mapper'
 import { useMentorProfileQuery } from '@/hooks/queries/mentor/useMentorProfileQuery'
+import { useMentorCalendarQuery } from '@/hooks/queries/mentor/useMentorCalendarQuery'
 import {
   formatMeetingTypeLabel,
   formatTimeLabel,
@@ -45,11 +54,42 @@ const MentorProfile = () => {
     [mentorProfileQuery.data]
   )
   const [selectedOfferingIdState, setSelectedOfferingId] = useState<string>()
+  const [initialWeekStart] = useState(() => getWeekStartIso(new Date()))
+  const [requestedWeekStart, setRequestedWeekStart] = useState<string>()
+  const [selectedSlotIdState, setSelectedSlotId] = useState<string>()
+  const calendarRange = requestedWeekStart
+    ? getCalendarWeekRange(requestedWeekStart)
+    : getInitialCalendarDiscoveryRange(initialWeekStart)
+  const mentorCalendarQuery = useMentorCalendarQuery(mentorId, calendarRange.from, calendarRange.to)
+  const queriedCalendar = useMemo(
+    () =>
+      mentorCalendarQuery.data && mentor
+        ? mapMentorCalendarToViewModel(mentorCalendarQuery.data, mentor.bookableMeetingType)
+        : null,
+    [mentor, mentorCalendarQuery.data]
+  )
+  const displayWeekStart =
+    requestedWeekStart ??
+    (queriedCalendar?.slots[0] ? getWeekStartIso(queriedCalendar.slots[0].date) : initialWeekStart)
+  const calendar = useMemo(
+    () => (queriedCalendar ? getCalendarWeekView(queriedCalendar, displayWeekStart) : null),
+    [displayWeekStart, queriedCalendar]
+  )
+  const selectedSlot = calendar
+    ? resolveSelectedCalendarSlot(calendar.slots, selectedSlotIdState)
+    : null
+  const selectedSlotId = selectedSlot?.id
   const selectedOfferingId = mentor?.offerings.some(
     (offering) => offering.id === selectedOfferingIdState
   )
     ? selectedOfferingIdState
     : (mentor?.offerings.find((offering) => offering.active)?.id ?? mentor?.offerings[0]?.id)
+
+  const handleChangeWeek = (weekOffset: number) => {
+    const nextWeekStart = addDaysToIsoDate(displayWeekStart, weekOffset * 7)
+
+    setRequestedWeekStart(nextWeekStart)
+  }
 
   const notFound =
     mentorId === null ||
@@ -117,14 +157,26 @@ const MentorProfile = () => {
           />
 
           <TrustAndExperienceSection mentor={mentor} />
-          <AvailabilitySection mentor={mentor} />
+          <AvailabilitySection
+            calendar={calendar}
+            isError={mentorCalendarQuery.isError}
+            isLoading={mentorCalendarQuery.isLoading}
+            selectedSlotId={selectedSlotId}
+            weekStart={displayWeekStart}
+            onChangeWeek={handleChangeWeek}
+            onSelectSlot={setSelectedSlotId}
+          />
           <ReviewsSection mentor={mentor} />
         </main>
 
         <BookingSidebar
+          calendarSlots={calendar?.slots ?? []}
+          isCalendarLoading={mentorCalendarQuery.isLoading}
           mentor={mentor}
+          selectedSlotId={selectedSlotId}
           selectedOfferingId={selectedOfferingId}
           className='lg:col-start-2 lg:row-start-1'
+          onSelectSlot={setSelectedSlotId}
         />
       </div>
     </PageShell>
@@ -416,57 +468,110 @@ function InfoTile({ icon, lines, title }: { icon: ReactNode; lines: string[]; ti
   )
 }
 
-function AvailabilitySection({ mentor }: { mentor: MentorProfileViewModel }) {
+function AvailabilitySection({
+  calendar,
+  isError,
+  isLoading,
+  onChangeWeek,
+  onSelectSlot,
+  selectedSlotId,
+  weekStart
+}: {
+  calendar: MentorCalendarViewModel | null
+  isError: boolean
+  isLoading: boolean
+  onChangeWeek: (weekOffset: number) => void
+  onSelectSlot: (slotId: string) => void
+  selectedSlotId?: string
+  weekStart: string
+}) {
   return (
     <ContentSection
       id='availability'
       title='Khả dụng và lịch dạy'
-      subtitle='Các khung giờ mentor đang mở để học viên cân nhắc trước khi đặt.'
+      subtitle='Chọn một khung giờ còn trống để cập nhật yêu cầu đặt lịch.'
     >
-      <div className='grid gap-4 md:grid-cols-[minmax(0,1fr)_220px]'>
-        <div className='overflow-hidden rounded-xl border border-slate-200'>
-          {mentor.recurringAvailability.length ? (
-            mentor.recurringAvailability.map((window) => (
-              <div
-                key={window.id}
-                className='grid grid-cols-[100px_minmax(0,1fr)] border-b border-slate-200 last:border-b-0'
-              >
-                <div className='bg-slate-50 px-3 py-3 text-sm font-bold'>{window.dayLabel}</div>
-                <div className='px-3 py-3'>
-                  <Badge variant='info'>
-                    {formatTimeLabel(window.startTime)} - {formatTimeLabel(window.endTime)}
-                  </Badge>
-                  <span className='text-muted ml-2 text-xs'>
-                    {window.meetingTypes.map(formatMeetingTypeLabel).join(' / ')}
-                  </span>
-                </div>
-              </div>
-            ))
-          ) : (
-            <InlineEmpty text='Chưa có lịch lặp lại hằng tuần.' />
-          )}
-        </div>
-
-        <div className='rounded-xl border border-slate-200 bg-slate-50 p-4'>
-          <p className='text-primary flex items-center gap-2 text-sm font-bold'>
-            <CalendarDays size={16} /> Lịch gần nhất
-          </p>
-          {mentor.specificDateAvailability[0] ? (
-            <div className='mt-3 rounded-lg bg-white p-3'>
-              <p className='text-ink text-sm font-bold'>
-                {mentor.specificDateAvailability[0].dateLabel}
-              </p>
-              <p className='text-muted mt-1 text-xs'>
-                {formatTimeLabel(mentor.specificDateAvailability[0].startTime)} -{' '}
-                {formatTimeLabel(mentor.specificDateAvailability[0].endTime)}
-              </p>
-            </div>
-          ) : (
-            <p className='text-muted mt-3 text-xs'>Chưa có lịch theo ngày cụ thể.</p>
-          )}
-        </div>
+      <div className='flex items-center justify-between gap-3'>
+        <Button size='sm' type='button' variant='outline' onClick={() => onChangeWeek(-1)}>
+          <ChevronLeft size={16} />
+          Tuần trước
+        </Button>
+        <p className='text-ink text-center text-sm font-bold'>{formatWeekRange(weekStart)}</p>
+        <Button size='sm' type='button' variant='outline' onClick={() => onChangeWeek(1)}>
+          Tuần sau
+          <ChevronRight size={16} />
+        </Button>
       </div>
+
+      {isLoading ? (
+        <div className='mt-4 h-48 animate-pulse rounded-xl bg-slate-100' />
+      ) : isError ? (
+        <div className='mt-4'>
+          <InlineEmpty text='Không tải được lịch của mentor trong tuần này.' />
+        </div>
+      ) : calendar?.dates.length ? (
+        <div className='mt-4 grid gap-2 md:grid-cols-7'>
+          {calendar.dates.map((date) => (
+            <CalendarDayColumn
+              key={date.date}
+              date={date.date}
+              selectedSlotId={selectedSlotId}
+              slots={date.slots}
+              onSelectSlot={onSelectSlot}
+            />
+          ))}
+        </div>
+      ) : (
+        <div className='mt-4'>
+          <InlineEmpty text='Mentor chưa có khung giờ trống trong tuần này.' />
+        </div>
+      )}
     </ContentSection>
+  )
+}
+
+function CalendarDayColumn({
+  date,
+  onSelectSlot,
+  selectedSlotId,
+  slots
+}: {
+  date: string
+  onSelectSlot: (slotId: string) => void
+  selectedSlotId?: string
+  slots: MentorCalendarSlotViewModel[]
+}) {
+  return (
+    <div className='overflow-hidden rounded-xl border border-slate-200 bg-slate-50'>
+      <div className='border-b border-slate-200 bg-white px-2 py-2 text-center'>
+        <p className='text-ink text-xs font-bold'>{formatCalendarDayLabel(date)}</p>
+      </div>
+      <div className='min-h-28 space-y-2 p-2'>
+        {slots.length ? (
+          slots.map((slot) => {
+            const selected = slot.id === selectedSlotId
+
+            return (
+              <button
+                key={slot.id}
+                className={cn(
+                  'w-full rounded-lg border px-2 py-2 text-center text-xs font-semibold transition',
+                  selected
+                    ? 'border-blue-500 bg-blue-600 text-white'
+                    : 'border-blue-200 bg-blue-50 text-blue-700 hover:border-blue-400'
+                )}
+                type='button'
+                onClick={() => onSelectSlot(slot.id)}
+              >
+                {formatTimeLabel(slot.startTime)}-{formatTimeLabel(slot.endTime)}
+              </button>
+            )
+          })
+        ) : (
+          <p className='pt-3 text-center text-xs text-slate-400'>Không có lịch</p>
+        )}
+      </div>
+    </div>
   )
 }
 
@@ -529,6 +634,93 @@ function parseMentorId(value: string | undefined) {
   if (!value) return null
   const parsedValue = Number(value)
   return Number.isInteger(parsedValue) && parsedValue > 0 ? parsedValue : null
+}
+
+function getInitialCalendarDiscoveryRange(from: string) {
+  return {
+    from,
+    to: addDaysToIsoDate(from, 30)
+  }
+}
+
+function getCalendarWeekView(calendar: MentorCalendarViewModel, weekStart: string) {
+  const weekEnd = addDaysToIsoDate(weekStart, 6)
+  const weekDates = calendar.dates.filter((date) => date.date >= weekStart && date.date <= weekEnd)
+  const weekSlots = weekDates.flatMap((date) => date.slots)
+  const nearestSlotId = weekSlots.find((slot) => slot.status === 'AVAILABLE')?.id
+  const slots = weekSlots.map((slot) => ({
+    ...slot,
+    isNearestBookable: slot.id === nearestSlotId
+  }))
+
+  return {
+    ...calendar,
+    from: weekStart,
+    to: weekEnd,
+    dates: weekDates.map((date) => ({
+      ...date,
+      slots: slots.filter((slot) => slot.date === date.date)
+    })),
+    slots
+  }
+}
+
+function getCalendarWeekRange(weekStart: string) {
+  return {
+    from: weekStart,
+    to: addDaysToIsoDate(weekStart, 6)
+  }
+}
+
+function getWeekStartIso(value: Date | string) {
+  const date = typeof value === 'string' ? new Date(`${value}T00:00:00`) : new Date(value)
+  const dayOfWeek = date.getDay() === 0 ? 7 : date.getDay()
+
+  date.setDate(date.getDate() - dayOfWeek + 1)
+
+  return toIsoDate(date)
+}
+
+function addDaysToIsoDate(value: string, days: number) {
+  const date = new Date(`${value}T00:00:00`)
+
+  date.setDate(date.getDate() + days)
+
+  return toIsoDate(date)
+}
+
+function toIsoDate(date: Date) {
+  const year = date.getFullYear()
+  const month = `${date.getMonth() + 1}`.padStart(2, '0')
+  const day = `${date.getDate()}`.padStart(2, '0')
+
+  return `${year}-${month}-${day}`
+}
+
+function formatWeekRange(weekStart: string) {
+  const weekEnd = addDaysToIsoDate(weekStart, 6)
+
+  return `${formatShortDate(weekStart)} - ${formatShortDate(weekEnd)}`
+}
+
+function formatCalendarDayLabel(value: string) {
+  const date = new Date(`${value}T00:00:00`)
+
+  return new Intl.DateTimeFormat('vi-VN', {
+    weekday: 'short',
+    day: '2-digit',
+    month: '2-digit'
+  }).format(date)
+}
+
+function formatShortDate(value: string) {
+  const date = new Date(`${value}T00:00:00`)
+
+  return new Intl.DateTimeFormat('vi-VN', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric'
+  }).format(date)
 }
 
 export default MentorProfile

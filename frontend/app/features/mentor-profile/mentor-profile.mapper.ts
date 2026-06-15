@@ -3,7 +3,6 @@ import type {
   MentorAchievementDetailApiResponse,
   MentorAchievementTypeApiResponse,
   MentorApprovalStatusApiResponse,
-  MentorAvailabilityDetailApiResponse,
   MentorDetailApiResponse,
   MentorMeetingTypeApiResponse,
   MentorProficiencyLevelApiResponse,
@@ -21,24 +20,6 @@ export type MentorProfileExperienceItem = {
 export type MentorProfileEducationItem = {
   degree: string
   school: string
-}
-
-export type MentorProfileRecurringAvailability = {
-  id: string
-  startTime: string
-  endTime: string
-  dayLabel: string
-  meetingTypes: MentorMeetingTypeApiResponse[]
-}
-
-export type MentorProfileSpecificDateAvailability = {
-  id: string
-  bookingDate: string
-  startTime: string
-  endTime: string
-  dateLabel: string
-  meetingTypes: MentorMeetingTypeApiResponse[]
-  note?: string
 }
 
 export type MentorProfileOffering = {
@@ -82,8 +63,6 @@ export type MentorProfileViewModel = {
   teachingStyle: string
   achievements: string[]
   offerings: MentorProfileOffering[]
-  recurringAvailability: MentorProfileRecurringAvailability[]
-  specificDateAvailability: MentorProfileSpecificDateAvailability[]
   experience: MentorProfileExperienceItem[]
   education: MentorProfileEducationItem[]
   reviews: MentorProfileReview[]
@@ -94,7 +73,7 @@ export type MentorProfileViewModel = {
 export function mapMentorProfileToViewModel(
   bundle: MentorProfileApiBundle
 ): MentorProfileViewModel {
-  const { achievements, availabilities, detail, subjects, traits } = bundle
+  const { achievements, detail, subjects, traits } = bundle
   const meetingTypes = unique(
     [detail.meetingType].filter((value): value is MentorMeetingTypeApiResponse => Boolean(value))
   )
@@ -146,14 +125,12 @@ export function mapMentorProfileToViewModel(
     subjects: unique(subjects.map((item) => item.subjectName)),
     grades: unique(subjects.map((item) => item.gradeName)),
     meetingTypes,
-    availabilitySummary: buildAvailabilitySummary(availabilities, detail, meetingTypes),
+    availabilitySummary: buildAvailabilitySummary(detail, meetingTypes),
     teachingStyle:
       detail.teachingStyle?.trim() ||
       'Phong cách giảng dạy đang được mentor cập nhật thêm trong hồ sơ công khai.',
     achievements: buildAchievementHighlights(achievements),
     offerings,
-    recurringAvailability: buildRecurringAvailability(availabilities, meetingTypes),
-    specificDateAvailability: buildSpecificDateAvailability(availabilities, meetingTypes),
     experience: buildExperience(detail, achievements),
     education: buildEducation(detail),
     reviews: [],
@@ -245,121 +222,19 @@ function buildEducation(detail: MentorDetailApiResponse) {
   ]
 }
 
-function buildRecurringAvailability(
-  availabilities: MentorAvailabilityDetailApiResponse[],
-  meetingTypes: MentorMeetingTypeApiResponse[]
-) {
-  return availabilities
-    .filter((item) => item.availabilityType === 'RECURRING' && item.dayOfWeek !== null)
-    .sort((left, right) => {
-      if (left.dayOfWeek !== right.dayOfWeek)
-        return (left.dayOfWeek ?? 99) - (right.dayOfWeek ?? 99)
-      return left.startTime.localeCompare(right.startTime)
-    })
-    .map((item) => ({
-      id: `recurring-${item.id}`,
-      dayLabel: formatDayOfWeek(item.dayOfWeek),
-      startTime: item.startTime,
-      endTime: item.endTime,
-      meetingTypes
-    }))
-}
-
-function buildSpecificDateAvailability(
-  availabilities: MentorAvailabilityDetailApiResponse[],
-  meetingTypes: MentorMeetingTypeApiResponse[]
-) {
-  return availabilities
-    .filter(
-      (
-        item
-      ): item is MentorAvailabilityDetailApiResponse & {
-        availableDate: string
-      } => item.availabilityType === 'SPECIFIC_DATE' && Boolean(item.availableDate)
-    )
-    .sort((left, right) => {
-      if (left.availableDate !== right.availableDate) {
-        return left.availableDate.localeCompare(right.availableDate)
-      }
-
-      return left.startTime.localeCompare(right.startTime)
-    })
-    .map((item) => ({
-      id: `specific-${item.id}`,
-      bookingDate: item.availableDate,
-      dateLabel: formatDateLabel(item.availableDate),
-      startTime: item.startTime,
-      endTime: item.endTime,
-      meetingTypes
-    }))
-}
-
 function buildAvailabilitySummary(
-  availabilities: MentorAvailabilityDetailApiResponse[],
   detail: MentorDetailApiResponse,
   meetingTypes: MentorMeetingTypeApiResponse[]
 ) {
-  const recurring = availabilities
-    .filter((item) => item.availabilityType === 'RECURRING' && item.dayOfWeek !== null)
-    .sort((left, right) => {
-      if (left.dayOfWeek !== right.dayOfWeek)
-        return (left.dayOfWeek ?? 99) - (right.dayOfWeek ?? 99)
-      return left.startTime.localeCompare(right.startTime)
-    })
   const locationLabel = [detail.currentLocation.districtName, detail.currentLocation.cityName]
     .filter(Boolean)
     .join(', ')
   const meetingLabel = meetingTypes.map(formatMeetingTypeLabel).join(' / ')
 
-  if (recurring[0]) {
-    return [
-      `${formatDayOfWeek(recurring[0].dayOfWeek)} ${formatTimeLabel(recurring[0].startTime)}-${formatTimeLabel(recurring[0].endTime)}`,
-      locationLabel || meetingLabel
-    ]
-      .filter(Boolean)
-      .join(' · ')
-  }
-
-  const specific = buildSpecificDateAvailability(availabilities, meetingTypes)
-
-  if (specific[0]) {
-    return [
-      specific[0].dateLabel,
-      `${formatTimeLabel(specific[0].startTime)}-${formatTimeLabel(specific[0].endTime)}`,
-      meetingLabel
-    ]
-      .filter(Boolean)
-      .join(' · ')
-  }
-
   return (
     [locationLabel, meetingLabel].filter(Boolean).join(' · ') ||
     'Lịch dạy công khai đang được cập nhật thêm.'
   )
-}
-
-function formatDateLabel(value: string) {
-  const date = new Date(`${value}T00:00:00`)
-
-  return Number.isNaN(date.getTime())
-    ? value
-    : new Intl.DateTimeFormat('vi-VN', {
-        weekday: 'short',
-        day: '2-digit',
-        month: '2-digit'
-      }).format(date)
-}
-
-function formatDayOfWeek(dayOfWeek: number | null) {
-  if (dayOfWeek === 1) return 'Thứ 2'
-  if (dayOfWeek === 2) return 'Thứ 3'
-  if (dayOfWeek === 3) return 'Thứ 4'
-  if (dayOfWeek === 4) return 'Thứ 5'
-  if (dayOfWeek === 5) return 'Thứ 6'
-  if (dayOfWeek === 6) return 'Thứ 7'
-  if (dayOfWeek === 7) return 'Chủ nhật'
-
-  return 'Lịch định kỳ'
 }
 
 function formatAchievementSummary(item: MentorAchievementDetailApiResponse) {
