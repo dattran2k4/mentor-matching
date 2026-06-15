@@ -1,15 +1,13 @@
 import type { BookingMeetingTypeApiResponse } from '@/types/api/booking'
 import type { MentorCalendarApiResponse } from '@/types/api/mentor-calendar'
 
-export type MentorCalendarSlotStatus = 'AVAILABLE' | 'BOOKED' | 'UNAVAILABLE'
-
 export type MentorCalendarSlotViewModel = {
   id: string
   date: string
   startTime: string
   endTime: string
   meetingType: BookingMeetingTypeApiResponse | null
-  status: MentorCalendarSlotStatus
+  isBookable: boolean
   isNearestBookable: boolean
 }
 
@@ -38,13 +36,13 @@ export function mapMentorCalendarToViewModel(
         startTime: window.startTime,
         endTime: window.endTime,
         meetingType,
-        status: 'AVAILABLE',
+        isBookable: true,
         isNearestBookable: false
       }))
     )
     .sort(compareCalendarSlots)
 
-  const nearestBookableSlot = slots.find((slot) => slot.status === 'AVAILABLE')
+  const nearestBookableSlot = slots.find((slot) => slot.isBookable)
   const slotsWithNearest = slots.map((slot) => ({
     ...slot,
     isNearestBookable: slot.id === nearestBookableSlot?.id
@@ -67,9 +65,9 @@ export function resolveSelectedCalendarSlot(
   selectedSlotId?: string
 ) {
   return (
-    slots.find((slot) => slot.id === selectedSlotId && slot.status === 'AVAILABLE') ??
-    slots.find((slot) => slot.isNearestBookable && slot.status === 'AVAILABLE') ??
-    slots.find((slot) => slot.status === 'AVAILABLE') ??
+    slots.find((slot) => slot.id === selectedSlotId && slot.isBookable) ??
+    slots.find((slot) => slot.isNearestBookable && slot.isBookable) ??
+    slots.find((slot) => slot.isBookable) ??
     null
   )
 }

@@ -48,7 +48,7 @@ const BookingSidebar = ({
     mentor.offerings.find((offering) => offering.id === selectedOfferingId) ??
     mentor.offerings.find((offering) => offering.active) ??
     mentor.offerings[0]
-  const availableSlots = calendarSlots.filter((slot) => slot.status === 'AVAILABLE')
+  const availableSlots = calendarSlots.filter((slot) => slot.isBookable)
   const selectedSlot = availableSlots.find((slot) => slot.id === selectedSlotId)
   const nearestSlots = availableSlots.slice(0, 3)
   const visibleSlots =
