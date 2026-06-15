@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import com.mentormatching.modules.scheduling.application.dto.GetMentorCalendarQuery;
 import com.mentormatching.modules.scheduling.application.dto.MentorCalendarDetail;
 import com.mentormatching.modules.scheduling.application.port.in.GetMentorCalendarUseCase;
+import com.mentormatching.modules.scheduling.application.port.out.MentorAvailabilityRepositoryPort;
 import com.mentormatching.modules.scheduling.application.port.out.SchedulingMentorLookupPort;
 import com.mentormatching.shared.exception.InvalidDataException;
 import com.mentormatching.shared.exception.ResourceNotFoundException;
@@ -18,15 +19,19 @@ public class MentorCalendarQueryService implements GetMentorCalendarUseCase {
     private static final long MAX_CALENDAR_RANGE_DAYS = 31;
 
     private final SchedulingMentorLookupPort schedulingMentorLookupPort;
+    private final MentorAvailabilityRepositoryPort mentorAvailabilityRepositoryPort;
 
-    public MentorCalendarQueryService(SchedulingMentorLookupPort schedulingMentorLookupPort) {
+    public MentorCalendarQueryService(SchedulingMentorLookupPort schedulingMentorLookupPort,
+            MentorAvailabilityRepositoryPort mentorAvailabilityRepositoryPort) {
         this.schedulingMentorLookupPort = schedulingMentorLookupPort;
+        this.mentorAvailabilityRepositoryPort = mentorAvailabilityRepositoryPort;
     }
 
     @Override
     public MentorCalendarDetail getMentorCalendar(GetMentorCalendarQuery query) {
         validateQuery(query);
         ensureApprovedMentor(query.mentorId());
+        mentorAvailabilityRepositoryPort.findCalendarAvailabilities(query.mentorId(), query.from(), query.to());
         return new MentorCalendarDetail(query.mentorId(), query.from(), query.to(), List.of());
     }
 

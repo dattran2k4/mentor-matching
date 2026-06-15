@@ -3,6 +3,7 @@ package com.mentormatching.modules.scheduling.application.service;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -14,6 +15,7 @@ import org.junit.jupiter.api.Test;
 import com.mentormatching.modules.scheduling.application.dto.GetMentorCalendarQuery;
 import com.mentormatching.modules.scheduling.application.dto.MentorCalendarDetail;
 import com.mentormatching.modules.scheduling.application.dto.SchedulingMentorSnapshot;
+import com.mentormatching.modules.scheduling.application.port.out.MentorAvailabilityRepositoryPort;
 import com.mentormatching.modules.scheduling.application.port.out.SchedulingMentorLookupPort;
 import com.mentormatching.shared.exception.InvalidDataException;
 import com.mentormatching.shared.exception.ResourceNotFoundException;
@@ -21,12 +23,15 @@ import com.mentormatching.shared.exception.ResourceNotFoundException;
 class MentorCalendarQueryServiceTest {
 
     private SchedulingMentorLookupPort schedulingMentorLookupPort;
+    private MentorAvailabilityRepositoryPort mentorAvailabilityRepositoryPort;
     private MentorCalendarQueryService mentorCalendarQueryService;
 
     @BeforeEach
     void setUp() {
         schedulingMentorLookupPort = mock(SchedulingMentorLookupPort.class);
-        mentorCalendarQueryService = new MentorCalendarQueryService(schedulingMentorLookupPort);
+        mentorAvailabilityRepositoryPort = mock(MentorAvailabilityRepositoryPort.class);
+        mentorCalendarQueryService = new MentorCalendarQueryService(schedulingMentorLookupPort,
+                mentorAvailabilityRepositoryPort);
     }
 
     @Test
@@ -43,6 +48,7 @@ class MentorCalendarQueryServiceTest {
         assertEquals(from, result.from());
         assertEquals(to, result.to());
         verify(schedulingMentorLookupPort).getMentor(10L);
+        verify(mentorAvailabilityRepositoryPort).findCalendarAvailabilities(10L, from, to);
     }
 
     @Test
@@ -55,6 +61,8 @@ class MentorCalendarQueryServiceTest {
                         LocalDate.of(2026, 6, 1), LocalDate.of(2026, 6, 7))));
 
         assertEquals("Mentor profile not found", exception.getMessage());
+        verify(mentorAvailabilityRepositoryPort, never()).findCalendarAvailabilities(
+                10L, LocalDate.of(2026, 6, 1), LocalDate.of(2026, 6, 7));
     }
 
     @Test
