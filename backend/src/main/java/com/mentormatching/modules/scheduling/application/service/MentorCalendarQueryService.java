@@ -5,10 +5,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
@@ -38,8 +35,8 @@ public class MentorCalendarQueryService implements GetMentorCalendarUseCase {
     private final Clock clock;
 
     public MentorCalendarQueryService(SchedulingMentorLookupPort schedulingMentorLookupPort,
-            MentorAvailabilityRepositoryPort mentorAvailabilityRepositoryPort,
-            SchedulingBookingLookupPort schedulingBookingLookupPort, Clock clock) {
+                                      MentorAvailabilityRepositoryPort mentorAvailabilityRepositoryPort,
+                                      SchedulingBookingLookupPort schedulingBookingLookupPort, Clock clock) {
         this.schedulingMentorLookupPort = schedulingMentorLookupPort;
         this.mentorAvailabilityRepositoryPort = mentorAvailabilityRepositoryPort;
         this.schedulingBookingLookupPort = schedulingBookingLookupPort;
@@ -62,7 +59,7 @@ public class MentorCalendarQueryService implements GetMentorCalendarUseCase {
      * Dựng lịch từng ngày trong khoảng yêu cầu, bao gồm cả ngày không còn khung giờ trống.
      */
     private List<MentorCalendarDateDetail> buildCalendarDates(LocalDate from, LocalDate to,
-            List<MentorAvailability> availabilities, List<SchedulingBookingBlock> bookingBlocks) {
+                                                              List<MentorAvailability> availabilities, List<SchedulingBookingBlock> bookingBlocks) {
         LocalDateTime bookingCutoff = LocalDateTime.now(clock).truncatedTo(ChronoUnit.MINUTES).plusMinutes(1);
         Map<LocalDate, List<TimeWindow>> bookingWindowsByDate = bookingBlocks.stream()
                 .collect(Collectors.groupingBy(SchedulingBookingBlock::bookingDate,
@@ -80,8 +77,8 @@ public class MentorCalendarQueryService implements GetMentorCalendarUseCase {
      * Lấy các khung giờ rảnh của một ngày sau khi gộp availability và trừ booking.
      */
     private List<MentorCalendarWindowDetail> buildAvailableWindows(LocalDate date,
-            List<MentorAvailability> availabilities, List<TimeWindow> bookingWindows,
-            LocalDateTime bookingCutoff) {
+                                                                   List<MentorAvailability> availabilities, List<TimeWindow> bookingWindows,
+                                                                   LocalDateTime bookingCutoff) {
         if (date.isBefore(bookingCutoff.toLocalDate())) {
             return List.of();
         }
@@ -93,7 +90,7 @@ public class MentorCalendarQueryService implements GetMentorCalendarUseCase {
 
         return subtractWindows(mergeWindows(availableWindows), mergeWindows(bookingWindows)).stream()
                 .map(window -> trimPastTime(date, window, bookingCutoff))
-                .filter(window -> window != null)
+                .filter(Objects::nonNull)
                 .map(window -> new MentorCalendarWindowDetail(window.startTime(), window.endTime()))
                 .toList();
     }
@@ -137,21 +134,27 @@ public class MentorCalendarQueryService implements GetMentorCalendarUseCase {
         for (TimeWindow window : sortedWindows) {
             if (mergedWindows.isEmpty()) {
                 mergedWindows.add(window);
-                continue;
+            } else {
+                mergeOrAppendWindow(mergedWindows, window);
             }
-
-            TimeWindow previous = mergedWindows.getLast();
-            if (window.startTime().isAfter(previous.endTime())) {
-                mergedWindows.add(window);
-                continue;
-            }
-
-            LocalTime mergedEnd = window.endTime().isAfter(previous.endTime())
-                    ? window.endTime()
-                    : previous.endTime();
-            mergedWindows.set(mergedWindows.size() - 1, new TimeWindow(previous.startTime(), mergedEnd));
         }
         return mergedWindows;
+    }
+
+    /**
+     * Gộp window với phần tử cuối nếu chồng lấn, ngược lại thêm thành khoảng mới.
+     */
+    private void mergeOrAppendWindow(List<TimeWindow> mergedWindows, TimeWindow window) {
+        TimeWindow previous = mergedWindows.getLast();
+        if (window.startTime().isAfter(previous.endTime())) {
+            mergedWindows.add(window);
+            return;
+        }
+
+        LocalTime mergedEnd = window.endTime().isAfter(previous.endTime())
+                ? window.endTime()
+                : previous.endTime();
+        mergedWindows.set(mergedWindows.size() - 1, new TimeWindow(previous.startTime(), mergedEnd));
     }
 
     /**
