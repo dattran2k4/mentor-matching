@@ -1,7 +1,7 @@
 import { Navigate, Outlet, useLocation } from 'react-router'
 
 import { path } from '@/config/path'
-import { useAuthStore } from '@/store/auth-store'
+import { useAuthStore } from '@/stores/auth-store'
 
 export default function ProtectedLayout() {
   const accessToken = useAuthStore((state) => state.accessToken)

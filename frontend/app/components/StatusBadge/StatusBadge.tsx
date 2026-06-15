@@ -1,9 +1,9 @@
 import { AlertTriangle, CheckCircle2, Clock, ShieldAlert, XCircle } from 'lucide-react'
 
 import { Badge } from '@/components/ui/badge'
-import type { BookingStatus, PaymentStatus } from '@/types/booking'
-import type { MentorApprovalStatus, MentorVerificationStatus } from '@/types/mentor'
-import type { UserStatus } from '@/types/user'
+import type { BookingStatus, PaymentStatus } from '@/types/models/booking'
+import type { MentorApprovalStatus, MentorVerificationStatus } from '@/types/models/mentor'
+import type { UserStatus } from '@/types/models/user'
 import { cn } from '@/utils/cn'
 
 type StatusBadgeKind = 'booking' | 'payment' | 'approval' | 'verification' | 'user'
@@ -40,7 +40,7 @@ const statusConfigMap: Record<
 > = {
   booking: {
     PENDING: { label: 'Chờ xác nhận', tone: 'warning', icon: Clock },
-    CONFIRMED: { label: 'Đã đặt lịch', tone: 'info', icon: CheckCircle2 },
+    CONFIRMED: { label: 'Đã xác nhận', tone: 'success', icon: CheckCircle2 },
     COMPLETED: { label: 'Hoàn thành', tone: 'success', icon: CheckCircle2 },
     CANCELLED: { label: 'Đã hủy', tone: 'muted', icon: XCircle },
     REJECTED: { label: 'Bị từ chối', tone: 'danger', icon: XCircle },

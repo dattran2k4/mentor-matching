@@ -1,4 +1,4 @@
-import type { Subject } from '@/types/subject'
+import type { Subject } from '@/types/models/subject'
 
 export type SubjectPreview = Subject & {
   icon: string

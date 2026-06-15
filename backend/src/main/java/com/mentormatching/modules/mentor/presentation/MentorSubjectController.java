@@ -7,6 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -15,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.mentormatching.modules.mentor.application.dto.MentorSubjectDetail;
+import com.mentormatching.modules.mentor.application.port.in.DeleteCurrentMentorSubjectUseCase;
 import com.mentormatching.modules.mentor.application.port.in.GetCurrentMentorSubjectsUseCase;
 import com.mentormatching.modules.mentor.application.port.in.GetMentorSubjectsUseCase;
 import com.mentormatching.modules.mentor.application.port.in.UpsertCurrentMentorSubjectUseCase;
@@ -35,6 +37,7 @@ public class MentorSubjectController {
 
     private final GetCurrentMentorSubjectsUseCase getCurrentMentorSubjectsUseCase;
     private final UpsertCurrentMentorSubjectUseCase upsertCurrentMentorSubjectUseCase;
+    private final DeleteCurrentMentorSubjectUseCase deleteCurrentMentorSubjectUseCase;
     private final GetMentorSubjectsUseCase getMentorSubjectsUseCase;
     private final ApiResponseFactory apiResponseFactory;
 
@@ -56,6 +59,15 @@ public class MentorSubjectController {
         return apiResponseFactory.success(MentorSubjectDetailResponse.from(
                 upsertCurrentMentorSubjectUseCase.upsertCurrentMentorSubject(request.toCommand(principal))),
                 "Save current mentor subject successfully");
+    }
+
+    @PreAuthorize("isAuthenticated()")
+    @DeleteMapping("/me/subjects/{mentorSubjectId}")
+    public ApiResponse<Void> deleteCurrentMentorSubject(
+            @AuthenticationPrincipal AuthenticatedPrincipal principal,
+            @PathVariable Long mentorSubjectId) {
+        deleteCurrentMentorSubjectUseCase.deleteCurrentMentorSubject(principal.getId(), mentorSubjectId);
+        return apiResponseFactory.success(null, "Delete current mentor subject successfully");
     }
 
     @GetMapping("/{id}/subjects")

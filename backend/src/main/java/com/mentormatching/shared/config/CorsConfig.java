@@ -3,8 +3,8 @@ package com.mentormatching.shared.config;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
-import org.springframework.web.filter.CorsFilter;
 
 import com.mentormatching.shared.config.properties.AppCorsProperties;
 
@@ -12,7 +12,7 @@ import com.mentormatching.shared.config.properties.AppCorsProperties;
 public class CorsConfig {
 
     @Bean
-    public CorsFilter corsFilter(AppCorsProperties corsProperties) {
+    public CorsConfigurationSource corsConfigurationSource(AppCorsProperties corsProperties) {
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.setAllowedOrigins(corsProperties.allowedOrigins());
         configuration.setAllowedMethods(corsProperties.allowedMethods());
@@ -23,6 +23,6 @@ public class CorsConfig {
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
-        return new CorsFilter(source);
+        return source;
     }
 }

@@ -5,8 +5,8 @@ import type {
   MentorOfferingProficiency,
   SpecificDateAvailabilityWindow,
   WeeklyAvailabilityWindow
-} from '@/types/mentor'
-import type { BookingStatus, PaymentStatus } from '@/types/booking'
+} from '@/types/models/mentor'
+import type { BookingStatus, PaymentStatus } from '@/types/models/booking'
 
 type MentorWorkspaceAction = {
   label: string

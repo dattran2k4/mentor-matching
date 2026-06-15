@@ -9,6 +9,8 @@ public interface MentorSubjectRepositoryPort {
 
     MentorSubject save(MentorSubject mentorSubject);
 
+    void delete(MentorSubject mentorSubject);
+
     Optional<MentorSubject> findById(Long id);
 
     List<MentorSubject> findByMentorId(Long mentorId);

@@ -1,4 +1,4 @@
-import type { Booking, BookingStatus, PaymentStatus } from '@/types/booking'
+import type { Booking, BookingStatus, PaymentStatus } from '@/types/models/booking'
 
 type LearnerBookingAction = {
   label: string

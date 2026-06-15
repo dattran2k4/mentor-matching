@@ -4,15 +4,17 @@ import { Award, ShieldCheck, Sparkles } from 'lucide-react'
 import { StatusBadge } from '@/components/StatusBadge'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent } from '@/components/ui/card'
-import type { Mentor } from '@/types/mentor'
+import type { MentorProfileViewModel } from '@/features/mentor-profile/mentor-profile.mapper'
 import { cn } from '@/utils/cn'
 
 type MentorTrustBlockProps = {
-  mentor: Mentor
+  mentor: MentorProfileViewModel
   className?: string
 }
 
 export function MentorTrustBlock({ className, mentor }: MentorTrustBlockProps) {
+  const hasPublicTrustStatuses = Boolean(mentor.approvalStatus || mentor.verificationStatus)
+
   return (
     <Card className={cn('rounded-3xl', className)}>
       <CardContent className='p-6'>
@@ -25,19 +27,34 @@ export function MentorTrustBlock({ className, mentor }: MentorTrustBlockProps) {
             </p>
           </div>
           <div className='flex flex-wrap gap-2'>
-            <StatusBadge kind='approval' status={mentor.approvalStatus} />
-            <StatusBadge kind='verification' status={mentor.verificationStatus} />
+            {mentor.approvalStatus ? (
+              <StatusBadge kind='approval' status={mentor.approvalStatus} />
+            ) : null}
+            {mentor.verificationStatus ? (
+              <StatusBadge kind='verification' status={mentor.verificationStatus} />
+            ) : null}
+            {!hasPublicTrustStatuses ? (
+              <Badge variant='muted'>Endpoint public chưa trả về trạng thái trust</Badge>
+            ) : null}
           </div>
         </div>
 
         <div className='mt-5 grid gap-4 md:grid-cols-2'>
           <TrustCard
-            description='Hồ sơ công khai sau khi được đội ngũ vận hành kiểm tra nội dung giảng dạy, thông tin cơ bản và khả năng nhận lịch.'
+            description={
+              mentor.approvalStatus
+                ? 'Hồ sơ công khai sau khi được đội ngũ vận hành kiểm tra nội dung giảng dạy, thông tin cơ bản và khả năng nhận lịch.'
+                : 'Route public hiện chưa trả về approval status, nên màn hình giữ thông tin này ở trạng thái trung thực thay vì suy diễn.'
+            }
             icon={<ShieldCheck className='text-primary h-4 w-4' />}
             title='Duyệt hồ sơ mentor'
           />
           <TrustCard
-            description='Trạng thái xác minh được theo dõi riêng để làm rõ danh tính, không thay thế cho trạng thái duyệt công khai.'
+            description={
+              mentor.verificationStatus
+                ? 'Trạng thái xác minh được theo dõi riêng để làm rõ danh tính, không thay thế cho trạng thái duyệt công khai.'
+                : 'Route public hiện chưa trả về verification status, nên chỉ hiển thị phần tín hiệu có thật từ contract hiện có.'
+            }
             icon={<Award className='text-primary h-4 w-4' />}
             title='Xác minh danh tính'
           />
@@ -49,11 +66,15 @@ export function MentorTrustBlock({ className, mentor }: MentorTrustBlockProps) {
             <p className='text-ink text-sm font-semibold'>Điểm nổi bật khi ra quyết định</p>
           </div>
           <div className='mt-3 flex flex-wrap gap-2'>
-            {mentor.highlights.map((highlight) => (
-              <Badge key={highlight} variant='muted'>
-                {highlight}
-              </Badge>
-            ))}
+            {mentor.highlights.length ? (
+              mentor.highlights.map((highlight) => (
+                <Badge key={highlight} variant='muted'>
+                  {highlight}
+                </Badge>
+              ))
+            ) : (
+              <Badge variant='outline'>Mentor chưa công khai thêm điểm nổi bật</Badge>
+            )}
           </div>
         </div>
 

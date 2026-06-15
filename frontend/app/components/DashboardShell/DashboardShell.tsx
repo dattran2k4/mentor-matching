@@ -5,7 +5,7 @@ import { Link, NavLink, Outlet, useNavigate } from 'react-router'
 import { buttonVariants } from '@/components/ui/button'
 import { path } from '@/config/path'
 import type { DashboardNavItem } from '@/constants/dashboard-nav'
-import { useAuthStore } from '@/store/auth-store'
+import { useAuthStore } from '@/stores/auth-store'
 import { cn } from '@/utils/cn'
 
 type DashboardShellProps = {

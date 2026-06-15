@@ -29,6 +29,11 @@ public class MentorSubjectPersistenceAdapter implements MentorSubjectRepositoryP
     }
 
     @Override
+    public void delete(MentorSubject mentorSubject) {
+        mentorSubjectJpaRepository.delete(mentorSubjectPersistenceMapper.toEntity(mentorSubject));
+    }
+
+    @Override
     public Optional<MentorSubject> findById(Long id) {
         return mentorSubjectJpaRepository.findById(id).map(mentorSubjectPersistenceMapper::toDomain);
     }

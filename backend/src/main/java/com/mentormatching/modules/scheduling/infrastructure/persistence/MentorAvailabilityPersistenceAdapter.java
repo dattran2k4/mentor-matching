@@ -1,8 +1,10 @@
 package com.mentormatching.modules.scheduling.infrastructure.persistence;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import com.mentormatching.modules.scheduling.application.port.out.MentorAvailabilityRepositoryPort;
@@ -12,21 +14,21 @@ import com.mentormatching.modules.scheduling.infrastructure.persistence.mapper.M
 import com.mentormatching.modules.scheduling.infrastructure.persistence.repository.MentorAvailabilityJpaRepository;
 
 @Component
+@RequiredArgsConstructor
 public class MentorAvailabilityPersistenceAdapter implements MentorAvailabilityRepositoryPort {
 
     private final MentorAvailabilityJpaRepository mentorAvailabilityJpaRepository;
     private final MentorAvailabilityPersistenceMapper mentorAvailabilityPersistenceMapper;
 
-    public MentorAvailabilityPersistenceAdapter(MentorAvailabilityJpaRepository mentorAvailabilityJpaRepository,
-                                                MentorAvailabilityPersistenceMapper mentorAvailabilityPersistenceMapper) {
-        this.mentorAvailabilityJpaRepository = mentorAvailabilityJpaRepository;
-        this.mentorAvailabilityPersistenceMapper = mentorAvailabilityPersistenceMapper;
-    }
-
     @Override
     public MentorAvailability save(MentorAvailability mentorAvailability) {
         return mentorAvailabilityPersistenceMapper.toDomain(mentorAvailabilityJpaRepository.save(
                 mentorAvailabilityPersistenceMapper.toEntity(mentorAvailability)));
+    }
+
+    @Override
+    public void delete(MentorAvailability mentorAvailability) {
+        mentorAvailabilityJpaRepository.delete(mentorAvailabilityPersistenceMapper.toEntity(mentorAvailability));
     }
 
     @Override
@@ -36,7 +38,15 @@ public class MentorAvailabilityPersistenceAdapter implements MentorAvailabilityR
 
     @Override
     public List<MentorAvailability> findByMentorId(Long mentorId) {
-        return mentorAvailabilityJpaRepository.findByMentorId(mentorId).stream()
+        return mentorAvailabilityJpaRepository
+                .findByMentorIdOrderByAvailabilityTypeAscDayOfWeekAscAvailableDateAscStartTimeAsc(mentorId).stream()
+                .map(mentorAvailabilityPersistenceMapper::toDomain)
+                .toList();
+    }
+
+    @Override
+    public List<MentorAvailability> findCalendarAvailabilities(Long mentorId, LocalDate from, LocalDate to) {
+        return mentorAvailabilityJpaRepository.findCalendarAvailabilities(mentorId, from, to).stream()
                 .map(mentorAvailabilityPersistenceMapper::toDomain)
                 .toList();
     }
