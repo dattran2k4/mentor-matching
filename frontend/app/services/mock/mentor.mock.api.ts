@@ -1,6 +1,7 @@
 import { useAuthStore } from '@/stores/auth-store'
 import { getMockEmailFromToken, mockUsers } from '@/services/mock/auth.mock.api'
 import type { ApiResponse, PageResponse } from '@/types/api/common'
+import type { MentorCalendarApiResponse } from '@/types/api/mentor-calendar'
 import type {
   AdminMentorDetailApiResponse,
   AdminMentorListItemApiResponse,
@@ -369,6 +370,62 @@ function filterMentorItemsBySearch<T extends { fullName: string; headline: strin
   })
 }
 
+function normalizeDate(value: string) {
+  return new Date(`${value}T00:00:00`)
+}
+
+function toIsoDate(value: Date) {
+  const year = value.getFullYear()
+  const month = `${value.getMonth() + 1}`.padStart(2, '0')
+  const day = `${value.getDate()}`.padStart(2, '0')
+
+  return `${year}-${month}-${day}`
+}
+
+function buildMentorCalendar(
+  mentorId: number,
+  from: string,
+  to: string
+): MentorCalendarApiResponse {
+  const fromDate = normalizeDate(from)
+  const toDate = normalizeDate(to)
+  const availabilities = mentorAvailabilitiesByMentorId[mentorId] ?? []
+  const dates: MentorCalendarApiResponse['dates'] = []
+
+  for (
+    let cursor = new Date(fromDate);
+    cursor.getTime() <= toDate.getTime();
+    cursor.setDate(cursor.getDate() + 1)
+  ) {
+    const currentDate = new Date(cursor)
+    const isoDate = toIsoDate(currentDate)
+    const dayOfWeek = currentDate.getDay() === 0 ? 7 : currentDate.getDay()
+
+    const availableWindows = availabilities
+      .filter((item) => {
+        if (item.availabilityType === 'SPECIFIC_DATE') return item.availableDate === isoDate
+        return item.availabilityType === 'RECURRING' && item.dayOfWeek === dayOfWeek
+      })
+      .sort((left, right) => left.startTime.localeCompare(right.startTime))
+      .map((item) => ({
+        startTime: item.startTime,
+        endTime: item.endTime
+      }))
+
+    dates.push({
+      date: isoDate,
+      availableWindows
+    })
+  }
+
+  return {
+    mentorId,
+    from,
+    to,
+    dates
+  }
+}
+
 function filterByMeetingType<T extends { meetingType: MentorMeetingTypeApiResponse | null }>(
   items: T[],
   meetingType?: MentorMeetingTypeApiResponse
@@ -652,6 +709,19 @@ export const mockMentorApi = {
     return buildSuccessResponse(
       mentorAvailabilitiesByMentorId[mentorId] ?? [],
       'Get mentor availabilities successfully'
+    )
+  },
+
+  async getMentorCalendarBooking(
+    mentorId: number,
+    from: string,
+    to: string
+  ): Promise<ApiResponse<MentorCalendarApiResponse>> {
+    await delay()
+
+    return buildSuccessResponse(
+      buildMentorCalendar(mentorId, from, to),
+      'Get mentor calendar successfully'
     )
   },
 

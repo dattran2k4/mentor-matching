@@ -2,6 +2,7 @@ import { env } from '@/config/env'
 import http from '@/libs/http'
 import { mockMentorApi } from '@/services/mock/mentor.mock.api'
 import type { ApiResponse } from '@/types/api/common'
+import type { MentorCalendarApiResponse } from '@/types/api/mentor-calendar'
 import type {
   AdminMentorDetailApiResponse,
   AdminMentorListPageApiResponse,
@@ -44,6 +45,7 @@ const MENTOR_ENDPOINTS = {
   mentorAchievements: (mentorId: number) => `mentors/${mentorId}/achievements`,
   myVerification: 'mentors/me/verification',
   mentorAvailabilities: (mentorId: number) => `mentors/${mentorId}/availabilities`,
+  mentorCalendarBooking: (mentorId: number) => `mentors/${mentorId}/calendar-booking`,
   adminMentors: 'admin/mentors',
   adminMentorDetail: (mentorId: number) => `admin/mentors/${mentorId}`,
   adminMentorApproval: (mentorId: number) => `admin/mentors/${mentorId}/approval`,
@@ -196,6 +198,20 @@ const defaultMentorApi = {
     (
       await http.get<ApiResponse<MentorAvailabilityDetailApiResponse[]>>(
         MENTOR_ENDPOINTS.mentorAvailabilities(mentorId)
+      )
+    ).data,
+
+  getMentorCalendarBooking: async (
+    mentorId: number,
+    from: string,
+    to: string
+  ): Promise<ApiResponse<MentorCalendarApiResponse>> =>
+    (
+      await http.get<ApiResponse<MentorCalendarApiResponse>>(
+        MENTOR_ENDPOINTS.mentorCalendarBooking(mentorId),
+        {
+          params: { from, to }
+        }
       )
     ).data,
 
