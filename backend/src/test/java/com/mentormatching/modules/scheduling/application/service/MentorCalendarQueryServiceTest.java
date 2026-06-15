@@ -8,16 +8,25 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import com.mentormatching.modules.scheduling.application.dto.GetMentorCalendarQuery;
+import com.mentormatching.modules.scheduling.application.dto.MentorCalendarDateDetail;
 import com.mentormatching.modules.scheduling.application.dto.MentorCalendarDetail;
+import com.mentormatching.modules.scheduling.application.dto.MentorCalendarWindowDetail;
+import com.mentormatching.modules.scheduling.application.dto.SchedulingBookingBlock;
 import com.mentormatching.modules.scheduling.application.dto.SchedulingMentorSnapshot;
 import com.mentormatching.modules.scheduling.application.port.out.MentorAvailabilityRepositoryPort;
 import com.mentormatching.modules.scheduling.application.port.out.SchedulingBookingLookupPort;
 import com.mentormatching.modules.scheduling.application.port.out.SchedulingMentorLookupPort;
+import com.mentormatching.modules.scheduling.domain.AvailabilityType;
+import com.mentormatching.modules.scheduling.domain.MentorAvailability;
+import com.mentormatching.modules.scheduling.domain.MentorAvailabilityRestoreData;
 import com.mentormatching.shared.exception.InvalidDataException;
 import com.mentormatching.shared.exception.ResourceNotFoundException;
 
@@ -53,6 +62,52 @@ class MentorCalendarQueryServiceTest {
         verify(schedulingMentorLookupPort).getMentor(10L);
         verify(mentorAvailabilityRepositoryPort).findCalendarAvailabilities(10L, from, to);
         verify(schedulingBookingLookupPort).getScheduleBlocks(10L, from, to);
+    }
+
+    @Test
+    void getMentorCalendarMergesAvailabilitiesAndSubtractsBookingBlocks() {
+        LocalDate from = LocalDate.of(2026, 6, 15);
+        LocalDate to = LocalDate.of(2026, 6, 17);
+        when(schedulingMentorLookupPort.getMentor(10L))
+                .thenReturn(new SchedulingMentorSnapshot(10L, true));
+        when(mentorAvailabilityRepositoryPort.findCalendarAvailabilities(10L, from, to))
+                .thenReturn(List.of(
+                        availability(AvailabilityType.RECURRING, 1, null, 9, 0, 12, 0),
+                        availability(AvailabilityType.SPECIFIC_DATE, null, from, 11, 0, 14, 0),
+                        availability(AvailabilityType.RECURRING, 2, null, 8, 0, 9, 0)));
+        when(schedulingBookingLookupPort.getScheduleBlocks(10L, from, to))
+                .thenReturn(List.of(
+                        new SchedulingBookingBlock(from, LocalTime.of(10, 0), LocalTime.of(11, 0)),
+                        new SchedulingBookingBlock(from, LocalTime.of(12, 0), LocalTime.of(13, 0)),
+                        new SchedulingBookingBlock(from.plusDays(1), LocalTime.of(7, 0), LocalTime.of(8, 0))));
+
+        MentorCalendarDetail result = mentorCalendarQueryService.getMentorCalendar(
+                new GetMentorCalendarQuery(10L, from, to));
+
+        assertEquals(List.of(
+                new MentorCalendarDateDetail(from, List.of(
+                        new MentorCalendarWindowDetail(LocalTime.of(9, 0), LocalTime.of(10, 0)),
+                        new MentorCalendarWindowDetail(LocalTime.of(11, 0), LocalTime.of(12, 0)),
+                        new MentorCalendarWindowDetail(LocalTime.of(13, 0), LocalTime.of(14, 0)))),
+                new MentorCalendarDateDetail(from.plusDays(1), List.of(
+                        new MentorCalendarWindowDetail(LocalTime.of(8, 0), LocalTime.of(9, 0)))),
+                new MentorCalendarDateDetail(to, List.of())), result.dates());
+    }
+
+    @Test
+    void getMentorCalendarReturnsEmptyWindowsWhenBookingCoversAvailability() {
+        LocalDate date = LocalDate.of(2026, 6, 15);
+        when(schedulingMentorLookupPort.getMentor(10L))
+                .thenReturn(new SchedulingMentorSnapshot(10L, true));
+        when(mentorAvailabilityRepositoryPort.findCalendarAvailabilities(10L, date, date))
+                .thenReturn(List.of(availability(AvailabilityType.RECURRING, 1, null, 9, 0, 11, 0)));
+        when(schedulingBookingLookupPort.getScheduleBlocks(10L, date, date))
+                .thenReturn(List.of(new SchedulingBookingBlock(date, LocalTime.of(8, 0), LocalTime.of(12, 0))));
+
+        MentorCalendarDetail result = mentorCalendarQueryService.getMentorCalendar(
+                new GetMentorCalendarQuery(10L, date, date));
+
+        assertEquals(List.of(new MentorCalendarDateDetail(date, List.of())), result.dates());
     }
 
     @Test
@@ -122,5 +177,12 @@ class MentorCalendarQueryServiceTest {
                         LocalDate.of(2026, 6, 1), LocalDate.of(2026, 7, 2))));
 
         assertEquals("Calendar date range must not exceed 31 days", exception.getMessage());
+    }
+
+    private MentorAvailability availability(AvailabilityType type, Integer dayOfWeek, LocalDate availableDate,
+            int startHour, int startMinute, int endHour, int endMinute) {
+        return MentorAvailability.restore(new MentorAvailabilityRestoreData(100L, 10L, type, dayOfWeek,
+                availableDate, LocalTime.of(startHour, startMinute), LocalTime.of(endHour, endMinute),
+                LocalDateTime.of(2026, 6, 1, 10, 0), LocalDateTime.of(2026, 6, 1, 10, 0)));
     }
 }
