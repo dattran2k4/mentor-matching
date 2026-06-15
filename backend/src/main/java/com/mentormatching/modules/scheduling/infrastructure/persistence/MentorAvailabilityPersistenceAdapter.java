@@ -1,5 +1,6 @@
 package com.mentormatching.modules.scheduling.infrastructure.persistence;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -39,6 +40,13 @@ public class MentorAvailabilityPersistenceAdapter implements MentorAvailabilityR
     public List<MentorAvailability> findByMentorId(Long mentorId) {
         return mentorAvailabilityJpaRepository
                 .findByMentorIdOrderByAvailabilityTypeAscDayOfWeekAscAvailableDateAscStartTimeAsc(mentorId).stream()
+                .map(mentorAvailabilityPersistenceMapper::toDomain)
+                .toList();
+    }
+
+    @Override
+    public List<MentorAvailability> findCalendarAvailabilities(Long mentorId, LocalDate from, LocalDate to) {
+        return mentorAvailabilityJpaRepository.findCalendarAvailabilities(mentorId, from, to).stream()
                 .map(mentorAvailabilityPersistenceMapper::toDomain)
                 .toList();
     }

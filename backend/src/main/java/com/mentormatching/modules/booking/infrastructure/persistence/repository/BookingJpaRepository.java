@@ -21,6 +21,19 @@ public interface BookingJpaRepository extends JpaRepository<BookingJpaEntity, Lo
     List<BookingJpaEntity> findByStatus(BookingStatus status);
 
     @Query("""
+            select booking
+            from BookingJpaEntity booking
+            where booking.mentorId = :mentorId
+              and booking.bookingDate between :from and :to
+              and booking.status in :statuses
+            order by booking.bookingDate asc, booking.startTime asc
+            """)
+    List<BookingJpaEntity> findScheduleBlockingBookings(@Param("mentorId") Long mentorId,
+                                                        @Param("from") LocalDate from,
+                                                        @Param("to") LocalDate to,
+                                                        @Param("statuses") List<BookingStatus> statuses);
+
+    @Query("""
             select count(booking) > 0
             from BookingJpaEntity booking
             where booking.mentorId = :mentorId
@@ -35,4 +48,3 @@ public interface BookingJpaRepository extends JpaRepository<BookingJpaEntity, Lo
                                      @Param("endTime") LocalTime endTime,
                                      @Param("statuses") List<BookingStatus> statuses);
 }
-

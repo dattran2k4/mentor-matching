@@ -30,6 +30,9 @@ public interface BookingRepositoryPort {
 
     List<Booking> findByStatus(BookingStatus status);
 
+    List<Booking> findScheduleBlockingBookings(Long mentorId, LocalDate from, LocalDate to,
+            List<BookingStatus> statuses);
+
     boolean existsOverlappingBooking(Long mentorId, LocalDate bookingDate, LocalTime startTime, LocalTime endTime,
                                      List<BookingStatus> statuses);
 }

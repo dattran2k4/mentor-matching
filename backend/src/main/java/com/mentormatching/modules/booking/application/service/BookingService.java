@@ -9,6 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.mentormatching.modules.booking.application.dto.BookingMentorSubjectSnapshot;
 import com.mentormatching.modules.booking.application.dto.BookingPaymentSummary;
+import com.mentormatching.modules.booking.application.dto.BookingScheduleBlock;
 import com.mentormatching.modules.booking.application.dto.BookingMentorSnapshot;
 import com.mentormatching.modules.booking.application.dto.RejectBookingByMentorCommand;
 import com.mentormatching.modules.booking.application.dto.BookingUserSnapshot;
@@ -21,6 +22,7 @@ import com.mentormatching.modules.booking.application.port.in.CreateBookingUseCa
 import com.mentormatching.modules.booking.application.port.in.GetBookingPaymentSummaryUseCase;
 import com.mentormatching.modules.booking.application.port.in.GetBookingsUseCase;
 import com.mentormatching.modules.booking.application.port.in.GetMentorBookingsUseCase;
+import com.mentormatching.modules.booking.application.port.in.GetMentorScheduleBlocksUseCase;
 import com.mentormatching.modules.booking.application.port.in.GetMyBookingsUseCase;
 import com.mentormatching.modules.booking.application.port.in.RejectBookingByMentorUseCase;
 import com.mentormatching.modules.booking.application.port.out.BookingAvailabilityLookupPort;
@@ -43,7 +45,7 @@ import com.mentormatching.shared.response.PageResponse;
 @Service
 public class BookingService implements CreateBookingUseCase, GetBookingPaymentSummaryUseCase, GetBookingsUseCase,
         GetMyBookingsUseCase, GetMentorBookingsUseCase, RejectBookingByMentorUseCase,
-        CompleteBookingByMentorUseCase {
+        CompleteBookingByMentorUseCase, GetMentorScheduleBlocksUseCase {
 
     private static final List<BookingStatus> SCHEDULE_BLOCKING_STATUSES = List.of(BookingStatus.PENDING,
             BookingStatus.CONFIRMED);
@@ -119,6 +121,16 @@ public class BookingService implements CreateBookingUseCase, GetBookingPaymentSu
         // lấy mentor profile id từ user id
         BookingMentorSnapshot mentor = bookingMentorLookupPort.getMentorSnapshotByUserId(query.mentorUserId());
         return bookingRepositoryPort.findMentorBookings(mentor.mentorId(), query);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<BookingScheduleBlock> getMentorScheduleBlocks(Long mentorId, LocalDate from, LocalDate to) {
+        return bookingRepositoryPort.findScheduleBlockingBookings(mentorId, from, to,
+                        SCHEDULE_BLOCKING_STATUSES).stream()
+                .map(booking -> new BookingScheduleBlock(booking.getBookingDate(), booking.getStartTime(),
+                        booking.getEndTime()))
+                .toList();
     }
 
     @Override
