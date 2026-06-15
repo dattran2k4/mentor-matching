@@ -1,6 +1,8 @@
 package com.mentormatching.modules.scheduling.application.service;
 
+import java.time.Clock;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
@@ -33,13 +35,15 @@ public class MentorCalendarQueryService implements GetMentorCalendarUseCase {
     private final SchedulingMentorLookupPort schedulingMentorLookupPort;
     private final MentorAvailabilityRepositoryPort mentorAvailabilityRepositoryPort;
     private final SchedulingBookingLookupPort schedulingBookingLookupPort;
+    private final Clock clock;
 
     public MentorCalendarQueryService(SchedulingMentorLookupPort schedulingMentorLookupPort,
             MentorAvailabilityRepositoryPort mentorAvailabilityRepositoryPort,
-            SchedulingBookingLookupPort schedulingBookingLookupPort) {
+            SchedulingBookingLookupPort schedulingBookingLookupPort, Clock clock) {
         this.schedulingMentorLookupPort = schedulingMentorLookupPort;
         this.mentorAvailabilityRepositoryPort = mentorAvailabilityRepositoryPort;
         this.schedulingBookingLookupPort = schedulingBookingLookupPort;
+        this.clock = clock;
     }
 
     @Override
@@ -59,6 +63,7 @@ public class MentorCalendarQueryService implements GetMentorCalendarUseCase {
      */
     private List<MentorCalendarDateDetail> buildCalendarDates(LocalDate from, LocalDate to,
             List<MentorAvailability> availabilities, List<SchedulingBookingBlock> bookingBlocks) {
+        LocalDateTime bookingCutoff = LocalDateTime.now(clock).truncatedTo(ChronoUnit.MINUTES).plusMinutes(1);
         Map<LocalDate, List<TimeWindow>> bookingWindowsByDate = bookingBlocks.stream()
                 .collect(Collectors.groupingBy(SchedulingBookingBlock::bookingDate,
                         Collectors.mapping(block -> new TimeWindow(block.startTime(), block.endTime()),
@@ -66,7 +71,8 @@ public class MentorCalendarQueryService implements GetMentorCalendarUseCase {
 
         return from.datesUntil(to.plusDays(1))
                 .map(date -> new MentorCalendarDateDetail(date,
-                        buildAvailableWindows(date, availabilities, bookingWindowsByDate.getOrDefault(date, List.of()))))
+                        buildAvailableWindows(date, availabilities,
+                                bookingWindowsByDate.getOrDefault(date, List.of()), bookingCutoff)))
                 .toList();
     }
 
@@ -74,15 +80,38 @@ public class MentorCalendarQueryService implements GetMentorCalendarUseCase {
      * Lấy các khung giờ rảnh của một ngày sau khi gộp availability và trừ booking.
      */
     private List<MentorCalendarWindowDetail> buildAvailableWindows(LocalDate date,
-            List<MentorAvailability> availabilities, List<TimeWindow> bookingWindows) {
+            List<MentorAvailability> availabilities, List<TimeWindow> bookingWindows,
+            LocalDateTime bookingCutoff) {
+        if (date.isBefore(bookingCutoff.toLocalDate())) {
+            return List.of();
+        }
+
         List<TimeWindow> availableWindows = availabilities.stream()
                 .filter(availability -> appliesToDate(availability, date))
                 .map(availability -> new TimeWindow(availability.getStartTime(), availability.getEndTime()))
                 .toList();
 
         return subtractWindows(mergeWindows(availableWindows), mergeWindows(bookingWindows)).stream()
+                .map(window -> trimPastTime(date, window, bookingCutoff))
+                .filter(window -> window != null)
                 .map(window -> new MentorCalendarWindowDetail(window.startTime(), window.endTime()))
                 .toList();
+    }
+
+    /**
+     * Loại thời gian đã qua và cắt đầu window của ngày hiện tại tới phút có thể booking gần nhất.
+     */
+    private TimeWindow trimPastTime(LocalDate date, TimeWindow window, LocalDateTime bookingCutoff) {
+        if (date.isAfter(bookingCutoff.toLocalDate())) {
+            return window;
+        }
+
+        LocalTime cutoffTime = bookingCutoff.toLocalTime();
+        if (!window.endTime().isAfter(cutoffTime)) {
+            return null;
+        }
+        LocalTime startTime = window.startTime().isBefore(cutoffTime) ? cutoffTime : window.startTime();
+        return new TimeWindow(startTime, window.endTime());
     }
 
     /**

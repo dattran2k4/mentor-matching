@@ -7,9 +7,12 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.time.Clock;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.ZoneId;
 import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -32,6 +35,8 @@ import com.mentormatching.shared.exception.ResourceNotFoundException;
 
 class MentorCalendarQueryServiceTest {
 
+    private static final ZoneId TEST_ZONE = ZoneId.of("Asia/Ho_Chi_Minh");
+
     private SchedulingMentorLookupPort schedulingMentorLookupPort;
     private MentorAvailabilityRepositoryPort mentorAvailabilityRepositoryPort;
     private SchedulingBookingLookupPort schedulingBookingLookupPort;
@@ -42,8 +47,8 @@ class MentorCalendarQueryServiceTest {
         schedulingMentorLookupPort = mock(SchedulingMentorLookupPort.class);
         mentorAvailabilityRepositoryPort = mock(MentorAvailabilityRepositoryPort.class);
         schedulingBookingLookupPort = mock(SchedulingBookingLookupPort.class);
-        mentorCalendarQueryService = new MentorCalendarQueryService(schedulingMentorLookupPort,
-                mentorAvailabilityRepositoryPort, schedulingBookingLookupPort);
+        mentorCalendarQueryService = createService(Clock.fixed(
+                Instant.parse("2026-06-13T17:00:00Z"), TEST_ZONE));
     }
 
     @Test
@@ -108,6 +113,33 @@ class MentorCalendarQueryServiceTest {
                 new GetMentorCalendarQuery(10L, date, date));
 
         assertEquals(List.of(new MentorCalendarDateDetail(date, List.of())), result.dates());
+    }
+
+    @Test
+    void getMentorCalendarRemovesPastDatesAndTrimsCurrentDateWindow() {
+        LocalDate from = LocalDate.of(2026, 6, 14);
+        LocalDate today = LocalDate.of(2026, 6, 15);
+        LocalDate to = LocalDate.of(2026, 6, 16);
+        mentorCalendarQueryService = createService(Clock.fixed(
+                Instant.parse("2026-06-15T03:15:30Z"), TEST_ZONE));
+        when(schedulingMentorLookupPort.getMentor(10L))
+                .thenReturn(new SchedulingMentorSnapshot(10L, true));
+        when(mentorAvailabilityRepositoryPort.findCalendarAvailabilities(10L, from, to))
+                .thenReturn(List.of(
+                        availability(AvailabilityType.SPECIFIC_DATE, null, from, 9, 0, 12, 0),
+                        availability(AvailabilityType.SPECIFIC_DATE, null, today, 9, 0, 12, 0),
+                        availability(AvailabilityType.SPECIFIC_DATE, null, today, 8, 0, 10, 0),
+                        availability(AvailabilityType.SPECIFIC_DATE, null, to, 9, 0, 12, 0)));
+
+        MentorCalendarDetail result = mentorCalendarQueryService.getMentorCalendar(
+                new GetMentorCalendarQuery(10L, from, to));
+
+        assertEquals(List.of(
+                new MentorCalendarDateDetail(from, List.of()),
+                new MentorCalendarDateDetail(today, List.of(
+                        new MentorCalendarWindowDetail(LocalTime.of(10, 16), LocalTime.of(12, 0)))),
+                new MentorCalendarDateDetail(to, List.of(
+                        new MentorCalendarWindowDetail(LocalTime.of(9, 0), LocalTime.of(12, 0))))), result.dates());
     }
 
     @Test
@@ -184,5 +216,10 @@ class MentorCalendarQueryServiceTest {
         return MentorAvailability.restore(new MentorAvailabilityRestoreData(100L, 10L, type, dayOfWeek,
                 availableDate, LocalTime.of(startHour, startMinute), LocalTime.of(endHour, endMinute),
                 LocalDateTime.of(2026, 6, 1, 10, 0), LocalDateTime.of(2026, 6, 1, 10, 0)));
+    }
+
+    private MentorCalendarQueryService createService(Clock clock) {
+        return new MentorCalendarQueryService(schedulingMentorLookupPort, mentorAvailabilityRepositoryPort,
+                schedulingBookingLookupPort, clock);
     }
 }
