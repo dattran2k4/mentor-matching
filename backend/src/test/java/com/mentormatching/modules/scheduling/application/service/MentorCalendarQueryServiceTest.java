@@ -16,6 +16,7 @@ import com.mentormatching.modules.scheduling.application.dto.GetMentorCalendarQu
 import com.mentormatching.modules.scheduling.application.dto.MentorCalendarDetail;
 import com.mentormatching.modules.scheduling.application.dto.SchedulingMentorSnapshot;
 import com.mentormatching.modules.scheduling.application.port.out.MentorAvailabilityRepositoryPort;
+import com.mentormatching.modules.scheduling.application.port.out.SchedulingBookingLookupPort;
 import com.mentormatching.modules.scheduling.application.port.out.SchedulingMentorLookupPort;
 import com.mentormatching.shared.exception.InvalidDataException;
 import com.mentormatching.shared.exception.ResourceNotFoundException;
@@ -24,14 +25,16 @@ class MentorCalendarQueryServiceTest {
 
     private SchedulingMentorLookupPort schedulingMentorLookupPort;
     private MentorAvailabilityRepositoryPort mentorAvailabilityRepositoryPort;
+    private SchedulingBookingLookupPort schedulingBookingLookupPort;
     private MentorCalendarQueryService mentorCalendarQueryService;
 
     @BeforeEach
     void setUp() {
         schedulingMentorLookupPort = mock(SchedulingMentorLookupPort.class);
         mentorAvailabilityRepositoryPort = mock(MentorAvailabilityRepositoryPort.class);
+        schedulingBookingLookupPort = mock(SchedulingBookingLookupPort.class);
         mentorCalendarQueryService = new MentorCalendarQueryService(schedulingMentorLookupPort,
-                mentorAvailabilityRepositoryPort);
+                mentorAvailabilityRepositoryPort, schedulingBookingLookupPort);
     }
 
     @Test
@@ -49,6 +52,7 @@ class MentorCalendarQueryServiceTest {
         assertEquals(to, result.to());
         verify(schedulingMentorLookupPort).getMentor(10L);
         verify(mentorAvailabilityRepositoryPort).findCalendarAvailabilities(10L, from, to);
+        verify(schedulingBookingLookupPort).getScheduleBlocks(10L, from, to);
     }
 
     @Test
@@ -62,6 +66,8 @@ class MentorCalendarQueryServiceTest {
 
         assertEquals("Mentor profile not found", exception.getMessage());
         verify(mentorAvailabilityRepositoryPort, never()).findCalendarAvailabilities(
+                10L, LocalDate.of(2026, 6, 1), LocalDate.of(2026, 6, 7));
+        verify(schedulingBookingLookupPort, never()).getScheduleBlocks(
                 10L, LocalDate.of(2026, 6, 1), LocalDate.of(2026, 6, 7));
     }
 

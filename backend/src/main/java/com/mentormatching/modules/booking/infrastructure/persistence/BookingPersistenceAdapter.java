@@ -93,6 +93,14 @@ public class BookingPersistenceAdapter implements BookingRepositoryPort {
     }
 
     @Override
+    public List<Booking> findScheduleBlockingBookings(Long mentorId, LocalDate from, LocalDate to,
+            List<BookingStatus> statuses) {
+        return bookingJpaRepository.findScheduleBlockingBookings(mentorId, from, to, statuses).stream()
+                .map(bookingPersistenceMapper::toDomain)
+                .toList();
+    }
+
+    @Override
     public boolean existsOverlappingBooking(Long mentorId, LocalDate bookingDate, LocalTime startTime,
                                             LocalTime endTime, List<BookingStatus> statuses) {
         return bookingJpaRepository.existsOverlappingBooking(mentorId, bookingDate, startTime, endTime, statuses);

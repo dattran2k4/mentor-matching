@@ -11,12 +11,14 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.List;
 import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import com.mentormatching.modules.booking.application.dto.BookingMentorSnapshot;
+import com.mentormatching.modules.booking.application.dto.BookingScheduleBlock;
 import com.mentormatching.modules.booking.application.dto.RejectBookingByMentorCommand;
 import com.mentormatching.modules.booking.application.port.out.BookingAvailabilityLookupPort;
 import com.mentormatching.modules.booking.application.port.out.BookingMentorLookupPort;
@@ -188,6 +190,24 @@ class BookingServiceTest {
 
         assertEquals("Booking can only be completed after the session end time", exception.getMessage());
         verify(bookingRepositoryPort, never()).save(booking);
+    }
+
+    @Test
+    void getMentorScheduleBlocksReturnsPendingAndConfirmedBookingWindows() {
+        LocalDate from = LocalDate.of(2026, 6, 15);
+        LocalDate to = LocalDate.of(2026, 6, 21);
+        Booking pending = pendingBooking(10L);
+        Booking confirmed = confirmedFutureBooking(10L);
+        when(bookingRepositoryPort.findScheduleBlockingBookings(10L, from, to,
+                List.of(BookingStatus.PENDING, BookingStatus.CONFIRMED)))
+                .thenReturn(List.of(pending, confirmed));
+
+        List<BookingScheduleBlock> result = bookingService.getMentorScheduleBlocks(10L, from, to);
+
+        assertEquals(List.of(
+                new BookingScheduleBlock(pending.getBookingDate(), pending.getStartTime(), pending.getEndTime()),
+                new BookingScheduleBlock(confirmed.getBookingDate(), confirmed.getStartTime(),
+                        confirmed.getEndTime())), result);
     }
 
     private Booking pendingBooking(Long mentorId) {

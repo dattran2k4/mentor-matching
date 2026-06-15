@@ -9,6 +9,7 @@ import com.mentormatching.modules.scheduling.application.dto.GetMentorCalendarQu
 import com.mentormatching.modules.scheduling.application.dto.MentorCalendarDetail;
 import com.mentormatching.modules.scheduling.application.port.in.GetMentorCalendarUseCase;
 import com.mentormatching.modules.scheduling.application.port.out.MentorAvailabilityRepositoryPort;
+import com.mentormatching.modules.scheduling.application.port.out.SchedulingBookingLookupPort;
 import com.mentormatching.modules.scheduling.application.port.out.SchedulingMentorLookupPort;
 import com.mentormatching.shared.exception.InvalidDataException;
 import com.mentormatching.shared.exception.ResourceNotFoundException;
@@ -20,11 +21,14 @@ public class MentorCalendarQueryService implements GetMentorCalendarUseCase {
 
     private final SchedulingMentorLookupPort schedulingMentorLookupPort;
     private final MentorAvailabilityRepositoryPort mentorAvailabilityRepositoryPort;
+    private final SchedulingBookingLookupPort schedulingBookingLookupPort;
 
     public MentorCalendarQueryService(SchedulingMentorLookupPort schedulingMentorLookupPort,
-            MentorAvailabilityRepositoryPort mentorAvailabilityRepositoryPort) {
+            MentorAvailabilityRepositoryPort mentorAvailabilityRepositoryPort,
+            SchedulingBookingLookupPort schedulingBookingLookupPort) {
         this.schedulingMentorLookupPort = schedulingMentorLookupPort;
         this.mentorAvailabilityRepositoryPort = mentorAvailabilityRepositoryPort;
+        this.schedulingBookingLookupPort = schedulingBookingLookupPort;
     }
 
     @Override
@@ -32,6 +36,7 @@ public class MentorCalendarQueryService implements GetMentorCalendarUseCase {
         validateQuery(query);
         ensureApprovedMentor(query.mentorId());
         mentorAvailabilityRepositoryPort.findCalendarAvailabilities(query.mentorId(), query.from(), query.to());
+        schedulingBookingLookupPort.getScheduleBlocks(query.mentorId(), query.from(), query.to());
         return new MentorCalendarDetail(query.mentorId(), query.from(), query.to(), List.of());
     }
 
