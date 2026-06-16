@@ -78,9 +78,11 @@ Or with a profile:
 
 ```bash
 SPRING_PROFILES_ACTIVE=dev ./mvnw spring-boot:run
-SPRING_PROFILES_ACTIVE=test ./mvnw spring-boot:run
 SPRING_PROFILES_ACTIVE=prod ./mvnw spring-boot:run
 ```
+
+`test` is reserved for automated tests through `./mvnw test` and
+`@ActiveProfiles("test")`.
 
 ## Run Tests
 

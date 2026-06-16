@@ -36,7 +36,8 @@ export const mentorNavItems: DashboardNavItem[] = [
   { label: 'Lịch dạy', to: path.mentorPanel.schedule, icon: Calendar },
   { label: 'Học viên', to: path.mentorPanel.students, icon: GraduationCap },
   { label: 'Thu nhập', to: path.mentorPanel.earnings, icon: DollarSign },
-  { label: 'Hồ sơ mentor', to: path.mentorPanel.profile, icon: BookOpen }
+  { label: 'Hồ sơ mentor', to: path.mentorPanel.profile, icon: BookOpen },
+  { label: 'Xác thực danh tính', to: path.mentorPanel.verification, icon: Shield }
 ]
 
 export const adminNavItems: DashboardNavItem[] = [

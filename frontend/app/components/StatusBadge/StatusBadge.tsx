@@ -40,7 +40,7 @@ const statusConfigMap: Record<
 > = {
   booking: {
     PENDING: { label: 'Chờ xác nhận', tone: 'warning', icon: Clock },
-    CONFIRMED: { label: 'Đã đặt lịch', tone: 'info', icon: CheckCircle2 },
+    CONFIRMED: { label: 'Đã xác nhận', tone: 'success', icon: CheckCircle2 },
     COMPLETED: { label: 'Hoàn thành', tone: 'success', icon: CheckCircle2 },
     CANCELLED: { label: 'Đã hủy', tone: 'muted', icon: XCircle },
     REJECTED: { label: 'Bị từ chối', tone: 'danger', icon: XCircle },

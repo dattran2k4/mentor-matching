@@ -4,14 +4,19 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.mentormatching.modules.payment.application.dto.PaymentDetail;
 import com.mentormatching.modules.payment.application.dto.PaymentResult;
 import com.mentormatching.modules.payment.application.port.in.CreatePaymentUseCase;
+import com.mentormatching.modules.payment.application.port.in.GetPaymentDetailUseCase;
 import com.mentormatching.modules.payment.presentation.dto.request.CreatePaymentRequest;
+import com.mentormatching.modules.payment.presentation.dto.response.PaymentDetailResponse;
 import com.mentormatching.modules.payment.presentation.dto.response.PaymentResponse;
 import com.mentormatching.shared.response.ApiResponse;
 import com.mentormatching.shared.response.ApiResponseFactory;
@@ -26,6 +31,7 @@ import jakarta.validation.Valid;
 public class PaymentController {
 
     private final CreatePaymentUseCase createPaymentUseCase;
+    private final GetPaymentDetailUseCase getPaymentDetailUseCase;
     private final ApiResponseFactory apiResponseFactory;
 
     @PostMapping
@@ -35,5 +41,14 @@ public class PaymentController {
         log.info("Received request to create payment for userId {}", principal.getId());
         PaymentResult payment = createPaymentUseCase.createPayment(request.toCommand(principal));
         return apiResponseFactory.created(PaymentResponse.from(payment), "Create payment successfully");
+    }
+
+    @GetMapping("/{paymentId}")
+    @PreAuthorize("isAuthenticated()")
+    public ApiResponse<PaymentDetailResponse> getPaymentDetail(
+            @AuthenticationPrincipal AuthenticatedPrincipal principal,
+            @PathVariable Long paymentId) {
+        PaymentDetail payment = getPaymentDetailUseCase.getPaymentDetail(principal.getId(), paymentId);
+        return apiResponseFactory.success(PaymentDetailResponse.from(payment), "Get payment detail successfully");
     }
 }

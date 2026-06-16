@@ -143,14 +143,16 @@ public class MentorQueryService implements GetMentorSummaryUseCase, GetMentorSub
     public MentorSummary getMentorSummary(Long mentorId) {
         MentorProfile mentor = mentorProfileRepositoryPort.findById(mentorId)
                 .orElseThrow(() -> new ResourceNotFoundException("Mentor profile not found"));
-        return new MentorSummary(mentor.getId(), mentor.getUserId(), mentor.getMeetingType());
+        return new MentorSummary(mentor.getId(), mentor.getUserId(), mentor.getMeetingType(),
+                mentor.getApprovalStatus());
     }
 
     @Override
     public MentorSummary getMentorSummaryByUserId(Long userId) {
         MentorProfile mentor = mentorProfileRepositoryPort.findByUserId(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("Mentor profile not found"));
-        return new MentorSummary(mentor.getId(), mentor.getUserId(), mentor.getMeetingType());
+        return new MentorSummary(mentor.getId(), mentor.getUserId(), mentor.getMeetingType(),
+                mentor.getApprovalStatus());
     }
 
     @Override

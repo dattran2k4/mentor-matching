@@ -2,10 +2,12 @@ import { type RouteConfig, index, layout, route } from '@react-router/dev/routes
 
 export default [
   // Public marketing site
-  layout('layouts/MainLayout.tsx', [
-    index('routes/HomeFesba.tsx'),
-    route('discover', 'routes/Discover.tsx'),
-    route('mentor/:id', 'routes/MentorProfile.tsx')
+  layout('layouts/main-layout.tsx', [
+    index('routes/home.tsx'),
+    route('discover', 'routes/discover.tsx'),
+    route('mentor-profile/:id', 'routes/mentor-profile.tsx'),
+    route('payment/success', 'routes/payment/success.tsx'),
+    route('payment/cancel', 'routes/payment/cancel.tsx')
   ]),
 
   // User dashboard — /user/*
@@ -19,14 +21,15 @@ export default [
     ])
   ]),
 
-  // Mentor dashboard — /mentor-panel/* (avoids /mentor/:id public profile)
-  route('mentor-panel', 'routes/mentor-role-layout.tsx', [
+  // Mentor dashboard — /mentor/*
+  route('mentor', 'routes/mentor-role-layout.tsx', [
     layout('layouts/mentor-layout.tsx', [
-      index('routes/mentor-panel/dashboard.tsx'),
-      route('schedule', 'routes/mentor-panel/schedule.tsx'),
-      route('students', 'routes/mentor-panel/students.tsx'),
-      route('earnings', 'routes/mentor-panel/earnings.tsx'),
-      route('profile', 'routes/mentor-panel/profile.tsx')
+      index('routes/mentor/dashboard.tsx'),
+      route('schedule', 'routes/mentor/schedule.tsx'),
+      route('students', 'routes/mentor/students.tsx'),
+      route('earnings', 'routes/mentor/earnings.tsx'),
+      route('profile', 'routes/mentor/profile.tsx'),
+      route('verification', 'routes/mentor/verification.tsx')
     ])
   ]),
 
@@ -43,6 +46,5 @@ export default [
 
   // Auth & template routes
   layout('routes/guest-layout.tsx', [route('login', 'routes/login.tsx')]),
-  route('forbidden', 'routes/forbidden.tsx'),
-  layout('routes/protected-layout.tsx', [route('old-home', 'routes/home.tsx')])
+  route('forbidden', 'routes/forbidden.tsx')
 ] satisfies RouteConfig

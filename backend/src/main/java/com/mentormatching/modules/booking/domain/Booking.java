@@ -87,6 +87,35 @@ public class Booking {
         touch();
     }
 
+    public void reject(Long mentorUserId, String cancelReason) {
+        if (status != BookingStatus.PENDING) {
+            throw new InvalidDataException("Only pending booking can be rejected");
+        }
+        if (mentorUserId == null) {
+            throw new InvalidDataException("Mentor user id is required when rejecting booking");
+        }
+        if (cancelReason == null || cancelReason.isBlank()) {
+            throw new InvalidDataException("Cancel reason is required when rejecting booking");
+        }
+        this.status = BookingStatus.REJECTED;
+        this.cancelledBy = mentorUserId;
+        this.cancelReason = cancelReason.trim();
+        touch();
+    }
+
+    public void complete(LocalDateTime currentTime) {
+        requireNotNull(currentTime, "Current time is required when completing booking");
+        if (status != BookingStatus.CONFIRMED) {
+            throw new InvalidDataException("Only confirmed booking can be completed");
+        }
+        LocalDateTime bookingEndAt = LocalDateTime.of(bookingDate, endTime);
+        if (!currentTime.isAfter(bookingEndAt)) {
+            throw new InvalidDataException("Booking can only be completed after the session end time");
+        }
+        this.status = BookingStatus.COMPLETED;
+        touch();
+    }
+
     public Long getId() {
         return id;
     }

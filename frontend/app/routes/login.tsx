@@ -1,16 +1,17 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { motion } from 'framer-motion'
-import { Mail, Lock, ArrowLeft, ChevronRight, Sparkles } from 'lucide-react'
+import { Mail, Lock, ArrowLeft, ChevronRight } from 'lucide-react'
 import { useForm } from 'react-hook-form'
 import { Link, useNavigate, useSearchParams } from 'react-router'
 import axios from 'axios'
 
+import { BrandLogo } from '@/components/BrandLogo'
 import { Button } from '@/components/Button'
 import { path } from '@/config/path'
 import { getCurrentUserQueryOptions } from '@/hooks/queries/auth/useCurrentUserQuery'
 import { useLoginMutation } from '@/hooks/queries/auth/useLoginMutation'
-import { queryClient } from '@/lib/query-client'
-import { loginSchema, type LoginFormValues } from '@/schemas/auth'
+import { queryClient } from '@/libs/query-client'
+import { loginSchema, type LoginFormValues } from '@/schemas/auth.schema'
 import type { ErrorResponse } from '@/types/api/common'
 import { getDashboardPath } from '@/utils/get-dashboard-path'
 import { isAxiosUnauthorizedError } from '@/utils/http-error'
@@ -78,7 +79,7 @@ export default function LoginPage() {
             backgroundPosition: ['0% 0%', '100% 100%'],
             scale: [1, 1.1, 1]
           }}
-          className='absolute inset-0 z-0 bg-[radial-gradient(circle_at_top_right,var(--color-primary)_0%,transparent_40%),radial-gradient(circle_at_bottom_left,#0ea5e9_0%,transparent_40%),linear-gradient(135deg,#1e1b4b_0%,#312e81_100%)]'
+          className='absolute inset-0 z-0 bg-[radial-gradient(circle_at_top_right,rgba(37,99,235,0.28)_0%,transparent_42%),radial-gradient(circle_at_bottom_left,rgba(14,165,233,0.22)_0%,transparent_40%),linear-gradient(135deg,#0f172a_0%,#172554_52%,#1d4ed8_100%)]'
           initial={{ scale: 1 }}
           transition={{ duration: 20, repeat: Infinity, repeatType: 'reverse', ease: 'easeInOut' }}
         />
@@ -90,24 +91,23 @@ export default function LoginPage() {
         />
 
         <div className='relative z-20 flex h-full flex-col justify-between p-12 text-white'>
-          <Link className='flex items-center gap-2 text-xl font-bold tracking-tight' to='/'>
-            <div className='text-primary flex h-10 w-10 items-center justify-center rounded-xl bg-white'>
-              <Sparkles className='h-6 w-6' />
-            </div>
-            <span>Mentor Matching</span>
-          </Link>
+          <BrandLogo
+            className='w-fit'
+            markClassName='rounded-2xl bg-white/98 shadow-lg ring-white/30'
+            textClassName='text-white! group-hover:text-white!'
+          />
 
           <motion.div
             animate={{ opacity: 1, y: 0 }}
             initial={{ opacity: 0, y: 20 }}
             transition={{ delay: 0.5 }}
           >
-            <h2 className='font-display mb-6 text-5xl leading-tight font-bold'>
-              Nâng tầm kỹ năng <br /> cùng đội ngũ Mentor tài năng.
+            <h2 className='font-display mb-6 text-5xl leading-tight font-bold text-white'>
+              Tìm người dạy phù hợp, <br /> học cho dễ vào hơn.
             </h2>
-            <p className='max-w-md text-lg text-white/80'>
-              Hàng ngàn sinh viên đã tìm thấy người thầy của mình. Hãy bắt đầu hành trình phát triển
-              bản thân ngay hôm nay.
+            <p className='max-w-md text-lg leading-relaxed text-white/80'>
+              Chọn mentor theo môn học, cách dạy và lịch học phù hợp với bạn. Mọi thứ gọn gàng, dễ
+              xem và dễ bắt đầu.
             </p>
           </motion.div>
 
