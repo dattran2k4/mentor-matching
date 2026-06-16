@@ -7,16 +7,20 @@ import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
+
 import com.mentormatching.modules.booking.domain.Booking;
 import com.mentormatching.modules.booking.domain.BookingStatus;
 import com.mentormatching.modules.review.application.dto.CreateReviewCommand;
 import com.mentormatching.modules.review.application.dto.MentorRatingSummary;
 import com.mentormatching.modules.review.application.dto.MentorReviewItem;
 import com.mentormatching.modules.review.application.dto.ReviewDetail;
+import com.mentormatching.modules.review.application.dto.UpdateReviewCommand;
 import com.mentormatching.modules.review.application.port.in.CalculateMentorRatingSummaryUseCase;
 import com.mentormatching.modules.review.application.port.in.CreateReviewUseCase;
 import com.mentormatching.modules.review.application.port.in.GetMentorReviewsUseCase;
 import com.mentormatching.modules.review.application.port.in.GetReviewDetailUseCase;
+import com.mentormatching.modules.review.application.port.in.UpdateReviewUseCase;
 import com.mentormatching.modules.review.application.port.out.ReviewBookingLookupPort;
 import com.mentormatching.modules.review.application.port.out.ReviewMentorLookupPort;
 import com.mentormatching.modules.review.application.port.out.ReviewRepositoryPort;
@@ -27,7 +31,7 @@ import com.mentormatching.shared.exception.ResourceNotFoundException;
 import com.mentormatching.shared.response.PageResponse;
 
 @Service
-public class ReviewService implements CreateReviewUseCase, GetReviewDetailUseCase, GetMentorReviewsUseCase, CalculateMentorRatingSummaryUseCase {
+public class ReviewService implements CreateReviewUseCase, GetReviewDetailUseCase, GetMentorReviewsUseCase, CalculateMentorRatingSummaryUseCase, UpdateReviewUseCase {
 
     private final ReviewRepositoryPort reviewRepositoryPort;
     private final ReviewBookingLookupPort reviewBookingLookupPort;
@@ -149,5 +153,23 @@ public class ReviewService implements CreateReviewUseCase, GetReviewDetailUseCas
         }
 
         return new MentorRatingSummary(averageRating, totalReviews, distribution);
+    }
+
+    @Override
+    @Transactional
+    public void updateReview(UpdateReviewCommand command) {
+        Review review = reviewRepositoryPort.findById(command.reviewId())
+                .orElseThrow(() -> new ResourceNotFoundException("Review not found"));
+
+        if (!review.getStudentUserId().equals(command.studentUserId())) {
+            throw new InvalidDataException("You are not authorized to update this review");
+        }
+
+        if (review.getCreatedAt().plusDays(30).isBefore(LocalDateTime.now())) {
+            throw new InvalidDataException("Reviews can only be updated within 30 days of creation");
+        }
+
+        review.update(command.rating(), command.comment());
+        reviewRepositoryPort.save(review);
     }
 }

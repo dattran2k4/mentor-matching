@@ -11,6 +11,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -20,7 +21,9 @@ import com.mentormatching.modules.review.application.port.in.CalculateMentorRati
 import com.mentormatching.modules.review.application.port.in.CreateReviewUseCase;
 import com.mentormatching.modules.review.application.port.in.GetMentorReviewsUseCase;
 import com.mentormatching.modules.review.application.port.in.GetReviewDetailUseCase;
+import com.mentormatching.modules.review.application.port.in.UpdateReviewUseCase;
 import com.mentormatching.modules.review.presentation.dto.request.CreateReviewRequest;
+import com.mentormatching.modules.review.presentation.dto.request.UpdateReviewRequest;
 import com.mentormatching.modules.review.presentation.dto.response.CreateReviewResponse;
 import com.mentormatching.modules.review.presentation.dto.response.MentorRatingSummaryResponse;
 import com.mentormatching.modules.review.presentation.dto.response.MentorReviewResponse;
@@ -45,6 +48,7 @@ public class ReviewController {
     private final GetReviewDetailUseCase getReviewDetailUseCase;
     private final GetMentorReviewsUseCase getMentorReviewsUseCase;
     private final CalculateMentorRatingSummaryUseCase calculateMentorRatingSummaryUseCase;
+    private final UpdateReviewUseCase updateReviewUseCase;
     private final ApiResponseFactory apiResponseFactory;
 
     @PostMapping
@@ -77,5 +81,14 @@ public class ReviewController {
         MentorRatingSummaryResponse summary = MentorRatingSummaryResponse.from(
                 calculateMentorRatingSummaryUseCase.calculateMentorRatingSummary(mentorId));
         return apiResponseFactory.success(summary, "Get mentor rating summary successfully");
+    }
+
+    @PutMapping("/{id}")
+    @PreAuthorize("isAuthenticated()")
+    public ApiResponse<Void> updateReview(@AuthenticationPrincipal AuthenticatedPrincipal principal,
+                                          @PathVariable Long id,
+                                          @Valid @RequestBody UpdateReviewRequest request) {
+        updateReviewUseCase.updateReview(request.toCommand(id, principal));
+        return apiResponseFactory.success(null, "Update review successfully");
     }
 }
