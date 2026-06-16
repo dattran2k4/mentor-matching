@@ -15,6 +15,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -24,6 +25,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.mentormatching.modules.mentor.application.dto.GetMentorsQuery;
 import com.mentormatching.modules.mentor.application.dto.MentorDetail;
 import com.mentormatching.modules.mentor.application.dto.MentorListItem;
+import com.mentormatching.modules.mentor.application.port.in.CreateCurrentMentorUseCase;
 import com.mentormatching.modules.mentor.application.port.in.GetCurrentMentorUseCase;
 import com.mentormatching.modules.mentor.application.port.in.GetMentorDetailUseCase;
 import com.mentormatching.modules.mentor.application.port.in.GetMentorsUseCase;
@@ -50,11 +52,21 @@ import jakarta.validation.constraints.Min;
 @RequestMapping("/api/v1/mentors")
 public class MentorController {
 
+    private final CreateCurrentMentorUseCase createCurrentMentorUseCase;
     private final GetCurrentMentorUseCase getCurrentMentorUseCase;
     private final UpdateCurrentMentorUseCase updateCurrentMentorUseCase;
     private final GetMentorsUseCase getMentorsUseCase;
     private final GetMentorDetailUseCase getMentorDetailUseCase;
     private final ApiResponseFactory apiResponseFactory;
+
+    @PreAuthorize("isAuthenticated()")
+    @PostMapping("/me")
+    public ApiResponse<CurrentMentorResponse> createCurrentMentor(
+            @AuthenticationPrincipal AuthenticatedPrincipal principal,
+            @Valid @RequestBody UpdateCurrentMentorRequest request) {
+        return apiResponseFactory.success(CurrentMentorResponse.from(createCurrentMentorUseCase.createCurrentMentor(
+                request.toCommand(principal))), "Create mentor profile successfully");
+    }
 
     @PreAuthorize("isAuthenticated()")
     @GetMapping("/me")

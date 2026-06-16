@@ -52,6 +52,19 @@ public class MentorProfile {
         this.updatedAt = data.updatedAt();
     }
 
+    public static MentorProfile create(Long userId, String avatarUrl, Gender gender, Long hometownCityId,
+                                       Long currentDistrictId, String headline, String introduction,
+                                       String teachingStyle, Integer experienceYears, String currentPosition,
+                                       String workplace, String education, String major, MeetingType meetingType) {
+        LocalDateTime now = LocalDateTime.now();
+        MentorProfile mentorProfile = new MentorProfile(new MentorProfileRestoreData(null, userId, avatarUrl, gender,
+                hometownCityId, currentDistrictId, headline, introduction, teachingStyle, experienceYears,
+                currentPosition, workplace, education, major, meetingType, MentorApprovalStatus.PENDING, null, null,
+                null, now, now));
+        mentorProfile.validateExperienceYears(experienceYears);
+        return mentorProfile;
+    }
+
     public static MentorProfile restore(MentorProfileRestoreData data) {
         return new MentorProfile(data);
     }
