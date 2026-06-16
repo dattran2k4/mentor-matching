@@ -87,7 +87,7 @@ const BookingSidebar = ({
     if (!isLoggedIn) return 'Đăng nhập bằng tài khoản học viên để gửi yêu cầu.'
     if (!isLearner && !currentUserQuery.isLoading)
       return 'Chỉ tài khoản học viên có thể gửi yêu cầu đặt lịch.'
-    return 'Bạn chỉ thanh toán sau khi mentor xác nhận yêu cầu.'
+    return null
   })()
 
   const handleCreateBooking = () => {
@@ -252,10 +252,12 @@ const BookingSidebar = ({
           </Button>
         )}
 
-        <p className='text-muted mt-3 flex items-start gap-2 text-xs leading-relaxed'>
-          <CheckCircle2 className='mt-0.5 shrink-0 text-emerald-600' size={14} />
-          {actionHint}
-        </p>
+        {actionHint ? (
+          <p className='text-muted mt-3 flex items-start gap-2 text-xs leading-relaxed'>
+            <CheckCircle2 className='mt-0.5 shrink-0 text-emerald-600' size={14} />
+            {actionHint}
+          </p>
+        ) : null}
       </CardContent>
     </Card>
   )
