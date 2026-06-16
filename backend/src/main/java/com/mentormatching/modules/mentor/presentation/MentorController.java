@@ -26,6 +26,7 @@ import com.mentormatching.modules.mentor.application.dto.GetMentorsQuery;
 import com.mentormatching.modules.mentor.application.dto.MentorDetail;
 import com.mentormatching.modules.mentor.application.dto.MentorListItem;
 import com.mentormatching.modules.mentor.application.port.in.CreateCurrentMentorUseCase;
+import com.mentormatching.modules.mentor.application.port.in.GetCurrentMentorOnboardingStatusUseCase;
 import com.mentormatching.modules.mentor.application.port.in.GetCurrentMentorUseCase;
 import com.mentormatching.modules.mentor.application.port.in.GetMentorDetailUseCase;
 import com.mentormatching.modules.mentor.application.port.in.GetMentorsUseCase;
@@ -33,6 +34,7 @@ import com.mentormatching.modules.mentor.application.port.in.UpdateCurrentMentor
 import com.mentormatching.modules.mentor.domain.Gender;
 import com.mentormatching.modules.mentor.domain.MeetingType;
 import com.mentormatching.modules.mentor.presentation.dto.request.UpdateCurrentMentorRequest;
+import com.mentormatching.modules.mentor.presentation.dto.response.CurrentMentorOnboardingStatusResponse;
 import com.mentormatching.modules.mentor.presentation.dto.response.CurrentMentorResponse;
 import com.mentormatching.modules.mentor.presentation.dto.response.MentorDetailResponse;
 import com.mentormatching.modules.mentor.presentation.dto.response.MentorListItemResponse;
@@ -53,6 +55,7 @@ import jakarta.validation.constraints.Min;
 public class MentorController {
 
     private final CreateCurrentMentorUseCase createCurrentMentorUseCase;
+    private final GetCurrentMentorOnboardingStatusUseCase getCurrentMentorOnboardingStatusUseCase;
     private final GetCurrentMentorUseCase getCurrentMentorUseCase;
     private final UpdateCurrentMentorUseCase updateCurrentMentorUseCase;
     private final GetMentorsUseCase getMentorsUseCase;
@@ -74,6 +77,15 @@ public class MentorController {
             @AuthenticationPrincipal AuthenticatedPrincipal principal) {
         return apiResponseFactory.success(CurrentMentorResponse.from(getCurrentMentorUseCase.getCurrentMentor(
                 principal.getId())), "Get current mentor profile successfully");
+    }
+
+    @PreAuthorize("isAuthenticated()")
+    @GetMapping("/me/onboarding-status")
+    public ApiResponse<CurrentMentorOnboardingStatusResponse> getCurrentMentorOnboardingStatus(
+            @AuthenticationPrincipal AuthenticatedPrincipal principal) {
+        return apiResponseFactory.success(CurrentMentorOnboardingStatusResponse.from(
+                getCurrentMentorOnboardingStatusUseCase.getCurrentMentorOnboardingStatus(principal.getId())),
+                "Get current mentor onboarding status successfully");
     }
 
     @PreAuthorize("isAuthenticated()")
