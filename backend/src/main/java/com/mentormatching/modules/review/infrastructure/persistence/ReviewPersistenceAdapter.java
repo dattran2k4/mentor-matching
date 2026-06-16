@@ -68,4 +68,9 @@ public class ReviewPersistenceAdapter implements ReviewRepositoryPort {
                 .data(reviewPage.getContent().stream().map(reviewPersistenceMapper::toDomain).toList())
                 .build();
     }
+
+    @Override
+    public void delete(Review review) {
+        reviewJpaRepository.delete(reviewPersistenceMapper.toEntity(review));
+    }
 }

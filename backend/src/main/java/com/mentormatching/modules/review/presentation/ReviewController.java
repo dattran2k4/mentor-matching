@@ -8,6 +8,7 @@ import static com.mentormatching.shared.response.PageQueryDefaults.DEFAULT_SORT_
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -19,6 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.mentormatching.modules.review.application.port.in.CalculateMentorRatingSummaryUseCase;
 import com.mentormatching.modules.review.application.port.in.CreateReviewUseCase;
+import com.mentormatching.modules.review.application.port.in.DeleteReviewUseCase;
 import com.mentormatching.modules.review.application.port.in.GetMentorReviewsUseCase;
 import com.mentormatching.modules.review.application.port.in.GetReviewDetailUseCase;
 import com.mentormatching.modules.review.application.port.in.UpdateReviewUseCase;
@@ -49,6 +51,7 @@ public class ReviewController {
     private final GetMentorReviewsUseCase getMentorReviewsUseCase;
     private final CalculateMentorRatingSummaryUseCase calculateMentorRatingSummaryUseCase;
     private final UpdateReviewUseCase updateReviewUseCase;
+    private final DeleteReviewUseCase deleteReviewUseCase;
     private final ApiResponseFactory apiResponseFactory;
 
     @PostMapping
@@ -90,5 +93,17 @@ public class ReviewController {
                                           @Valid @RequestBody UpdateReviewRequest request) {
         updateReviewUseCase.updateReview(request.toCommand(id, principal));
         return apiResponseFactory.success(null, "Update review successfully");
+    }
+
+    @DeleteMapping("/{id}")
+    @PreAuthorize("isAuthenticated()")
+    public ApiResponse<Void> deleteReview(@AuthenticationPrincipal AuthenticatedPrincipal principal,
+                                          @PathVariable Long id) {
+        boolean isAdminOrManager = org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication()
+                .getAuthorities().stream()
+                .map(org.springframework.security.core.GrantedAuthority::getAuthority)
+                .anyMatch(role -> role.equals("ROLE_ADMIN") || role.equals("ROLE_MANAGER"));
+        deleteReviewUseCase.deleteReview(id, principal.getId(), isAdminOrManager);
+        return apiResponseFactory.success(null, "Delete review successfully");
     }
 }

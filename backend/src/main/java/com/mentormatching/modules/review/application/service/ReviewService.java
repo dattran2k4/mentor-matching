@@ -20,6 +20,7 @@ import com.mentormatching.modules.review.application.port.in.CalculateMentorRati
 import com.mentormatching.modules.review.application.port.in.CreateReviewUseCase;
 import com.mentormatching.modules.review.application.port.in.GetMentorReviewsUseCase;
 import com.mentormatching.modules.review.application.port.in.GetReviewDetailUseCase;
+import com.mentormatching.modules.review.application.port.in.DeleteReviewUseCase;
 import com.mentormatching.modules.review.application.port.in.UpdateReviewUseCase;
 import com.mentormatching.modules.review.application.port.out.ReviewBookingLookupPort;
 import com.mentormatching.modules.review.application.port.out.ReviewMentorLookupPort;
@@ -31,7 +32,7 @@ import com.mentormatching.shared.exception.ResourceNotFoundException;
 import com.mentormatching.shared.response.PageResponse;
 
 @Service
-public class ReviewService implements CreateReviewUseCase, GetReviewDetailUseCase, GetMentorReviewsUseCase, CalculateMentorRatingSummaryUseCase, UpdateReviewUseCase {
+public class ReviewService implements CreateReviewUseCase, GetReviewDetailUseCase, GetMentorReviewsUseCase, CalculateMentorRatingSummaryUseCase, UpdateReviewUseCase, DeleteReviewUseCase {
 
     private final ReviewRepositoryPort reviewRepositoryPort;
     private final ReviewBookingLookupPort reviewBookingLookupPort;
@@ -171,5 +172,18 @@ public class ReviewService implements CreateReviewUseCase, GetReviewDetailUseCas
 
         review.update(command.rating(), command.comment());
         reviewRepositoryPort.save(review);
+    }
+
+    @Override
+    @Transactional
+    public void deleteReview(Long reviewId, Long currentUserId, boolean isAdminOrManager) {
+        Review review = reviewRepositoryPort.findById(reviewId)
+                .orElseThrow(() -> new ResourceNotFoundException("Review not found"));
+
+        if (!isAdminOrManager && !review.getStudentUserId().equals(currentUserId)) {
+            throw new InvalidDataException("You are not authorized to delete this review");
+        }
+
+        reviewRepositoryPort.delete(review);
     }
 }
