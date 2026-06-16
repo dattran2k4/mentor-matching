@@ -59,7 +59,7 @@ public class MentorProfile {
         LocalDateTime now = LocalDateTime.now();
         MentorProfile mentorProfile = new MentorProfile(new MentorProfileRestoreData(null, userId, avatarUrl, gender,
                 hometownCityId, currentDistrictId, headline, introduction, teachingStyle, experienceYears,
-                currentPosition, workplace, education, major, meetingType, MentorApprovalStatus.PENDING, null, null,
+                currentPosition, workplace, education, major, meetingType, MentorApprovalStatus.DRAFT, null, null,
                 null, now, now));
         mentorProfile.validateExperienceYears(experienceYears);
         return mentorProfile;
@@ -87,6 +87,19 @@ public class MentorProfile {
         this.education = education;
         this.major = major;
         this.meetingType = meetingType;
+    }
+
+    public void submitForReview() {
+        if (approvalStatus == MentorApprovalStatus.APPROVED) {
+            throw new InvalidDataException("Approved mentor profile cannot be submitted");
+        }
+        if (approvalStatus == MentorApprovalStatus.SUSPENDED) {
+            throw new InvalidDataException("Suspended mentor profile cannot be submitted");
+        }
+        this.approvalStatus = MentorApprovalStatus.PENDING;
+        this.approvalNote = null;
+        this.approvedBy = null;
+        this.approvedAt = null;
     }
 
     public void approve(Long adminUserId, String approvalNote) {

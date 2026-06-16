@@ -41,7 +41,7 @@ class CreateCurrentMentorServiceTest {
     }
 
     @Test
-    void createCurrentMentorCreatesPendingProfileAndReturnsFreshDetails() {
+    void createCurrentMentorCreatesDraftProfileAndReturnsFreshDetails() {
         UpdateCurrentMentorCommand command = new UpdateCurrentMentorCommand(20L,
                 "https://new.example.com/avatar.jpg", Gender.MALE, 11L, 22L, "New headline",
                 "New intro", "New style", 7, "New position", "New workplace", "New education",
@@ -49,7 +49,7 @@ class CreateCurrentMentorServiceTest {
         CurrentMentorDetails expected = new CurrentMentorDetails(10L, 20L, "Nguyen Minh Anh",
                 "https://new.example.com/avatar.jpg", Gender.MALE, 11L, "Ha Noi", 33L, "Ho Chi Minh City", 22L,
                 "District 1", "New headline", "New intro", "New style", 7, "New position", "New workplace",
-                "New education", "New major", MeetingType.HYBRID, MentorApprovalStatus.PENDING, null,
+                "New education", "New major", MeetingType.HYBRID, MentorApprovalStatus.DRAFT, null,
                 MentorVerificationStatus.PENDING, null, LocalDateTime.parse("2026-06-01T10:15:30"),
                 LocalDateTime.parse("2026-06-01T10:15:30"));
 

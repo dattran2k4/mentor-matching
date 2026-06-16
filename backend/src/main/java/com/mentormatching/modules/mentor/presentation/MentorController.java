@@ -30,6 +30,7 @@ import com.mentormatching.modules.mentor.application.port.in.GetCurrentMentorOnb
 import com.mentormatching.modules.mentor.application.port.in.GetCurrentMentorUseCase;
 import com.mentormatching.modules.mentor.application.port.in.GetMentorDetailUseCase;
 import com.mentormatching.modules.mentor.application.port.in.GetMentorsUseCase;
+import com.mentormatching.modules.mentor.application.port.in.SubmitCurrentMentorApplicationUseCase;
 import com.mentormatching.modules.mentor.application.port.in.UpdateCurrentMentorUseCase;
 import com.mentormatching.modules.mentor.domain.Gender;
 import com.mentormatching.modules.mentor.domain.MeetingType;
@@ -56,6 +57,7 @@ public class MentorController {
 
     private final CreateCurrentMentorUseCase createCurrentMentorUseCase;
     private final GetCurrentMentorOnboardingStatusUseCase getCurrentMentorOnboardingStatusUseCase;
+    private final SubmitCurrentMentorApplicationUseCase submitCurrentMentorApplicationUseCase;
     private final GetCurrentMentorUseCase getCurrentMentorUseCase;
     private final UpdateCurrentMentorUseCase updateCurrentMentorUseCase;
     private final GetMentorsUseCase getMentorsUseCase;
@@ -86,6 +88,15 @@ public class MentorController {
         return apiResponseFactory.success(CurrentMentorOnboardingStatusResponse.from(
                 getCurrentMentorOnboardingStatusUseCase.getCurrentMentorOnboardingStatus(principal.getId())),
                 "Get current mentor onboarding status successfully");
+    }
+
+    @PreAuthorize("isAuthenticated()")
+    @PostMapping("/me/submission")
+    public ApiResponse<CurrentMentorOnboardingStatusResponse> submitCurrentMentorApplication(
+            @AuthenticationPrincipal AuthenticatedPrincipal principal) {
+        return apiResponseFactory.success(CurrentMentorOnboardingStatusResponse.from(
+                submitCurrentMentorApplicationUseCase.submitCurrentMentorApplication(principal.getId())),
+                "Submit current mentor application successfully");
     }
 
     @PreAuthorize("isAuthenticated()")
