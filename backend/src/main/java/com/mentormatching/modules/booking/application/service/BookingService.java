@@ -30,6 +30,7 @@ import com.mentormatching.modules.booking.application.port.in.RejectBookingByMen
 import com.mentormatching.modules.booking.application.port.out.BookingAvailabilityLookupPort;
 import com.mentormatching.modules.booking.application.port.out.BookingMentorLookupPort;
 import com.mentormatching.modules.booking.application.port.out.BookingMentorSubjectLookupPort;
+import com.mentormatching.modules.booking.application.port.out.BookingNotificationPort;
 import com.mentormatching.modules.booking.application.port.out.BookingRepositoryPort;
 import com.mentormatching.modules.booking.application.port.out.BookingUserLookupPort;
 import com.mentormatching.modules.booking.domain.Booking;
@@ -58,18 +59,21 @@ public class BookingService implements CreateBookingUseCase, GetBookingPaymentSu
     private final BookingMentorSubjectLookupPort bookingMentorSubjectLookupPort;
     private final BookingAvailabilityLookupPort bookingAvailabilityLookupPort;
     private final PaymentRepositoryPort paymentRepositoryPort;
+    private final BookingNotificationPort bookingNotificationPort;
 
     public BookingService(BookingRepositoryPort bookingRepositoryPort, BookingUserLookupPort bookingUserLookupPort,
                           BookingMentorLookupPort bookingMentorLookupPort,
                           BookingMentorSubjectLookupPort bookingMentorSubjectLookupPort,
                           BookingAvailabilityLookupPort bookingAvailabilityLookupPort,
-                          PaymentRepositoryPort paymentRepositoryPort) {
+                          PaymentRepositoryPort paymentRepositoryPort,
+                          BookingNotificationPort bookingNotificationPort) {
         this.bookingRepositoryPort = bookingRepositoryPort;
         this.bookingUserLookupPort = bookingUserLookupPort;
         this.bookingMentorLookupPort = bookingMentorLookupPort;
         this.bookingMentorSubjectLookupPort = bookingMentorSubjectLookupPort;
         this.bookingAvailabilityLookupPort = bookingAvailabilityLookupPort;
         this.paymentRepositoryPort = paymentRepositoryPort;
+        this.bookingNotificationPort = bookingNotificationPort;
     }
 
     @Override
@@ -90,6 +94,7 @@ public class BookingService implements CreateBookingUseCase, GetBookingPaymentSu
                 mentorSubject.pricePerHour(), command.meetingType(), command.note()));
 
         Booking savedBooking = bookingRepositoryPort.save(booking);
+        bookingNotificationPort.notifyBookingCreated(savedBooking);
         return savedBooking.getId();
     }
 
@@ -145,6 +150,7 @@ public class BookingService implements CreateBookingUseCase, GetBookingPaymentSu
         ensureBookingHasNoPaidPayment(booking.getId());
         booking.reject(command.mentorUserId(), command.cancelReason());
         bookingRepositoryPort.save(booking);
+        bookingNotificationPort.notifyBookingRejected(booking);
     }
 
     @Override
@@ -155,6 +161,7 @@ public class BookingService implements CreateBookingUseCase, GetBookingPaymentSu
         ensureBookingBelongsToMentor(mentor.mentorId(), booking);
         booking.complete(LocalDateTime.now());
         bookingRepositoryPort.save(booking);
+        bookingNotificationPort.notifyBookingCompleted(booking);
     }
 
     private void validateBookingDateRange(GetBookingsQuery query) {
