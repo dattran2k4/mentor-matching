@@ -1,29 +1,21 @@
 package com.mentormatching.modules.notification.infrastructure.websocket;
 
-import java.util.Set;
-
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Component;
-import org.springframework.web.socket.TextMessage;
-import org.springframework.web.socket.WebSocketSession;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mentormatching.modules.notification.application.dto.NotificationResponse;
 import com.mentormatching.modules.notification.application.port.out.NotificationRealtimePort;
 import com.mentormatching.modules.notification.domain.Notification;
-import com.mentormatching.modules.notification.infrastructure.websocket.handler.NotificationWebSocketHandler;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Component
+@RequiredArgsConstructor
+@Slf4j
 public class NotificationRealtimeAdapter implements NotificationRealtimePort {
 
-    private final NotificationWebSocketHandler webSocketHandler;
-    private final ObjectMapper objectMapper;
-
-    public NotificationRealtimeAdapter(NotificationWebSocketHandler webSocketHandler) {
-        this.webSocketHandler = webSocketHandler;
-        this.objectMapper = new ObjectMapper()
-                .registerModule(new com.fasterxml.jackson.datatype.jsr310.JavaTimeModule())
-                .disable(com.fasterxml.jackson.databind.SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
-    }
+    private final SimpMessagingTemplate simpMessagingTemplate;
 
     @Override
     public void sendNotification(Notification notification) {
@@ -31,24 +23,19 @@ public class NotificationRealtimeAdapter implements NotificationRealtimePort {
             return;
         }
 
-        Set<WebSocketSession> sessions = webSocketHandler.getSessions(notification.getUserId());
-        if (sessions.isEmpty()) {
-            return;
-        }
-
         try {
             NotificationResponse response = NotificationResponse.from(notification);
-            String jsonPayload = objectMapper.writeValueAsString(response);
-            TextMessage textMessage = new TextMessage(jsonPayload);
-
-            for (WebSocketSession session : sessions) {
-                if (session.isOpen()) {
-                    session.sendMessage(textMessage);
-                }
-            }
+            
+            // Sending to a specific user. Spring will route it to: /user/{userId}/queue/notifications
+            // Note: The Principal's name must match notification.getUserId() as a string.
+            simpMessagingTemplate.convertAndSendToUser(
+                    String.valueOf(notification.getUserId()), 
+                    "/queue/notifications", 
+                    response
+            );
+            log.debug("Sent STOMP notification to user {}", notification.getUserId());
         } catch (Exception e) {
-            // Log warning or exception (SLF4J is available via Lombok if needed, or System.err for simple debug fallback, but let's just ignore/print stack trace here)
-            e.printStackTrace();
+            log.error("Failed to send STOMP notification to user {}", notification.getUserId(), e);
         }
     }
 }

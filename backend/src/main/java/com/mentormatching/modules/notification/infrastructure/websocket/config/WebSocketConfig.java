@@ -1,30 +1,46 @@
 package com.mentormatching.modules.notification.infrastructure.websocket.config;
 
 import org.springframework.context.annotation.Configuration;
-import org.springframework.web.socket.config.annotation.EnableWebSocket;
-import org.springframework.web.socket.config.annotation.WebSocketConfigurer;
-import org.springframework.web.socket.config.annotation.WebSocketHandlerRegistry;
+import org.springframework.messaging.simp.config.ChannelRegistration;
+import org.springframework.messaging.simp.config.MessageBrokerRegistry;
+import org.springframework.web.socket.config.annotation.EnableWebSocketMessageBroker;
+import org.springframework.web.socket.config.annotation.StompEndpointRegistry;
+import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerConfigurer;
 
-import com.mentormatching.modules.notification.infrastructure.websocket.handler.NotificationWebSocketHandler;
-import com.mentormatching.modules.notification.infrastructure.websocket.interceptor.WebSocketAuthInterceptor;
-import com.mentormatching.shared.security.jwt.JwtTokenProvider;
+import com.mentormatching.modules.notification.infrastructure.websocket.interceptor.StompAuthChannelInterceptor;
 
 @Configuration
-@EnableWebSocket
-public class WebSocketConfig implements WebSocketConfigurer {
+@EnableWebSocketMessageBroker
+public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
-    private final NotificationWebSocketHandler webSocketHandler;
-    private final JwtTokenProvider jwtTokenProvider;
+    private final StompAuthChannelInterceptor stompAuthChannelInterceptor;
 
-    public WebSocketConfig(NotificationWebSocketHandler webSocketHandler, JwtTokenProvider jwtTokenProvider) {
-        this.webSocketHandler = webSocketHandler;
-        this.jwtTokenProvider = jwtTokenProvider;
+    public WebSocketConfig(StompAuthChannelInterceptor stompAuthChannelInterceptor) {
+        this.stompAuthChannelInterceptor = stompAuthChannelInterceptor;
     }
 
     @Override
-    public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
-        registry.addHandler(webSocketHandler, "/ws/notifications")
-                .addInterceptors(new WebSocketAuthInterceptor(jwtTokenProvider))
-                .setAllowedOrigins("*");
+    public void registerStompEndpoints(StompEndpointRegistry registry) {
+        // Register the STOMP endpoint for notifications
+        registry.addEndpoint("/ws/notifications")
+                .setAllowedOriginPatterns("*"); // Allow all origins for testing/development
+    }
+
+    @Override
+    public void configureMessageBroker(MessageBrokerRegistry registry) {
+        // Simple memory broker for /queue and /topic destinations
+        registry.enableSimpleBroker("/queue", "/topic");
+        
+        // Prefix for messages sent FROM client TO server (e.g., @MessageMapping)
+        registry.setApplicationDestinationPrefixes("/app");
+        
+        // Prefix used to identify user destinations
+        registry.setUserDestinationPrefix("/user");
+    }
+
+    @Override
+    public void configureClientInboundChannel(ChannelRegistration registration) {
+        // Intercept incoming messages (specifically CONNECT) to validate JWT token
+        registration.interceptors(stompAuthChannelInterceptor);
     }
 }
