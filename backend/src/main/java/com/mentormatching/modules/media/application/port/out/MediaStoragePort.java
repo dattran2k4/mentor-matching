@@ -4,10 +4,15 @@ import com.mentormatching.modules.media.application.dto.ConfirmMediaUploadComman
 import com.mentormatching.modules.media.application.dto.CreateMediaUploadCommand;
 import com.mentormatching.modules.media.application.dto.MediaUploadIntent;
 import com.mentormatching.modules.media.domain.MediaAsset;
+import com.mentormatching.modules.media.domain.MediaProvider;
 
 public interface MediaStoragePort {
 
-    MediaUploadIntent createUploadIntent(MediaAsset mediaAsset, CreateMediaUploadCommand command);
+    MediaProvider provider();
+
+    String createObjectKey(CreateMediaUploadCommand command);
+
+    MediaUploadIntent createUploadIntent(MediaAsset mediaAsset);
 
     void verifyUpload(MediaAsset mediaAsset, ConfirmMediaUploadCommand command);
 
