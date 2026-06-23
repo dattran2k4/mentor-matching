@@ -17,6 +17,6 @@ public class GetMediaAssetService extends BaseMediaUseCaseService implements Get
 
     @Override
     public Optional<MediaAssetDetails> findById(Long mediaAssetId) {
-        throw new UnsupportedOperationException("Get media asset use case is not implemented yet");
+        return mediaAssetRepositoryPort.findById(mediaAssetId).map(this::toDetails);
     }
 }

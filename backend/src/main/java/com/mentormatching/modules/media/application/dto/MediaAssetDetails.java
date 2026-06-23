@@ -18,6 +18,7 @@ public record MediaAssetDetails(
         Integer height,
         MediaAccessType accessType,
         MediaPurpose purpose,
-        MediaStatus status
+        MediaStatus status,
+        Long uploadedByUserId
 ) {
 }

@@ -27,6 +27,7 @@ public interface MentorProfileJpaRepository extends JpaRepository<MentorProfileJ
                    mentor.userId as userId,
                    user.fullName as fullName,
                    mentor.avatarUrl as avatarUrl,
+                   mentor.avatarMediaId as avatarMediaId,
                    mentor.gender as gender,
                    mentor.headline as headline,
                    mentor.experienceYears as experienceYears,

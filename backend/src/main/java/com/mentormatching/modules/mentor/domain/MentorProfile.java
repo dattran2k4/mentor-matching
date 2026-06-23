@@ -9,6 +9,7 @@ public class MentorProfile {
     private final Long id;
     private final Long userId;
     private String avatarUrl;
+    private Long avatarMediaId;
     private Gender gender;
     private Long hometownCityId;
     private Long currentDistrictId;
@@ -32,6 +33,7 @@ public class MentorProfile {
         this.id = data.id();
         this.userId = data.userId();
         this.avatarUrl = data.avatarUrl();
+        this.avatarMediaId = data.avatarMediaId();
         this.gender = data.gender();
         this.hometownCityId = data.hometownCityId();
         this.currentDistrictId = data.currentDistrictId();
@@ -57,7 +59,7 @@ public class MentorProfile {
                                        String teachingStyle, Integer experienceYears, String currentPosition,
                                        String workplace, String education, String major, MeetingType meetingType) {
         LocalDateTime now = LocalDateTime.now();
-        MentorProfile mentorProfile = new MentorProfile(new MentorProfileRestoreData(null, userId, avatarUrl, gender,
+        MentorProfile mentorProfile = new MentorProfile(new MentorProfileRestoreData(null, userId, avatarUrl, null, gender,
                 hometownCityId, currentDistrictId, headline, introduction, teachingStyle, experienceYears,
                 currentPosition, workplace, education, major, meetingType, MentorApprovalStatus.DRAFT, null, null,
                 null, now, now));
@@ -87,6 +89,17 @@ public class MentorProfile {
         this.education = education;
         this.major = major;
         this.meetingType = meetingType;
+    }
+
+    public void updateAvatar(Long avatarMediaId, String avatarUrl) {
+        if (avatarMediaId == null) {
+            throw new InvalidDataException("Avatar media id is required");
+        }
+        if (avatarUrl == null || avatarUrl.isBlank()) {
+            throw new InvalidDataException("Avatar url is required");
+        }
+        this.avatarMediaId = avatarMediaId;
+        this.avatarUrl = avatarUrl;
     }
 
     public void submitForReview() {
@@ -153,6 +166,10 @@ public class MentorProfile {
 
     public String getAvatarUrl() {
         return avatarUrl;
+    }
+
+    public Long getAvatarMediaId() {
+        return avatarMediaId;
     }
 
     public Gender getGender() {

@@ -16,6 +16,7 @@ abstract class BaseMediaUseCaseService {
         return new MediaAssetDetails(mediaAsset.getId(), mediaAsset.getProvider(), mediaAsset.getObjectKey(),
                 mediaAsset.getDeliveryUrl(), mediaAsset.getResourceType(), mediaAsset.getMimeType(),
                 mediaAsset.getFileSizeBytes(), mediaAsset.getWidth(), mediaAsset.getHeight(),
-                mediaAsset.getAccessType(), mediaAsset.getPurpose(), mediaAsset.getStatus());
+                mediaAsset.getAccessType(), mediaAsset.getPurpose(), mediaAsset.getStatus(),
+                mediaAsset.getUploadedByUserId());
     }
 }
