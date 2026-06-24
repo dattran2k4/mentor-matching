@@ -47,14 +47,6 @@ public class MentorVerification {
     }
 
     public static MentorVerification submit(Long mentorId, String fullName, String idCardNumber,
-                                            String idCardFrontUrl, String idCardBackUrl,
-                                            String selfieWithIdUrl) {
-        return new MentorVerification(new MentorVerificationRestoreData(null, mentorId, fullName, idCardNumber,
-                idCardFrontUrl, idCardBackUrl, selfieWithIdUrl, MentorVerificationStatus.PENDING, null, null, null,
-                null, null));
-    }
-
-    public static MentorVerification submit(Long mentorId, String fullName, String idCardNumber,
                                             String idCardFrontUrl, Long idCardFrontMediaId,
                                             String idCardBackUrl, Long idCardBackMediaId,
                                             String selfieWithIdUrl, Long selfieWithIdMediaId) {
@@ -63,22 +55,10 @@ public class MentorVerification {
                 selfieWithIdMediaId, MentorVerificationStatus.PENDING, null, null, null, null, null));
     }
 
-    public void resubmit(String fullName, String idCardNumber, String idCardFrontUrl, String idCardBackUrl,
-                         String selfieWithIdUrl) {
-        this.fullName = fullName;
-        this.idCardNumber = idCardNumber;
-        this.idCardFrontUrl = idCardFrontUrl;
-        this.idCardBackUrl = idCardBackUrl;
-        this.selfieWithIdUrl = selfieWithIdUrl;
-        this.verificationStatus = MentorVerificationStatus.PENDING;
-        this.verifiedBy = null;
-        this.verifiedAt = null;
-        this.rejectionReason = null;
-    }
-
     public void resubmit(String fullName, String idCardNumber, String idCardFrontUrl, Long idCardFrontMediaId,
                          String idCardBackUrl, Long idCardBackMediaId, String selfieWithIdUrl,
                          Long selfieWithIdMediaId) {
+        validateCanResubmit();
         this.fullName = fullName;
         this.idCardNumber = idCardNumber;
         this.idCardFrontUrl = idCardFrontUrl;
@@ -118,6 +98,15 @@ public class MentorVerification {
     private void validatePendingForReview() {
         if (verificationStatus != MentorVerificationStatus.PENDING) {
             throw new InvalidDataException("Only pending verification can be reviewed");
+        }
+    }
+
+    private void validateCanResubmit() {
+        if (verificationStatus == MentorVerificationStatus.PENDING) {
+            throw new InvalidDataException("Pending verification cannot be updated");
+        }
+        if (verificationStatus == MentorVerificationStatus.VERIFIED) {
+            throw new InvalidDataException("Verified verification cannot be updated");
         }
     }
 
