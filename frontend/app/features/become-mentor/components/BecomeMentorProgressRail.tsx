@@ -9,10 +9,7 @@ type BecomeMentorProgressRailProps = {
   steps: BecomeMentorStep[]
 }
 
-export function BecomeMentorProgressRail({
-  onSelectStep,
-  steps
-}: BecomeMentorProgressRailProps) {
+export function BecomeMentorProgressRail({ onSelectStep, steps }: BecomeMentorProgressRailProps) {
   return (
     <aside className='rounded-[28px] border border-slate-200 bg-white p-5 shadow-sm'>
       <div className='space-y-1'>
@@ -37,13 +34,16 @@ export function BecomeMentorProgressRail({
               <div
                 className={cn(
                   'flex h-8 w-8 items-center justify-center rounded-full border text-sm font-semibold transition-colors',
-                  step.status === 'done' &&
-                    'border-emerald-200 bg-emerald-50 text-emerald-700',
+                  step.status === 'done' && 'border-emerald-200 bg-emerald-50 text-emerald-700',
                   step.status === 'current' && 'border-primary/25 bg-primary text-white',
                   step.status === 'upcoming' && 'border-slate-200 bg-white text-slate-400'
                 )}
               >
-                {step.status === 'done' ? <Check size={16} /> : <Circle size={14} fill='currentColor' />}
+                {step.status === 'done' ? (
+                  <Check size={16} />
+                ) : (
+                  <Circle size={14} fill='currentColor' />
+                )}
               </div>
               {index < steps.length - 1 ? <div className='mt-2 h-10 w-px bg-slate-200' /> : null}
             </div>

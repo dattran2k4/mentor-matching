@@ -24,9 +24,7 @@ type BecomeMentorVerificationSectionProps = {
   onChange: BecomeMentorFieldChangeHandler<BecomeMentorVerificationField>
   onValueChange: BecomeMentorFieldValueChangeHandler<BecomeMentorVerificationField>
   onClearDocument: (key: BecomeMentorDocumentKey) => void
-  onDocumentChange: (
-    key: BecomeMentorDocumentKey
-  ) => (event: ChangeEvent<HTMLInputElement>) => void
+  onDocumentChange: (key: BecomeMentorDocumentKey) => (event: ChangeEvent<HTMLInputElement>) => void
 }
 
 export function BecomeMentorVerificationSection({
@@ -48,7 +46,7 @@ export function BecomeMentorVerificationSection({
       <div className='space-y-5'>
         <div className='rounded-[24px] border border-blue-200 bg-blue-50/70 p-4'>
           <div className='flex items-start gap-3'>
-            <div className='bg-white text-primary flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl shadow-sm'>
+            <div className='text-primary flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-white shadow-sm'>
               <Shield size={18} />
             </div>
             <div>
@@ -56,7 +54,8 @@ export function BecomeMentorVerificationSection({
                 Chỉ mentor đã được xác minh và phê duyệt mới hiển thị trên trang kết nối
               </p>
               <p className='mt-1 text-sm leading-6 text-slate-600'>
-                Tạm thời UI này sẽ lấy tệp từ máy và hiển thị trạng thái đã chọn file để bạn dễ hoàn thiện hồ sơ.
+                Tạm thời UI này sẽ lấy tệp từ máy và hiển thị trạng thái đã chọn file để bạn dễ hoàn
+                thiện hồ sơ.
               </p>
             </div>
           </div>
@@ -95,7 +94,7 @@ export function BecomeMentorVerificationSection({
                 key={document.key}
               >
                 <div className='flex items-start justify-between gap-3'>
-                  <div className='bg-white text-primary flex h-10 w-10 items-center justify-center rounded-2xl shadow-sm'>
+                  <div className='text-primary flex h-10 w-10 items-center justify-center rounded-2xl bg-white shadow-sm'>
                     {done ? <CheckCircle2 size={18} /> : <UploadCloud size={18} />}
                   </div>
                   <Badge variant={done ? 'success' : 'muted'}>

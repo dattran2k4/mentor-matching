@@ -1,7 +1,4 @@
-import type {
-  BecomeMentorDocumentKey,
-  BecomeMentorFormState
-} from './become-mentor.types'
+import type { BecomeMentorDocumentKey, BecomeMentorFormState } from './become-mentor.types'
 
 export const initialBecomeMentorFormState: BecomeMentorFormState = {
   avatarUrl: '',

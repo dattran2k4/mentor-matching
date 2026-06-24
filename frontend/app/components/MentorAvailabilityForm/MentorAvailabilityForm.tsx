@@ -49,10 +49,9 @@ export function MentorAvailabilityForm({
   value
 }: MentorAvailabilityFormProps) {
   const toggleDay = (dayValue: string) => {
-    const selectedDays =
-      value.selectedDays.includes(dayValue)
-        ? value.selectedDays.filter((item) => item !== dayValue)
-        : [...value.selectedDays, dayValue]
+    const selectedDays = value.selectedDays.includes(dayValue)
+      ? value.selectedDays.filter((item) => item !== dayValue)
+      : [...value.selectedDays, dayValue]
 
     onChange({ ...value, selectedDays })
   }

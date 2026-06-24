@@ -6,7 +6,10 @@ import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
 import { NumericInput } from '@/components/ui/numeric-input'
 import { Textarea } from '@/components/ui/textarea'
-import { useCatalogGradesQuery, useCatalogSubjectsQuery } from '@/hooks/queries/catalog/useCatalogOptionsQuery'
+import {
+  useCatalogGradesQuery,
+  useCatalogSubjectsQuery
+} from '@/hooks/queries/catalog/useCatalogOptionsQuery'
 import type {
   BecomeMentorFieldChangeHandler,
   BecomeMentorFieldValueChangeHandler,
@@ -68,14 +71,16 @@ export function BecomeMentorOfferingsSection({
     label: formatGradeLabel(grade.name),
     value: formatGradeLabel(grade.name)
   }))
-  const subjectPlaceholder =
-    isSubjectsLoading
-      ? 'Đang tải môn học...'
-      : isSubjectsError
-        ? 'Không tải được môn học'
-        : 'Chọn môn'
-  const gradePlaceholder =
-    isGradesLoading ? 'Đang tải cấp lớp...' : isGradesError ? 'Không tải được cấp lớp' : 'Chọn cấp lớp'
+  const subjectPlaceholder = isSubjectsLoading
+    ? 'Đang tải môn học...'
+    : isSubjectsError
+      ? 'Không tải được môn học'
+      : 'Chọn môn'
+  const gradePlaceholder = isGradesLoading
+    ? 'Đang tải cấp lớp...'
+    : isGradesError
+      ? 'Không tải được cấp lớp'
+      : 'Chọn cấp lớp'
 
   return (
     <BecomeMentorSectionCard
@@ -179,7 +184,7 @@ export function BecomeMentorOfferingsSection({
 
             <Field>
               <Label htmlFor='mentor-price'>Học phí mỗi giờ</Label>
-              <div className='grid grid-cols-[minmax(0,1fr)_5.5rem] overflow-hidden rounded-xl border border-slate-200 bg-white focus-within:border-primary focus-within:ring-4 focus-within:ring-primary/10'>
+              <div className='focus-within:border-primary focus-within:ring-primary/10 grid grid-cols-[minmax(0,1fr)_5.5rem] overflow-hidden rounded-xl border border-slate-200 bg-white focus-within:ring-4'>
                 <NumericInput
                   className='h-11 w-full border-0 bg-transparent px-3 text-sm text-slate-900 outline-none placeholder:text-slate-400'
                   id='mentor-price'
@@ -220,10 +225,7 @@ function Field({ children }: { children: ReactNode }) {
   return <div className='space-y-2'>{children}</div>
 }
 
-function IconButton({
-  children,
-  ...props
-}: ComponentProps<typeof Button>) {
+function IconButton({ children, ...props }: ComponentProps<typeof Button>) {
   return (
     <Button className='h-10 w-10 rounded-xl p-0' size='icon' {...props}>
       {children}

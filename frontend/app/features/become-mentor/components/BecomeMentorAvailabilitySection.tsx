@@ -95,7 +95,8 @@ export function BecomeMentorAvailabilitySection({
               ))
             ) : (
               <div className='rounded-[22px] border border-dashed border-slate-300 bg-slate-50/80 px-5 py-6 text-sm leading-6 text-slate-500'>
-                Chưa có khung giờ nào. Hãy thêm lịch rảnh đầu tiên để quản trị viên hiểu khả năng nhận học viên của bạn.
+                Chưa có khung giờ nào. Hãy thêm lịch rảnh đầu tiên để quản trị viên hiểu khả năng
+                nhận học viên của bạn.
               </div>
             )}
           </div>
@@ -142,10 +143,7 @@ export function BecomeMentorAvailabilitySection({
   )
 }
 
-function IconButton({
-  children,
-  ...props
-}: ComponentProps<typeof Button>) {
+function IconButton({ children, ...props }: ComponentProps<typeof Button>) {
   return (
     <Button className='h-10 w-10 rounded-xl p-0' size='icon' {...props}>
       {children}
@@ -157,7 +155,9 @@ function formatRecurringDays(values: string[]) {
   const labels = values
     .slice()
     .sort((left, right) => Number(left) - Number(right))
-    .map((value) => mentorAvailabilityWeekdayOptions.find((option) => option.value === value)?.label)
+    .map(
+      (value) => mentorAvailabilityWeekdayOptions.find((option) => option.value === value)?.label
+    )
     .filter(Boolean)
 
   return labels.length ? labels.join(', ') : 'Lặp lại hằng tuần'
