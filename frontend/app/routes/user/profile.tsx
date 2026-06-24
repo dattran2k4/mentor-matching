@@ -1,6 +1,6 @@
 import type { ChangeEvent, FormEvent } from 'react'
 import { useMemo, useState } from 'react'
-import { CheckCircle2 } from 'lucide-react'
+import { AlertCircle, CheckCircle2 } from 'lucide-react'
 
 import { DashboardPage } from '@/components/DashboardPage'
 import { ScreenErrorState } from '@/components/ScreenErrorState'
@@ -16,7 +16,9 @@ import { useCurrentUserQuery } from '@/hooks/queries/auth/use-current-user-query
 import { useLearnerProfileQuery } from '@/hooks/queries/user/use-learner-profile-query'
 import { useUpdateCurrentUserMutation } from '@/hooks/queries/user/use-update-current-user-mutation'
 import { useUpdateLearnerProfileMutation } from '@/hooks/queries/user/use-update-learner-profile-mutation'
+import type { ErrorResponse } from '@/types/api-response'
 import type { CurrentUser, LearnerGender, LearnerProfile, UserType } from '@/types/user'
+import { getErrorMessage, parseValidationFieldErrors } from '@/utils/http-error'
 
 type ProfileFormValues = {
   fullName: string
@@ -29,6 +31,9 @@ type ProfileFormValues = {
   gradeId: string
   learningGoal: string
 }
+
+type ProfileFormField = keyof ProfileFormValues
+type ProfileFormErrors = Partial<Record<ProfileFormField, string>>
 
 const gradeOptions = [
   { value: '1', label: 'Lớp 1' },
@@ -58,6 +63,20 @@ const genderLabels: Record<LearnerGender, string> = {
   OTHER: 'Khác'
 }
 
+const accountFieldAliases: Partial<Record<string, ProfileFormField>> = {
+  fullName: 'fullName',
+  phone: 'phone',
+  userType: 'userType'
+}
+
+const learnerProfileFieldAliases: Partial<Record<string, ProfileFormField>> = {
+  gender: 'gender',
+  birthYear: 'birthYear',
+  schoolName: 'schoolName',
+  gradeId: 'gradeId',
+  learningGoal: 'learningGoal'
+}
+
 function getInitialFormValues(
   currentUser: CurrentUser,
   learnerProfile?: LearnerProfile
@@ -75,6 +94,28 @@ function getInitialFormValues(
   }
 }
 
+function normalizeFormValues(formValues: ProfileFormValues): ProfileFormValues {
+  return {
+    ...formValues,
+    fullName: formValues.fullName.trim(),
+    phone: formValues.phone.trim(),
+    schoolName: formValues.schoolName.trim(),
+    learningGoal: formValues.learningGoal.trim()
+  }
+}
+
+function areFormValuesEqual(left: ProfileFormValues, right: ProfileFormValues) {
+  return JSON.stringify(left) === JSON.stringify(right)
+}
+
+function getValidationErrors(
+  error: unknown,
+  fieldAliases: Partial<Record<string, ProfileFormField>>
+): ProfileFormErrors {
+  const responseData = (error as { response?: { data?: ErrorResponse } }).response?.data
+  return parseValidationFieldErrors(responseData?.message, fieldAliases)
+}
+
 type UserProfileFormProps = {
   initialValues: ProfileFormValues
 }
@@ -83,6 +124,9 @@ function UserProfileForm({ initialValues }: UserProfileFormProps) {
   const updateCurrentUserMutation = useUpdateCurrentUserMutation()
   const updateLearnerProfileMutation = useUpdateLearnerProfileMutation()
   const [formValues, setFormValues] = useState<ProfileFormValues>(initialValues)
+  const [savedValues, setSavedValues] = useState<ProfileFormValues>(initialValues)
+  const [fieldErrors, setFieldErrors] = useState<ProfileFormErrors>({})
+  const [formError, setFormError] = useState('')
   const [isSaved, setIsSaved] = useState(false)
 
   const completionItems = useMemo(
@@ -96,11 +140,17 @@ function UserProfileForm({ initialValues }: UserProfileFormProps) {
 
   const completedCount = completionItems.filter((item) => item.done).length
   const isSaving = updateCurrentUserMutation.isPending || updateLearnerProfileMutation.isPending
+  const isDirty = !areFormValuesEqual(formValues, savedValues)
 
   const handleFieldChange =
     (field: keyof ProfileFormValues) =>
     (event: ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
       setIsSaved(false)
+      setFormError('')
+      setFieldErrors((currentErrors) => ({
+        ...currentErrors,
+        [field]: undefined
+      }))
       setFormValues((currentValues) => ({
         ...currentValues,
         [field]: event.target.value
@@ -109,22 +159,39 @@ function UserProfileForm({ initialValues }: UserProfileFormProps) {
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
+    const nextFormValues = normalizeFormValues(formValues)
 
-    await updateCurrentUserMutation.mutateAsync({
-      fullName: formValues.fullName.trim(),
-      phone: formValues.phone.trim(),
-      userType: formValues.userType
-    })
+    setFormError('')
+    setFieldErrors({})
 
-    await updateLearnerProfileMutation.mutateAsync({
-      gender: formValues.gender || null,
-      birthYear: formValues.birthYear ? Number(formValues.birthYear) : null,
-      schoolName: formValues.schoolName.trim(),
-      gradeId: formValues.gradeId ? Number(formValues.gradeId) : null,
-      learningGoal: formValues.learningGoal.trim()
-    })
+    try {
+      await updateCurrentUserMutation.mutateAsync({
+        fullName: nextFormValues.fullName,
+        phone: nextFormValues.phone,
+        userType: nextFormValues.userType
+      })
 
-    setIsSaved(true)
+      await updateLearnerProfileMutation.mutateAsync({
+        gender: nextFormValues.gender || null,
+        birthYear: nextFormValues.birthYear ? Number(nextFormValues.birthYear) : null,
+        schoolName: nextFormValues.schoolName,
+        gradeId: nextFormValues.gradeId ? Number(nextFormValues.gradeId) : null,
+        learningGoal: nextFormValues.learningGoal
+      })
+
+      setFormValues(nextFormValues)
+      setSavedValues(nextFormValues)
+      setIsSaved(true)
+    } catch (error) {
+      const accountErrors = getValidationErrors(error, accountFieldAliases)
+      const learnerProfileErrors = getValidationErrors(error, learnerProfileFieldAliases)
+
+      setFieldErrors({
+        ...accountErrors,
+        ...learnerProfileErrors
+      })
+      setFormError(getErrorMessage(error, 'Không thể lưu hồ sơ lúc này. Vui lòng thử lại.'))
+    }
   }
 
   return (
@@ -138,11 +205,18 @@ function UserProfileForm({ initialValues }: UserProfileFormProps) {
             <div className='space-y-2'>
               <Label htmlFor='learner-full-name'>Họ và tên</Label>
               <Input
+                aria-invalid={Boolean(fieldErrors.fullName)}
+                aria-describedby={fieldErrors.fullName ? 'learner-full-name-error' : undefined}
                 id='learner-full-name'
                 onChange={handleFieldChange('fullName')}
                 required
                 value={formValues.fullName}
               />
+              {fieldErrors.fullName ? (
+                <p className='text-sm text-red-600' id='learner-full-name-error'>
+                  {fieldErrors.fullName}
+                </p>
+              ) : null}
             </div>
             <div className='space-y-2'>
               <Label htmlFor='learner-email'>Email</Label>
@@ -151,6 +225,8 @@ function UserProfileForm({ initialValues }: UserProfileFormProps) {
             <div className='space-y-2'>
               <Label htmlFor='learner-phone'>Số điện thoại</Label>
               <Input
+                aria-invalid={Boolean(fieldErrors.phone)}
+                aria-describedby={fieldErrors.phone ? 'learner-phone-error' : undefined}
                 id='learner-phone'
                 maxLength={20}
                 onChange={handleFieldChange('phone')}
@@ -158,10 +234,17 @@ function UserProfileForm({ initialValues }: UserProfileFormProps) {
                 type='tel'
                 value={formValues.phone}
               />
+              {fieldErrors.phone ? (
+                <p className='text-sm text-red-600' id='learner-phone-error'>
+                  {fieldErrors.phone}
+                </p>
+              ) : null}
             </div>
             <div className='space-y-2'>
               <Label htmlFor='learner-user-type'>Loại tài khoản</Label>
               <Select
+                aria-invalid={Boolean(fieldErrors.userType)}
+                aria-describedby={fieldErrors.userType ? 'learner-user-type-error' : undefined}
                 id='learner-user-type'
                 onChange={handleFieldChange('userType')}
                 value={formValues.userType}
@@ -172,6 +255,11 @@ function UserProfileForm({ initialValues }: UserProfileFormProps) {
                   </option>
                 ))}
               </Select>
+              {fieldErrors.userType ? (
+                <p className='text-sm text-red-600' id='learner-user-type-error'>
+                  {fieldErrors.userType}
+                </p>
+              ) : null}
             </div>
           </div>
         </WorkspacePanel>
@@ -184,6 +272,8 @@ function UserProfileForm({ initialValues }: UserProfileFormProps) {
             <div className='space-y-2'>
               <Label htmlFor='learner-gender'>Giới tính</Label>
               <Select
+                aria-invalid={Boolean(fieldErrors.gender)}
+                aria-describedby={fieldErrors.gender ? 'learner-gender-error' : undefined}
                 id='learner-gender'
                 onChange={handleFieldChange('gender')}
                 value={formValues.gender}
@@ -195,10 +285,17 @@ function UserProfileForm({ initialValues }: UserProfileFormProps) {
                   </option>
                 ))}
               </Select>
+              {fieldErrors.gender ? (
+                <p className='text-sm text-red-600' id='learner-gender-error'>
+                  {fieldErrors.gender}
+                </p>
+              ) : null}
             </div>
             <div className='space-y-2'>
               <Label htmlFor='learner-birth-year'>Năm sinh</Label>
               <Input
+                aria-invalid={Boolean(fieldErrors.birthYear)}
+                aria-describedby={fieldErrors.birthYear ? 'learner-birth-year-error' : undefined}
                 id='learner-birth-year'
                 max={2100}
                 min={1900}
@@ -206,10 +303,17 @@ function UserProfileForm({ initialValues }: UserProfileFormProps) {
                 type='number'
                 value={formValues.birthYear}
               />
+              {fieldErrors.birthYear ? (
+                <p className='text-sm text-red-600' id='learner-birth-year-error'>
+                  {fieldErrors.birthYear}
+                </p>
+              ) : null}
             </div>
             <div className='space-y-2'>
               <Label htmlFor='learner-grade'>Lớp hiện tại</Label>
               <Select
+                aria-invalid={Boolean(fieldErrors.gradeId)}
+                aria-describedby={fieldErrors.gradeId ? 'learner-grade-error' : undefined}
                 id='learner-grade'
                 onChange={handleFieldChange('gradeId')}
                 value={formValues.gradeId}
@@ -221,15 +325,27 @@ function UserProfileForm({ initialValues }: UserProfileFormProps) {
                   </option>
                 ))}
               </Select>
+              {fieldErrors.gradeId ? (
+                <p className='text-sm text-red-600' id='learner-grade-error'>
+                  {fieldErrors.gradeId}
+                </p>
+              ) : null}
             </div>
             <div className='space-y-2'>
               <Label htmlFor='learner-school'>Trường / trung tâm</Label>
               <Input
+                aria-invalid={Boolean(fieldErrors.schoolName)}
+                aria-describedby={fieldErrors.schoolName ? 'learner-school-error' : undefined}
                 id='learner-school'
                 maxLength={255}
                 onChange={handleFieldChange('schoolName')}
                 value={formValues.schoolName}
               />
+              {fieldErrors.schoolName ? (
+                <p className='text-sm text-red-600' id='learner-school-error'>
+                  {fieldErrors.schoolName}
+                </p>
+              ) : null}
             </div>
           </div>
         </WorkspacePanel>
@@ -241,15 +357,31 @@ function UserProfileForm({ initialValues }: UserProfileFormProps) {
           <div className='space-y-2'>
             <Label htmlFor='learner-goal'>Mục tiêu</Label>
             <Textarea
+              aria-invalid={Boolean(fieldErrors.learningGoal)}
+              aria-describedby={fieldErrors.learningGoal ? 'learner-goal-error' : undefined}
               className='min-h-36'
               id='learner-goal'
               maxLength={2000}
               onChange={handleFieldChange('learningGoal')}
               value={formValues.learningGoal}
             />
+            {fieldErrors.learningGoal ? (
+              <p className='text-sm text-red-600' id='learner-goal-error'>
+                {fieldErrors.learningGoal}
+              </p>
+            ) : null}
           </div>
+          {formError ? (
+            <WorkspaceNotice
+              className='rounded-2xl'
+              description={formError}
+              icon={AlertCircle}
+              title='Chưa lưu được hồ sơ'
+              tone='warning'
+            />
+          ) : null}
           <div className='flex justify-end border-t border-slate-100 pt-4'>
-            <Button isLoading={isSaving} type='submit'>
+            <Button disabled={!isDirty || isSaving} isLoading={isSaving} type='submit'>
               Lưu thông tin
             </Button>
           </div>
@@ -277,6 +409,15 @@ function UserProfileForm({ initialValues }: UserProfileFormProps) {
               </div>
             ))}
           </div>
+          {isDirty ? (
+            <WorkspaceNotice
+              className='rounded-2xl'
+              description='Bạn đã chỉnh sửa hồ sơ. Lưu lại để backend nhận dữ liệu mới nhất.'
+              icon={AlertCircle}
+              title='Có thay đổi chưa lưu'
+              tone='warning'
+            />
+          ) : null}
           {isSaved ? (
             <WorkspaceNotice
               className='rounded-2xl'
@@ -286,7 +427,6 @@ function UserProfileForm({ initialValues }: UserProfileFormProps) {
             />
           ) : null}
         </WorkspacePanel>
-
       </aside>
     </form>
   )
