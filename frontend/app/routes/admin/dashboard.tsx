@@ -1,4 +1,3 @@
-import { Link } from 'react-router'
 import {
   AlertTriangle,
   ArrowRight,
@@ -78,13 +77,13 @@ export default function AdminDashboardPage() {
         title='Cần xử lý hôm nay'
         description='Đưa các đầu việc cần quyết định lên trước metric để admin biết nên mở màn hình nào ngay.'
         action={
-          <Link
+          <a
             className={cn(buttonVariants({ size: 'sm', variant: 'link' }), 'h-auto px-0')}
-            to={path.admin.mentors}
+            href={path.admin.mentors}
           >
             Mở duyệt mentor
             <ArrowRight aria-hidden='true' size={14} />
-          </Link>
+          </a>
         }
       >
         {adminQueueItems.length === 0 ? (
@@ -117,9 +116,9 @@ export default function AdminDashboardPage() {
                     <Badge variant={item.priority === 'high' ? 'destructive' : 'warning'}>
                       {item.priority === 'high' ? 'Ưu tiên cao' : 'Theo dõi'}
                     </Badge>
-                    <Link className={buttonVariants()} to={path.admin.mentors}>
+                    <a className={buttonVariants()} href={path.admin.mentors}>
                       Rà soát hồ sơ
-                    </Link>
+                    </a>
                   </div>
                 </CardContent>
               </Card>
@@ -149,13 +148,13 @@ export default function AdminDashboardPage() {
           title='Báo cáo và cờ vận hành'
           description='Giữ màn hình này trung thực: chỉ hiển thị hàng đợi và bối cảnh xử lý, chưa giả lập moderation workflow đầy đủ.'
           action={
-            <Link
+            <a
               className={cn(buttonVariants({ size: 'sm', variant: 'link' }), 'h-auto px-0')}
-              to={path.admin.reports}
+              href={path.admin.reports}
             >
               Xem tất cả báo cáo
               <ArrowRight aria-hidden='true' size={14} />
-            </Link>
+            </a>
           }
         >
           <div className='space-y-4'>

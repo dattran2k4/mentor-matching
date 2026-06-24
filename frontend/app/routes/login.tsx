@@ -58,8 +58,11 @@ export default function LoginPage() {
 
     loginMutation.mutate(values, {
       onSuccess: () => {
+        const currentUserQueryOptions = getCurrentUserQueryOptions()
+
+        queryClient.removeQueries({ queryKey: currentUserQueryOptions.queryKey })
         queryClient
-          .fetchQuery(getCurrentUserQueryOptions())
+          .fetchQuery(currentUserQueryOptions)
           .then((user) => {
             const destination = redirectTo || getDashboardPath(user.roles)
             navigate(destination, { replace: true })
