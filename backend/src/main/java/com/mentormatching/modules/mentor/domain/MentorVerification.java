@@ -11,8 +11,11 @@ public class MentorVerification {
     private String fullName;
     private String idCardNumber;
     private String idCardFrontUrl;
+    private Long idCardFrontMediaId;
     private String idCardBackUrl;
+    private Long idCardBackMediaId;
     private String selfieWithIdUrl;
+    private Long selfieWithIdMediaId;
     private MentorVerificationStatus verificationStatus;
     private Long verifiedBy;
     private LocalDateTime verifiedAt;
@@ -26,8 +29,11 @@ public class MentorVerification {
         this.fullName = data.fullName();
         this.idCardNumber = data.idCardNumber();
         this.idCardFrontUrl = data.idCardFrontUrl();
+        this.idCardFrontMediaId = data.idCardFrontMediaId();
         this.idCardBackUrl = data.idCardBackUrl();
+        this.idCardBackMediaId = data.idCardBackMediaId();
         this.selfieWithIdUrl = data.selfieWithIdUrl();
+        this.selfieWithIdMediaId = data.selfieWithIdMediaId();
         this.verificationStatus = data.verificationStatus();
         this.verifiedBy = data.verifiedBy();
         this.verifiedAt = data.verifiedAt();
@@ -48,6 +54,15 @@ public class MentorVerification {
                 null, null));
     }
 
+    public static MentorVerification submit(Long mentorId, String fullName, String idCardNumber,
+                                            String idCardFrontUrl, Long idCardFrontMediaId,
+                                            String idCardBackUrl, Long idCardBackMediaId,
+                                            String selfieWithIdUrl, Long selfieWithIdMediaId) {
+        return new MentorVerification(new MentorVerificationRestoreData(null, mentorId, fullName, idCardNumber,
+                idCardFrontUrl, idCardFrontMediaId, idCardBackUrl, idCardBackMediaId, selfieWithIdUrl,
+                selfieWithIdMediaId, MentorVerificationStatus.PENDING, null, null, null, null, null));
+    }
+
     public void resubmit(String fullName, String idCardNumber, String idCardFrontUrl, String idCardBackUrl,
                          String selfieWithIdUrl) {
         this.fullName = fullName;
@@ -55,6 +70,23 @@ public class MentorVerification {
         this.idCardFrontUrl = idCardFrontUrl;
         this.idCardBackUrl = idCardBackUrl;
         this.selfieWithIdUrl = selfieWithIdUrl;
+        this.verificationStatus = MentorVerificationStatus.PENDING;
+        this.verifiedBy = null;
+        this.verifiedAt = null;
+        this.rejectionReason = null;
+    }
+
+    public void resubmit(String fullName, String idCardNumber, String idCardFrontUrl, Long idCardFrontMediaId,
+                         String idCardBackUrl, Long idCardBackMediaId, String selfieWithIdUrl,
+                         Long selfieWithIdMediaId) {
+        this.fullName = fullName;
+        this.idCardNumber = idCardNumber;
+        this.idCardFrontUrl = idCardFrontUrl;
+        this.idCardFrontMediaId = idCardFrontMediaId;
+        this.idCardBackUrl = idCardBackUrl;
+        this.idCardBackMediaId = idCardBackMediaId;
+        this.selfieWithIdUrl = selfieWithIdUrl;
+        this.selfieWithIdMediaId = selfieWithIdMediaId;
         this.verificationStatus = MentorVerificationStatus.PENDING;
         this.verifiedBy = null;
         this.verifiedAt = null;
@@ -109,12 +141,24 @@ public class MentorVerification {
         return idCardFrontUrl;
     }
 
+    public Long getIdCardFrontMediaId() {
+        return idCardFrontMediaId;
+    }
+
     public String getIdCardBackUrl() {
         return idCardBackUrl;
     }
 
+    public Long getIdCardBackMediaId() {
+        return idCardBackMediaId;
+    }
+
     public String getSelfieWithIdUrl() {
         return selfieWithIdUrl;
+    }
+
+    public Long getSelfieWithIdMediaId() {
+        return selfieWithIdMediaId;
     }
 
     public MentorVerificationStatus getVerificationStatus() {
