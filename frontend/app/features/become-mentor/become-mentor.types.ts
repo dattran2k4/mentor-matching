@@ -35,10 +35,6 @@ export type BecomeMentorFormState = {
   experienceYears: string
   currentPosition: string
   workplace: string
-  primarySubject: string
-  gradeLevel: string
-  pricePerHour: string
-  teachingNote: string
   offerings: BecomeMentorOffering[]
   availabilities: BecomeMentorAvailabilityWindow[]
   verificationFullName: string

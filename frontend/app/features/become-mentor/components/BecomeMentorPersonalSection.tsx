@@ -1,37 +1,29 @@
 import { ImagePlus } from 'lucide-react'
 import type { ChangeEvent, ReactNode } from 'react'
+import type { FieldErrors, UseFormRegister } from 'react-hook-form'
 
 import { buttonVariants } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Select } from '@/components/ui/select'
-import type {
-  BecomeMentorFieldChangeHandler,
-  BecomeMentorProfileField
-} from '@/features/become-mentor/types'
+import type { BecomeMentorProfileFormValues } from '@/features/become-mentor/schemas'
 
 import { BecomeMentorSectionCard } from './BecomeMentorSectionCard'
 
 type BecomeMentorPersonalSectionProps = {
   avatarUrl: string
-  currentLocation: string
   eyebrow?: string
-  fullName: string
-  gender: string
-  hometown: string
+  errors: FieldErrors<BecomeMentorProfileFormValues>
   onAvatarChange: (event: ChangeEvent<HTMLInputElement>) => void
-  onChange: BecomeMentorFieldChangeHandler<BecomeMentorProfileField>
+  register: UseFormRegister<BecomeMentorProfileFormValues>
 }
 
 export function BecomeMentorPersonalSection({
   avatarUrl,
-  currentLocation,
   eyebrow = 'Bước 1',
-  fullName,
-  gender,
-  hometown,
+  errors,
   onAvatarChange,
-  onChange
+  register
 }: BecomeMentorPersonalSectionProps) {
   return (
     <BecomeMentorSectionCard
@@ -74,17 +66,17 @@ export function BecomeMentorPersonalSection({
             <Field>
               <Label htmlFor='mentor-full-name'>Họ và tên</Label>
               <Input
+                {...register('fullName')}
                 id='mentor-full-name'
-                onChange={onChange('fullName')}
                 placeholder='Ví dụ: Nguyễn Văn A'
-                value={fullName}
               />
+              <FieldError message={errors.fullName?.message} />
             </Field>
 
             <div className='grid gap-4 md:grid-cols-2'>
               <Field>
                 <Label htmlFor='mentor-gender'>Giới tính</Label>
-                <Select id='mentor-gender' onChange={onChange('gender')} value={gender}>
+                <Select id='mentor-gender' {...register('gender')}>
                   <option value=''>Chọn giới tính</option>
                   <option value='MALE'>Nam</option>
                   <option value='FEMALE'>Nữ</option>
@@ -95,10 +87,9 @@ export function BecomeMentorPersonalSection({
               <Field>
                 <Label htmlFor='mentor-hometown'>Quê quán</Label>
                 <Input
+                  {...register('hometown')}
                   id='mentor-hometown'
-                  onChange={onChange('hometown')}
                   placeholder='Tỉnh / thành phố'
-                  value={hometown}
                 />
               </Field>
             </div>
@@ -106,11 +97,11 @@ export function BecomeMentorPersonalSection({
             <Field>
               <Label htmlFor='mentor-current-location'>Khu vực hiện tại</Label>
               <Input
+                {...register('currentLocation')}
                 id='mentor-current-location'
-                onChange={onChange('currentLocation')}
                 placeholder='Quận / huyện, tỉnh / thành phố nơi bạn có thể gặp trực tiếp'
-                value={currentLocation}
               />
+              <FieldError message={errors.currentLocation?.message} />
             </Field>
           </div>
         </div>
@@ -121,4 +112,10 @@ export function BecomeMentorPersonalSection({
 
 function Field({ children }: { children: ReactNode }) {
   return <div className='space-y-2'>{children}</div>
+}
+
+function FieldError({ message }: { message?: string }) {
+  if (!message) return null
+
+  return <p className='text-sm font-medium text-red-500'>{message}</p>
 }

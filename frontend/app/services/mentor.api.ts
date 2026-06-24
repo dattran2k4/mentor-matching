@@ -9,6 +9,7 @@ import type {
   AdminMentorVerificationDetailApiResponse,
   AdminMentorVerificationListPageApiResponse,
   CurrentMentorApiResponse,
+  CurrentMentorOnboardingStatusApiResponse,
   CurrentMentorTraitsApiResponse,
   CurrentMentorVerificationApiResponse,
   GetAdminMentorVerificationsQueryParams,
@@ -24,6 +25,7 @@ import type {
   ReviewMentorApprovalRequest,
   ReviewMentorVerificationRequest,
   SaveCurrentMentorAchievementRequest,
+  UpdateCurrentMentorAvatarRequest,
   UpdateCurrentMentorRequest,
   UpdateCurrentMentorTraitsRequest,
   UpsertCurrentMentorSubjectRequest,
@@ -32,9 +34,13 @@ import type {
 
 const MENTOR_ENDPOINTS = {
   me: 'mentors/me',
+  myAvatar: 'mentors/me/avatar',
+  myOnboardingStatus: 'mentors/me/onboarding-status',
+  mySubmission: 'mentors/me/submission',
   mentors: 'mentors',
   mentorDetail: (mentorId: number) => `mentors/${mentorId}`,
   mySubjects: 'mentors/me/subjects',
+  mySubjectDetail: (mentorSubjectId: number) => `mentors/me/subjects/${mentorSubjectId}`,
   mentorSubjects: (mentorId: number) => `mentors/${mentorId}/subjects`,
   myTraits: 'mentors/me/traits',
   personalityOptions: 'mentors/personality-options',
@@ -55,13 +61,42 @@ const MENTOR_ENDPOINTS = {
 } as const
 
 const defaultMentorApi = {
+  createCurrentMentor: async (
+    payload: UpdateCurrentMentorRequest
+  ): Promise<ApiResponse<CurrentMentorApiResponse>> =>
+    (await http.post<ApiResponse<CurrentMentorApiResponse>>(MENTOR_ENDPOINTS.me, payload)).data,
+
   getCurrentMentor: async (): Promise<ApiResponse<CurrentMentorApiResponse>> =>
     (await http.get<ApiResponse<CurrentMentorApiResponse>>(MENTOR_ENDPOINTS.me)).data,
+
+  getCurrentMentorOnboardingStatus: async (): Promise<
+    ApiResponse<CurrentMentorOnboardingStatusApiResponse>
+  > =>
+    (
+      await http.get<ApiResponse<CurrentMentorOnboardingStatusApiResponse>>(
+        MENTOR_ENDPOINTS.myOnboardingStatus
+      )
+    ).data,
+
+  submitCurrentMentorApplication: async (): Promise<
+    ApiResponse<CurrentMentorOnboardingStatusApiResponse>
+  > =>
+    (
+      await http.post<ApiResponse<CurrentMentorOnboardingStatusApiResponse>>(
+        MENTOR_ENDPOINTS.mySubmission
+      )
+    ).data,
 
   updateCurrentMentor: async (
     payload: UpdateCurrentMentorRequest
   ): Promise<ApiResponse<CurrentMentorApiResponse>> =>
     (await http.put<ApiResponse<CurrentMentorApiResponse>>(MENTOR_ENDPOINTS.me, payload)).data,
+
+  updateCurrentMentorAvatar: async (
+    payload: UpdateCurrentMentorAvatarRequest
+  ): Promise<ApiResponse<CurrentMentorApiResponse>> =>
+    (await http.patch<ApiResponse<CurrentMentorApiResponse>>(MENTOR_ENDPOINTS.myAvatar, payload))
+      .data,
 
   getMentors: async (
     params?: GetMentorsQueryParams
@@ -86,6 +121,9 @@ const defaultMentorApi = {
         payload
       )
     ).data,
+
+  deleteCurrentMentorSubject: async (mentorSubjectId: number): Promise<ApiResponse<null>> =>
+    (await http.delete<ApiResponse<null>>(MENTOR_ENDPOINTS.mySubjectDetail(mentorSubjectId))).data,
 
   getMentorSubjects: async (
     mentorId: number

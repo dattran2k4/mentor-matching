@@ -1,41 +1,42 @@
-import type { ChangeEvent, ReactNode } from 'react'
+import type { ReactNode } from 'react'
 import { CheckCircle2, Shield, UploadCloud } from 'lucide-react'
+import { Controller } from 'react-hook-form'
 
 import { Badge } from '@/components/ui/badge'
 import { buttonVariants } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { NumericInput } from '@/components/ui/numeric-input'
-import type {
-  BecomeMentorFieldChangeHandler,
-  BecomeMentorFieldValueChangeHandler,
-  BecomeMentorVerificationField
-} from '@/features/become-mentor/types'
+import { useBecomeMentorVerificationForm } from '@/features/become-mentor/hooks'
+import type { BecomeMentorVerificationFormValues } from '@/features/become-mentor/schemas'
 
 import { verificationDocumentMeta } from '../become-mentor.constants'
-import type { BecomeMentorDocumentKey, BecomeMentorFormState } from '../become-mentor.types'
+import type { BecomeMentorFormState } from '../become-mentor.types'
 
 import { BecomeMentorSectionCard } from './BecomeMentorSectionCard'
 
 type BecomeMentorVerificationSectionProps = {
   documents: BecomeMentorFormState['documents']
+  formId: string
   idCardNumber: string
+  onSubmit: (values: BecomeMentorVerificationFormValues) => void
   verificationFullName: string
-  onChange: BecomeMentorFieldChangeHandler<BecomeMentorVerificationField>
-  onValueChange: BecomeMentorFieldValueChangeHandler<BecomeMentorVerificationField>
-  onClearDocument: (key: BecomeMentorDocumentKey) => void
-  onDocumentChange: (key: BecomeMentorDocumentKey) => (event: ChangeEvent<HTMLInputElement>) => void
 }
 
 export function BecomeMentorVerificationSection({
   documents,
+  formId,
   idCardNumber,
-  onChange,
-  onValueChange,
-  onClearDocument,
-  onDocumentChange,
+  onSubmit,
   verificationFullName
 }: BecomeMentorVerificationSectionProps) {
+  const verificationForm = useBecomeMentorVerificationForm({
+    documents,
+    idCardNumber,
+    onSubmit,
+    verificationFullName
+  })
+
   return (
     <BecomeMentorSectionCard
       description='Chọn ảnh giấy tờ trực tiếp từ máy để hoàn thiện bước xác minh trước khi gửi duyệt.'
@@ -43,7 +44,7 @@ export function BecomeMentorVerificationSection({
       id='verification'
       title='Xác minh danh tính'
     >
-      <div className='space-y-5'>
+      <form className='space-y-5' id={formId} onSubmit={verificationForm.onSubmit}>
         <div className='rounded-[24px] border border-blue-200 bg-blue-50/70 p-4'>
           <div className='flex items-start gap-3'>
             <div className='text-primary flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-white shadow-sm'>
@@ -65,27 +66,36 @@ export function BecomeMentorVerificationSection({
           <Field>
             <Label htmlFor='mentor-verification-name'>Họ tên trên giấy tờ</Label>
             <Input
+              {...verificationForm.register('verificationFullName')}
               id='mentor-verification-name'
-              onChange={onChange('verificationFullName')}
               placeholder='Nhập giống với CCCD / ID'
-              value={verificationFullName}
             />
+            <FieldError message={verificationForm.errors.verificationFullName?.message} />
           </Field>
 
           <Field>
             <Label htmlFor='mentor-id-card-number'>Số giấy tờ</Label>
-            <NumericInput
-              id='mentor-id-card-number'
-              onValueChange={onValueChange('idCardNumber')}
-              placeholder='012345678901'
-              value={idCardNumber}
+            <Controller
+              control={verificationForm.control}
+              name='idCardNumber'
+              render={({ field }) => (
+                <NumericInput
+                  id='mentor-id-card-number'
+                  onBlur={field.onBlur}
+                  onValueChange={field.onChange}
+                  placeholder='012345678901'
+                  ref={field.ref}
+                  value={field.value}
+                />
+              )}
             />
+            <FieldError message={verificationForm.errors.idCardNumber?.message} />
           </Field>
         </div>
 
         <div className='grid gap-4 md:grid-cols-3'>
           {verificationDocumentMeta.map((document) => {
-            const fileName = documents[document.key]
+            const fileName = verificationForm.selectedDocuments[document.key]
             const done = Boolean(fileName)
 
             return (
@@ -114,7 +124,7 @@ export function BecomeMentorVerificationSection({
                   accept='image/png,image/jpeg,image/jpg'
                   className='sr-only'
                   id={`mentor-document-${document.key}`}
-                  onChange={onDocumentChange(document.key)}
+                  onChange={verificationForm.handleDocumentFileChange(document.key)}
                   type='file'
                 />
                 <div className='mt-5 flex flex-col gap-2'>
@@ -130,7 +140,7 @@ export function BecomeMentorVerificationSection({
                   {done ? (
                     <button
                       className='text-sm font-medium text-slate-500 transition hover:text-slate-700'
-                      onClick={() => onClearDocument(document.key)}
+                      onClick={() => verificationForm.clearDocument(document.key)}
                       type='button'
                     >
                       Xóa tệp đã chọn
@@ -141,11 +151,17 @@ export function BecomeMentorVerificationSection({
             )
           })}
         </div>
-      </div>
+      </form>
     </BecomeMentorSectionCard>
   )
 }
 
 function Field({ children }: { children: ReactNode }) {
   return <div className='space-y-2'>{children}</div>
+}
+
+function FieldError({ message }: { message?: string }) {
+  if (!message) return null
+
+  return <p className='text-sm font-medium text-red-500'>{message}</p>
 }

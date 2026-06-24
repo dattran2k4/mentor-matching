@@ -16,23 +16,29 @@ import { BecomeMentorSectionCard } from './BecomeMentorSectionCard'
 type BecomeMentorAvailabilitySectionProps = {
   availabilities: BecomeMentorAvailabilityWindow[]
   availabilityDraft: MentorAvailabilityDraftValue
+  formId: string
   isEditing: boolean
   onDraftChange: (value: MentorAvailabilityDraftValue) => void
   onEditAvailability: (availability: BecomeMentorAvailabilityWindow) => void
   onRemoveAvailability: (availabilityId: string) => void
   onResetDraft: () => void
   onSaveAvailability: () => void
+  onSubmitStep: () => void
+  stepError?: string
 }
 
 export function BecomeMentorAvailabilitySection({
   availabilities,
   availabilityDraft,
+  formId,
   isEditing,
   onDraftChange,
   onEditAvailability,
   onRemoveAvailability,
   onResetDraft,
-  onSaveAvailability
+  onSaveAvailability,
+  onSubmitStep,
+  stepError
 }: BecomeMentorAvailabilitySectionProps) {
   return (
     <BecomeMentorSectionCard
@@ -41,7 +47,14 @@ export function BecomeMentorAvailabilitySection({
       id='availability'
       title='Lịch rảnh ban đầu'
     >
-      <div className='space-y-6'>
+      <form
+        className='space-y-6'
+        id={formId}
+        onSubmit={(event) => {
+          event.preventDefault()
+          onSubmitStep()
+        }}
+      >
         <section className='rounded-[24px] border border-slate-200 bg-white p-5 shadow-sm'>
           <div className='border-b border-slate-100 pb-4'>
             <h3 className='text-xl font-semibold text-slate-900'>Danh sách khung giờ rảnh</h3>
@@ -99,6 +112,7 @@ export function BecomeMentorAvailabilitySection({
                 nhận học viên của bạn.
               </div>
             )}
+            {stepError ? <p className='text-sm font-medium text-red-500'>{stepError}</p> : null}
           </div>
         </section>
 
@@ -131,6 +145,7 @@ export function BecomeMentorAvailabilitySection({
                 disabled={!isMentorAvailabilityDraftValid(availabilityDraft)}
                 onClick={onSaveAvailability}
                 size='lg'
+                type='button'
               >
                 <Plus size={18} />
                 {isEditing ? 'Cập nhật khung giờ' : 'Thêm khung giờ'}
@@ -138,7 +153,7 @@ export function BecomeMentorAvailabilitySection({
             </div>
           </div>
         </section>
-      </div>
+      </form>
     </BecomeMentorSectionCard>
   )
 }

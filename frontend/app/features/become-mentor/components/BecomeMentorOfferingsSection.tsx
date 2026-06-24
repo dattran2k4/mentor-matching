@@ -1,54 +1,52 @@
 import type { ComponentProps, ReactNode } from 'react'
 import { Pencil, Plus, Trash2 } from 'lucide-react'
+import { Controller } from 'react-hook-form'
 
 import { AppSelect } from '@/components/ui/app-select'
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
 import { NumericInput } from '@/components/ui/numeric-input'
 import { Textarea } from '@/components/ui/textarea'
+import { useBecomeMentorOfferingsForm } from '@/features/become-mentor/hooks'
+import type { BecomeMentorOfferingFormValues } from '@/features/become-mentor/schemas'
 import {
   useCatalogGradesQuery,
   useCatalogSubjectsQuery
 } from '@/hooks/queries/catalog/useCatalogOptionsQuery'
-import type {
-  BecomeMentorFieldChangeHandler,
-  BecomeMentorFieldValueChangeHandler,
-  BecomeMentorOfferingDraftField
-} from '@/features/become-mentor/types'
+import { formatPrice } from '@/utils/format'
 
 import type { BecomeMentorOffering } from '../become-mentor.types'
 
 import { BecomeMentorSectionCard } from './BecomeMentorSectionCard'
 
 type BecomeMentorOfferingsSectionProps = {
-  gradeLevel: string
+  editingOffering: BecomeMentorOffering | null
+  formId: string
   isEditing: boolean
   offerings: BecomeMentorOffering[]
-  pricePerHour: string
-  primarySubject: string
-  teachingNote: string
-  onChange: BecomeMentorFieldChangeHandler<BecomeMentorOfferingDraftField>
-  onValueChange: BecomeMentorFieldValueChangeHandler<BecomeMentorOfferingDraftField>
   onEditOffering: (offering: BecomeMentorOffering) => void
   onRemoveOffering: (offeringId: string) => void
   onResetDraft: () => void
-  onSaveOffering: () => void
+  onSaveOffering: (values: BecomeMentorOfferingFormValues) => void
+  onSubmitStep: () => void
 }
 
 export function BecomeMentorOfferingsSection({
-  gradeLevel,
+  editingOffering,
+  formId,
   isEditing,
-  offerings,
-  onChange,
-  onValueChange,
   onEditOffering,
   onRemoveOffering,
   onResetDraft,
   onSaveOffering,
-  pricePerHour,
-  primarySubject,
-  teachingNote
+  onSubmitStep,
+  offerings
 }: BecomeMentorOfferingsSectionProps) {
+  const offeringsForm = useBecomeMentorOfferingsForm({
+    editingOffering,
+    onResetDraft,
+    onSaveOffering
+  })
   const {
     data: subjects,
     isLoading: isSubjectsLoading,
@@ -59,10 +57,6 @@ export function BecomeMentorOfferingsSection({
     isLoading: isGradesLoading,
     isError: isGradesError
   } = useCatalogGradesQuery()
-
-  const canSaveOffering = Boolean(
-    primarySubject.trim() && gradeLevel.trim() && pricePerHour.trim() && teachingNote.trim()
-  )
   const subjectOptions = (subjects ?? []).map((subject) => ({
     label: subject.name,
     value: subject.name
@@ -89,8 +83,15 @@ export function BecomeMentorOfferingsSection({
       id='offerings'
       title='Môn dạy và học phí'
     >
-      <div className='space-y-6'>
-        <section className='rounded-[24px] border border-slate-200 bg-white p-5 shadow-sm'>
+      <form
+        className='space-y-6'
+        id={formId}
+        onSubmit={(event) => {
+          event.preventDefault()
+          onSubmitStep()
+        }}
+      >
+        <section className='rounded-2xl border border-slate-200 bg-white p-5 shadow-sm'>
           <div className='border-b border-slate-100 pb-4'>
             <h3 className='text-xl font-semibold text-slate-900'>Danh sách môn học & học phí</h3>
           </div>
@@ -107,7 +108,7 @@ export function BecomeMentorOfferingsSection({
                       {offering.subject} - {offering.gradeLevel}
                     </p>
                     <p className='mt-1 text-lg font-medium text-slate-600'>
-                      {formatPrice(offering.pricePerHour)}
+                      {formatOfferingPrice(offering.pricePerHour)}
                     </p>
                   </div>
 
@@ -147,68 +148,97 @@ export function BecomeMentorOfferingsSection({
           <div className='mt-5 space-y-5'>
             <Field>
               <Label>Chọn môn học</Label>
-              <AppSelect
-                ariaLabel='Chọn môn học'
-                className='[&_button]:h-11 [&_button]:rounded-xl [&_button]:text-sm [&_span]:text-slate-900'
-                disabled={isSubjectsLoading || isSubjectsError || subjectOptions.length === 0}
-                onValueChange={onValueChange('primarySubject')}
-                options={subjectOptions}
-                placeholder={subjectPlaceholder}
-                value={primarySubject}
+              <Controller
+                control={offeringsForm.control}
+                name='primarySubject'
+                render={({ field }) => (
+                  <AppSelect
+                    ariaLabel='Chọn môn học'
+                    className='[&_button]:h-11 [&_button]:rounded-xl [&_button]:text-sm [&_span]:text-slate-900'
+                    disabled={isSubjectsLoading || isSubjectsError || subjectOptions.length === 0}
+                    onValueChange={field.onChange}
+                    options={subjectOptions}
+                    placeholder={subjectPlaceholder}
+                    value={field.value}
+                  />
+                )}
               />
+              <FieldError message={offeringsForm.errors.primarySubject?.message} />
             </Field>
 
             <Field>
               <Label>Cấp lớp</Label>
-              <AppSelect
-                ariaLabel='Chọn cấp lớp'
-                className='[&_button]:h-11 [&_button]:rounded-xl [&_button]:text-sm [&_span]:text-slate-900'
-                disabled={isGradesLoading || isGradesError || gradeOptions.length === 0}
-                onValueChange={onValueChange('gradeLevel')}
-                options={gradeOptions}
-                placeholder={gradePlaceholder}
-                value={gradeLevel}
+              <Controller
+                control={offeringsForm.control}
+                name='gradeLevel'
+                render={({ field }) => (
+                  <AppSelect
+                    ariaLabel='Chọn cấp lớp'
+                    className='[&_button]:h-11 [&_button]:rounded-xl [&_button]:text-sm [&_span]:text-slate-900'
+                    disabled={isGradesLoading || isGradesError || gradeOptions.length === 0}
+                    onValueChange={field.onChange}
+                    options={gradeOptions}
+                    placeholder={gradePlaceholder}
+                    value={field.value}
+                  />
+                )}
               />
+              <FieldError message={offeringsForm.errors.gradeLevel?.message} />
             </Field>
 
             <Field>
               <Label htmlFor='mentor-teaching-note'>Mô tả ngắn về môn học</Label>
               <Textarea
+                {...offeringsForm.register('teachingNote')}
                 className='min-h-28'
                 id='mentor-teaching-note'
-                onChange={onChange('teachingNote')}
                 placeholder='Mô tả ngắn gọn nội dung và phương pháp giảng dạy...'
-                value={teachingNote}
               />
+              <FieldError message={offeringsForm.errors.teachingNote?.message} />
             </Field>
 
             <Field>
               <Label htmlFor='mentor-price'>Học phí mỗi giờ</Label>
               <div className='focus-within:border-primary focus-within:ring-primary/10 grid grid-cols-[minmax(0,1fr)_5.5rem] overflow-hidden rounded-xl border border-slate-200 bg-white focus-within:ring-4'>
-                <NumericInput
-                  className='h-11 w-full border-0 bg-transparent px-3 text-sm text-slate-900 outline-none placeholder:text-slate-400'
-                  id='mentor-price'
-                  onValueChange={onValueChange('pricePerHour')}
-                  placeholder='Ví dụ: 300000'
-                  value={pricePerHour}
+                <Controller
+                  control={offeringsForm.control}
+                  name='pricePerHour'
+                  render={({ field }) => (
+                    <NumericInput
+                      className='h-11 w-full border-0 bg-transparent px-3 text-sm text-slate-900 outline-none placeholder:text-slate-400'
+                      id='mentor-price'
+                      onBlur={field.onBlur}
+                      onValueChange={field.onChange}
+                      placeholder='Ví dụ: 300000'
+                      ref={field.ref}
+                      value={field.value}
+                    />
+                  )}
                 />
                 <div className='flex items-center justify-center border-l border-slate-200 bg-slate-50 text-sm font-medium text-slate-600'>
                   đ/giờ
                 </div>
               </div>
+              <FieldError message={offeringsForm.errors.pricePerHour?.message} />
             </Field>
 
             <div className='flex flex-col gap-3 sm:flex-row'>
               {isEditing ? (
-                <Button className='rounded-2xl' onClick={onResetDraft} variant='outline'>
+                <Button
+                  className='rounded-2xl'
+                  onClick={offeringsForm.cancelEditing}
+                  type='button'
+                  variant='outline'
+                >
                   Hủy chỉnh sửa
                 </Button>
               ) : null}
               <Button
                 className='w-full rounded-2xl sm:flex-1'
-                disabled={!canSaveOffering}
-                onClick={onSaveOffering}
+                disabled={!offeringsForm.canSaveOffering}
+                onClick={offeringsForm.saveOffering}
                 size='lg'
+                type='button'
               >
                 <Plus size={18} />
                 {isEditing ? 'Cập nhật môn học' : 'Thêm môn học mới'}
@@ -216,13 +246,19 @@ export function BecomeMentorOfferingsSection({
             </div>
           </div>
         </section>
-      </div>
+      </form>
     </BecomeMentorSectionCard>
   )
 }
 
 function Field({ children }: { children: ReactNode }) {
   return <div className='space-y-2'>{children}</div>
+}
+
+function FieldError({ message }: { message?: string }) {
+  if (!message) return null
+
+  return <p className='text-sm font-medium text-red-500'>{message}</p>
 }
 
 function IconButton({ children, ...props }: ComponentProps<typeof Button>) {
@@ -233,16 +269,22 @@ function IconButton({ children, ...props }: ComponentProps<typeof Button>) {
   )
 }
 
-function formatPrice(value: string) {
+function formatGradeLabel(value: string) {
+  return value.replace(/^Lop\s+/i, 'Lớp ')
+}
+
+function formatOfferingPrice(value: string) {
   const digits = value.replace(/\D/g, '')
 
   if (!digits) {
     return 'Chưa đặt học phí'
   }
 
-  return `${new Intl.NumberFormat('vi-VN').format(Number(digits))}đ/giờ`
-}
+  const numericValue = Number(digits)
 
-function formatGradeLabel(value: string) {
-  return value.replace(/^Lop\s+/i, 'Lớp ')
+  if (Number.isNaN(numericValue)) {
+    return 'Chưa đặt học phí'
+  }
+
+  return `${formatPrice(numericValue)}/giờ`
 }

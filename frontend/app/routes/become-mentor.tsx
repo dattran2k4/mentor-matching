@@ -1,35 +1,34 @@
-import type { ChangeEvent } from 'react'
 import { useState } from 'react'
 
-import type { MentorAvailabilityDraftValue } from '@/components/MentorAvailabilityForm/MentorAvailabilityForm'
 import { initialBecomeMentorFormState } from '@/features/become-mentor/become-mentor.constants'
 import {
   BecomeMentorAvailabilitySection,
   BecomeMentorHero,
   BecomeMentorOfferingsSection,
-  BecomeMentorPersonalSection,
+  BecomeMentorProfileStep,
   BecomeMentorProgressRail,
   BecomeMentorStickyBar,
-  BecomeMentorTeachingSection,
   BecomeMentorVerificationSection
 } from '@/features/become-mentor/components'
+import {
+  useBecomeMentorAvailabilityStep,
+  useBecomeMentorOfferingsStep,
+  useBecomeMentorProfileStep,
+  type BecomeMentorProfileStepState
+} from '@/features/become-mentor/hooks'
+import type { BecomeMentorVerificationFormValues } from '@/features/become-mentor/schemas'
 import type {
-  BecomeMentorFieldChangeHandler,
-  BecomeMentorFieldValueChangeHandler,
-  BecomeMentorPageField
-} from '@/features/become-mentor/types'
-import type {
-  BecomeMentorAvailabilityWindow,
-  BecomeMentorDocumentKey,
   BecomeMentorFormState,
-  BecomeMentorOffering,
   BecomeMentorReadinessItem,
   BecomeMentorStep
 } from '@/features/become-mentor/become-mentor.types'
 
-export function meta() {
-  return [{ title: 'Trở thành mentor | Mentor Matching' }]
-}
+const becomeMentorStepFormIds = {
+  profile: 'become-mentor-profile-form',
+  offerings: 'become-mentor-offerings-form',
+  availability: 'become-mentor-availability-form',
+  verification: 'become-mentor-verification-form'
+} satisfies Record<BecomeMentorStep['id'], string>
 
 function getReadinessItems(formState: BecomeMentorFormState): BecomeMentorReadinessItem[] {
   return [
@@ -109,248 +108,94 @@ function getSteps(
 export default function BecomeMentorPage() {
   const [formState, setFormState] = useState(initialBecomeMentorFormState)
   const [currentStepIndex, setCurrentStepIndex] = useState(0)
-  const [editingOfferingId, setEditingOfferingId] = useState<string | null>(null)
-  const [availabilityDraft, setAvailabilityDraft] = useState<MentorAvailabilityDraftValue>({
-    mode: 'RECURRING',
-    selectedDays: ['2', '4'],
-    specificDate: '',
-    startTime: '18:00',
-    endTime: '20:00'
-  })
-  const [editingAvailabilityId, setEditingAvailabilityId] = useState<string | null>(null)
 
   const readinessItems = getReadinessItems(formState)
   const steps = getSteps(readinessItems, currentStepIndex)
   const completedCount = readinessItems.filter((item) => item.done).length
   const currentStep = steps[currentStepIndex]
-
-  const handleFieldChange: BecomeMentorFieldChangeHandler<BecomeMentorPageField> =
-    (field) => (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-      const value = event.target.value
-      setFormState((current) => ({ ...current, [field]: value }))
-    }
-
-  const handleFieldValueChange: BecomeMentorFieldValueChangeHandler<BecomeMentorPageField> =
-    (field) => (value) => {
-      setFormState((current) => ({ ...current, [field]: value }))
-    }
-
-  const handleAvatarFileChange = (event: ChangeEvent<HTMLInputElement>) => {
-    const fileName = event.target.files?.[0]?.name ?? ''
-    setFormState((current) => ({ ...current, avatarUrl: fileName }))
+  const profileState: BecomeMentorProfileStepState = {
+    avatarUrl: formState.avatarUrl,
+    currentLocation: formState.currentLocation,
+    currentPosition: formState.currentPosition,
+    experienceYears: formState.experienceYears,
+    fullName: formState.fullName,
+    gender: formState.gender,
+    headline: formState.headline,
+    hometown: formState.hometown,
+    introduction: formState.introduction,
+    teachingStyle: formState.teachingStyle,
+    workplace: formState.workplace
   }
+  const profileStep = useBecomeMentorProfileStep({
+    formId: becomeMentorStepFormIds.profile,
+    onSubmit: (values) => {
+      setFormState((current) => ({ ...current, ...values }))
+      goToStep(currentStepIndex + 1)
+    },
+    profileState
+  })
 
-  const handleDocumentFileChange =
-    (key: BecomeMentorDocumentKey) => (event: ChangeEvent<HTMLInputElement>) => {
-      const fileName = event.target.files?.[0]?.name ?? ''
+  const offeringsStep = useBecomeMentorOfferingsStep({
+    offerings: formState.offerings,
+    setFormState
+  })
 
-      setFormState((current) => ({
-        ...current,
-        documents: {
-          ...current.documents,
-          [key]: fileName
-        }
-      }))
-    }
-
-  const clearDocument = (key: BecomeMentorDocumentKey) => {
-    setFormState((current) => ({
-      ...current,
-      documents: {
-        ...current.documents,
-        [key]: ''
-      }
-    }))
-  }
+  const availabilityStep = useBecomeMentorAvailabilityStep({
+    availabilities: formState.availabilities,
+    onSubmitStep: () => goToStep(currentStepIndex + 1),
+    setFormState
+  })
 
   const goToStep = (index: number) => {
     setCurrentStepIndex(Math.max(0, Math.min(index, steps.length - 1)))
   }
 
-  const resetOfferingDraft = () => {
-    setFormState((current) => ({
-      ...current,
-      primarySubject: '',
-      gradeLevel: '',
-      pricePerHour: '',
-      teachingNote: ''
-    }))
-    setEditingOfferingId(null)
-  }
-
-  const saveOffering = () => {
-    const draft = {
-      gradeLevel: formState.gradeLevel.trim(),
-      id: editingOfferingId ?? `offering-${Date.now()}`,
-      pricePerHour: formState.pricePerHour.trim(),
-      subject: formState.primarySubject.trim(),
-      teachingNote: formState.teachingNote.trim()
-    } satisfies BecomeMentorOffering
-
-    if (!draft.subject || !draft.gradeLevel || !draft.pricePerHour || !draft.teachingNote) {
-      return
-    }
-
-    setFormState((current) => ({
-      ...current,
-      offerings: editingOfferingId
-        ? current.offerings.map((item) => (item.id === editingOfferingId ? draft : item))
-        : [...current.offerings, draft],
-      primarySubject: '',
-      gradeLevel: '',
-      pricePerHour: '',
-      teachingNote: ''
-    }))
-    setEditingOfferingId(null)
-  }
-
-  const editOffering = (offering: BecomeMentorOffering) => {
-    setEditingOfferingId(offering.id)
-    setFormState((current) => ({
-      ...current,
-      primarySubject: offering.subject,
-      gradeLevel: offering.gradeLevel,
-      pricePerHour: offering.pricePerHour,
-      teachingNote: offering.teachingNote
-    }))
-  }
-
-  const removeOffering = (offeringId: string) => {
-    setFormState((current) => ({
-      ...current,
-      offerings: current.offerings.filter((item) => item.id !== offeringId)
-    }))
-
-    if (editingOfferingId === offeringId) {
-      resetOfferingDraft()
-    }
-  }
-
-  const resetAvailabilityDraft = () => {
-    setAvailabilityDraft({
-      mode: 'RECURRING',
-      selectedDays: ['2', '4'],
-      specificDate: '',
-      startTime: '18:00',
-      endTime: '20:00'
-    })
-    setEditingAvailabilityId(null)
-  }
-
-  const saveAvailability = () => {
-    const draft = {
-      endTime: availabilityDraft.endTime,
-      id: editingAvailabilityId ?? `availability-${Date.now()}`,
-      mode: availabilityDraft.mode,
-      selectedDays:
-        availabilityDraft.mode === 'RECURRING' ? availabilityDraft.selectedDays.slice() : [],
-      specificDate:
-        availabilityDraft.mode === 'SPECIFIC_DATE' ? availabilityDraft.specificDate : '',
-      startTime: availabilityDraft.startTime
-    } satisfies BecomeMentorAvailabilityWindow
-
-    if (!draft.startTime || !draft.endTime) return
-    if (draft.mode === 'RECURRING' && draft.selectedDays.length === 0) return
-    if (draft.mode === 'SPECIFIC_DATE' && !draft.specificDate) return
-
-    setFormState((current) => ({
-      ...current,
-      availabilities: editingAvailabilityId
-        ? current.availabilities.map((item) => (item.id === editingAvailabilityId ? draft : item))
-        : [...current.availabilities, draft]
-    }))
-    resetAvailabilityDraft()
-  }
-
-  const editAvailability = (availability: BecomeMentorAvailabilityWindow) => {
-    setEditingAvailabilityId(availability.id)
-    setAvailabilityDraft({
-      mode: availability.mode,
-      selectedDays: availability.selectedDays,
-      specificDate: availability.specificDate,
-      startTime: availability.startTime,
-      endTime: availability.endTime
-    })
-  }
-
-  const removeAvailability = (availabilityId: string) => {
-    setFormState((current) => ({
-      ...current,
-      availabilities: current.availabilities.filter((item) => item.id !== availabilityId)
-    }))
-
-    if (editingAvailabilityId === availabilityId) {
-      resetAvailabilityDraft()
-    }
+  const submitVerification = (values: BecomeMentorVerificationFormValues) => {
+    setFormState((current) => ({ ...current, ...values }))
+    goToStep(currentStepIndex + 1)
   }
 
   const renderCurrentStep = () => {
     switch (currentStep.id) {
       case 'profile':
-        return (
-          <div className='space-y-6'>
-            <BecomeMentorPersonalSection
-              avatarUrl={formState.avatarUrl}
-              currentLocation={formState.currentLocation}
-              eyebrow='Phần 1'
-              fullName={formState.fullName}
-              gender={formState.gender}
-              hometown={formState.hometown}
-              onAvatarChange={handleAvatarFileChange}
-              onChange={handleFieldChange}
-            />
-            <BecomeMentorTeachingSection
-              currentPosition={formState.currentPosition}
-              eyebrow='Phần 2'
-              experienceYears={formState.experienceYears}
-              headline={formState.headline}
-              introduction={formState.introduction}
-              onChange={handleFieldChange}
-              onValueChange={handleFieldValueChange}
-              teachingStyle={formState.teachingStyle}
-              workplace={formState.workplace}
-            />
-          </div>
-        )
+        return <BecomeMentorProfileStep {...profileStep} />
       case 'offerings':
         return (
           <BecomeMentorOfferingsSection
-            gradeLevel={formState.gradeLevel}
-            isEditing={Boolean(editingOfferingId)}
-            onChange={handleFieldChange}
-            onValueChange={handleFieldValueChange}
-            onEditOffering={editOffering}
-            onRemoveOffering={removeOffering}
-            onResetDraft={resetOfferingDraft}
-            onSaveOffering={saveOffering}
+            editingOffering={offeringsStep.editingOffering}
+            formId={becomeMentorStepFormIds.offerings}
+            isEditing={offeringsStep.isEditing}
+            onEditOffering={offeringsStep.onEditOffering}
+            onRemoveOffering={offeringsStep.onRemoveOffering}
+            onResetDraft={offeringsStep.onResetDraft}
+            onSaveOffering={offeringsStep.onSaveOffering}
+            onSubmitStep={() => goToStep(currentStepIndex + 1)}
             offerings={formState.offerings}
-            pricePerHour={formState.pricePerHour}
-            primarySubject={formState.primarySubject}
-            teachingNote={formState.teachingNote}
           />
         )
       case 'availability':
         return (
           <BecomeMentorAvailabilitySection
             availabilities={formState.availabilities}
-            availabilityDraft={availabilityDraft}
-            isEditing={Boolean(editingAvailabilityId)}
-            onDraftChange={setAvailabilityDraft}
-            onEditAvailability={editAvailability}
-            onRemoveAvailability={removeAvailability}
-            onResetDraft={resetAvailabilityDraft}
-            onSaveAvailability={saveAvailability}
+            availabilityDraft={availabilityStep.availabilityDraft}
+            formId={becomeMentorStepFormIds.availability}
+            isEditing={availabilityStep.isEditing}
+            onDraftChange={availabilityStep.onDraftChange}
+            onEditAvailability={availabilityStep.onEditAvailability}
+            onRemoveAvailability={availabilityStep.onRemoveAvailability}
+            onResetDraft={availabilityStep.onResetDraft}
+            onSaveAvailability={availabilityStep.onSaveAvailability}
+            onSubmitStep={availabilityStep.onSubmitStep}
+            stepError={availabilityStep.stepError}
           />
         )
       case 'verification':
         return (
           <BecomeMentorVerificationSection
             documents={formState.documents}
+            formId={becomeMentorStepFormIds.verification}
             idCardNumber={formState.idCardNumber}
-            onChange={handleFieldChange}
-            onValueChange={handleFieldValueChange}
-            onClearDocument={clearDocument}
-            onDocumentChange={handleDocumentFileChange}
+            onSubmit={submitVerification}
             verificationFullName={formState.verificationFullName}
           />
         )
@@ -392,11 +237,11 @@ export default function BecomeMentorPage() {
         <BecomeMentorStickyBar
           completedCount={completedCount}
           currentStepIndex={currentStepIndex}
+          currentStepFormId={becomeMentorStepFormIds[currentStep.id]}
           currentStepLabel={currentStep.label}
           isFirstStep={currentStepIndex === 0}
           isLastStep={currentStepIndex === steps.length - 1}
           onBack={() => goToStep(currentStepIndex - 1)}
-          onNext={() => goToStep(currentStepIndex + 1)}
           totalCount={readinessItems.length}
         />
       </div>
