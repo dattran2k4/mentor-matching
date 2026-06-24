@@ -26,6 +26,7 @@ import type { ErrorResponse } from '@/types/api/common'
 import type { LearnerGenderApiResponse, LearnerProfileApiResponse } from '@/types/api/user'
 import type { CurrentUser, UserType } from '@/types/models/user'
 import { cn } from '@/utils/cn'
+import { parseValidationFieldErrors } from '@/utils/http-error'
 
 type ProfileFormValues = {
   fullName: string
@@ -40,6 +41,8 @@ type ProfileFormValues = {
 }
 
 type UserProfileTabKey = 'account' | 'learning' | 'goals'
+type ProfileFormField = keyof ProfileFormValues
+type ProfileFormErrors = Partial<Record<ProfileFormField, string>>
 
 const DEFAULT_USER_TYPE: UserType = 'STUDENT'
 
@@ -77,6 +80,17 @@ const genderOptions: Array<{ label: string; value: LearnerGenderApiResponse }> =
   { label: 'Nữ', value: 'FEMALE' },
   { label: 'Khác', value: 'OTHER' }
 ]
+
+const profileFieldAliases: Partial<Record<string, ProfileFormField>> = {
+  fullName: 'fullName',
+  phone: 'phone',
+  userType: 'userType',
+  gender: 'gender',
+  birthYear: 'birthYear',
+  schoolName: 'schoolName',
+  gradeId: 'gradeId',
+  learningGoal: 'learningGoal'
+}
 
 function formatGradeLabel(name: string) {
   return name.replace(/^Lop\s+/i, 'Lớp ')
@@ -138,6 +152,12 @@ function getProfileSaveErrorMessage(error: unknown) {
   }
 
   return 'Không thể lưu hồ sơ lúc này.'
+}
+
+function getProfileFieldErrors(error: unknown): ProfileFormErrors {
+  if (!axios.isAxiosError<ErrorResponse>(error)) return {}
+
+  return parseValidationFieldErrors(error.response?.data?.message, profileFieldAliases)
 }
 
 function ProgressRing({ percent }: { percent: number }) {
@@ -227,6 +247,7 @@ export default function UserProfilePage() {
   const [draftFormValues, setDraftFormValues] = useState<ProfileFormValues | null>(null)
   const [saveSuccessMessage, setSaveSuccessMessage] = useState<string | null>(null)
   const [submitErrorMessage, setSubmitErrorMessage] = useState<string | null>(null)
+  const [fieldErrors, setFieldErrors] = useState<ProfileFormErrors>({})
 
   const sourceFormValues =
     currentUser && learnerProfile
@@ -272,6 +293,10 @@ export default function UserProfilePage() {
     (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
       setSaveSuccessMessage(null)
       setSubmitErrorMessage(null)
+      setFieldErrors((currentErrors) => ({
+        ...currentErrors,
+        [field]: undefined
+      }))
       setDraftFormValues((currentValues) => ({
         ...(currentValues ?? sourceFormValues),
         [field]: event.target.value
@@ -281,6 +306,10 @@ export default function UserProfilePage() {
   const handleSelectChange = (field: keyof ProfileFormValues) => (value: string) => {
     setSaveSuccessMessage(null)
     setSubmitErrorMessage(null)
+    setFieldErrors((currentErrors) => ({
+      ...currentErrors,
+      [field]: undefined
+    }))
     setDraftFormValues((currentValues) => ({
       ...(currentValues ?? sourceFormValues),
       [field]: value
@@ -291,6 +320,7 @@ export default function UserProfilePage() {
     setDraftFormValues(null)
     setSaveSuccessMessage(null)
     setSubmitErrorMessage(null)
+    setFieldErrors({})
     void refetchCurrentUser()
     void refetchLearnerProfile()
     void refetchGrades()
@@ -303,13 +333,16 @@ export default function UserProfilePage() {
 
     setSaveSuccessMessage(null)
     setSubmitErrorMessage(null)
+    setFieldErrors({})
 
     if (!formValues.userType) {
+      setFieldErrors({ userType: 'Vui lòng chọn vai trò học tập.' })
       setSubmitErrorMessage('Vui lòng chọn vai trò học tập để hoàn thiện hồ sơ.')
       return
     }
 
     if (!isValidBirthYear(formValues.birthYear)) {
+      setFieldErrors({ birthYear: 'Năm sinh không hợp lệ.' })
       setSubmitErrorMessage('Năm sinh không hợp lệ. Vui lòng nhập năm trong khoảng hợp lý.')
       return
     }
@@ -339,6 +372,7 @@ export default function UserProfilePage() {
           setSaveSuccessMessage(message || 'Hồ sơ đã được cập nhật thành công.')
         },
         onError: (error) => {
+          setFieldErrors(getProfileFieldErrors(error))
           setSubmitErrorMessage(getProfileSaveErrorMessage(error))
         }
       }
@@ -467,11 +501,18 @@ export default function UserProfilePage() {
                     <div className='space-y-2'>
                       <Label htmlFor='learner-full-name'>Họ và tên</Label>
                       <Input
+                        aria-invalid={Boolean(fieldErrors.fullName)}
+                        aria-describedby={fieldErrors.fullName ? 'learner-full-name-error' : undefined}
                         id='learner-full-name'
                         disabled={isSubmitting}
                         onChange={handleFieldChange('fullName')}
                         value={formValues.fullName}
                       />
+                      {fieldErrors.fullName ? (
+                        <p className='text-sm text-red-600' id='learner-full-name-error'>
+                          {fieldErrors.fullName}
+                        </p>
+                      ) : null}
                     </div>
                     <div className='space-y-2'>
                       <Label htmlFor='learner-email'>Email</Label>
@@ -486,12 +527,19 @@ export default function UserProfilePage() {
                     <div className='space-y-2'>
                       <Label htmlFor='learner-phone'>Số điện thoại</Label>
                       <Input
+                        aria-invalid={Boolean(fieldErrors.phone)}
+                        aria-describedby={fieldErrors.phone ? 'learner-phone-error' : undefined}
                         id='learner-phone'
                         disabled={isSubmitting}
                         onChange={handleFieldChange('phone')}
                         type='tel'
                         value={formValues.phone}
                       />
+                      {fieldErrors.phone ? (
+                        <p className='text-sm text-red-600' id='learner-phone-error'>
+                          {fieldErrors.phone}
+                        </p>
+                      ) : null}
                     </div>
                     <div className='space-y-2'>
                       <Label>Giới tính</Label>
@@ -504,6 +552,9 @@ export default function UserProfilePage() {
                         placeholder='Chọn giới tính'
                         value={formValues.gender}
                       />
+                      {fieldErrors.gender ? (
+                        <p className='text-sm text-red-600'>{fieldErrors.gender}</p>
+                      ) : null}
                     </div>
                     <div className='space-y-2 md:col-span-2'>
                       <Label>Vai trò học tập</Label>
@@ -516,6 +567,9 @@ export default function UserProfilePage() {
                         placeholder='Chọn vai trò học tập'
                         value={formValues.userType}
                       />
+                      {fieldErrors.userType ? (
+                        <p className='text-sm text-red-600'>{fieldErrors.userType}</p>
+                      ) : null}
                     </div>
                   </div>
                 </CardContent>
@@ -539,6 +593,10 @@ export default function UserProfilePage() {
                     <div className='space-y-2'>
                       <Label htmlFor='learner-birth-year'>Năm sinh</Label>
                       <Input
+                        aria-invalid={Boolean(fieldErrors.birthYear)}
+                        aria-describedby={
+                          fieldErrors.birthYear ? 'learner-birth-year-error' : undefined
+                        }
                         id='learner-birth-year'
                         className='h-11 rounded-xl'
                         disabled={isSubmitting}
@@ -547,6 +605,11 @@ export default function UserProfilePage() {
                         placeholder='Ví dụ: 2009'
                         value={formValues.birthYear}
                       />
+                      {fieldErrors.birthYear ? (
+                        <p className='text-sm text-red-600' id='learner-birth-year-error'>
+                          {fieldErrors.birthYear}
+                        </p>
+                      ) : null}
                     </div>
                     <div className='space-y-2'>
                       <Label>Lớp hiện tại</Label>
@@ -562,10 +625,15 @@ export default function UserProfilePage() {
                         placeholder='Chọn lớp hiện tại'
                         value={formValues.gradeId}
                       />
+                      {fieldErrors.gradeId ? (
+                        <p className='text-sm text-red-600'>{fieldErrors.gradeId}</p>
+                      ) : null}
                     </div>
                     <div className='space-y-2 md:col-span-2'>
                       <Label htmlFor='learner-school'>Trường / trung tâm</Label>
                       <Input
+                        aria-invalid={Boolean(fieldErrors.schoolName)}
+                        aria-describedby={fieldErrors.schoolName ? 'learner-school-error' : undefined}
                         id='learner-school'
                         className='h-11 rounded-xl'
                         disabled={isSubmitting}
@@ -573,6 +641,11 @@ export default function UserProfilePage() {
                         placeholder='Ví dụ: THPT Nguyễn Thượng Hiền'
                         value={formValues.schoolName}
                       />
+                      {fieldErrors.schoolName ? (
+                        <p className='text-sm text-red-600' id='learner-school-error'>
+                          {fieldErrors.schoolName}
+                        </p>
+                      ) : null}
                     </div>
                   </div>
 
@@ -614,6 +687,10 @@ export default function UserProfilePage() {
                   <div className='space-y-2'>
                     <Label htmlFor='learner-goal'>Mục tiêu hiện tại</Label>
                     <Textarea
+                      aria-invalid={Boolean(fieldErrors.learningGoal)}
+                      aria-describedby={
+                        fieldErrors.learningGoal ? 'learner-goal-error' : undefined
+                      }
                       id='learner-goal'
                       className='min-h-40 rounded-2xl'
                       disabled={isSubmitting}
@@ -621,6 +698,11 @@ export default function UserProfilePage() {
                       placeholder='Ví dụ: Củng cố nền tảng Toán lớp 9, chuẩn bị thi vào 10 hoặc cải thiện kỹ năng IELTS...'
                       value={formValues.learningGoal}
                     />
+                    {fieldErrors.learningGoal ? (
+                      <p className='text-sm text-red-600' id='learner-goal-error'>
+                        {fieldErrors.learningGoal}
+                      </p>
+                    ) : null}
                   </div>
 
                   <div className='grid gap-4 md:grid-cols-2'>
@@ -663,6 +745,7 @@ export default function UserProfilePage() {
                     setDraftFormValues(null)
                     setSaveSuccessMessage(null)
                     setSubmitErrorMessage(null)
+                    setFieldErrors({})
                   }}
                 >
                   Hủy thay đổi
@@ -705,6 +788,11 @@ export default function UserProfilePage() {
                   </div>
                 ))}
               </div>
+              {hasUnsavedChanges ? (
+                <div className='rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800'>
+                  Bạn đã chỉnh sửa hồ sơ. Lưu lại để backend nhận dữ liệu mới nhất.
+                </div>
+              ) : null}
               {saveSuccessMessage ? (
                 <div className='rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700'>
                   {saveSuccessMessage}
