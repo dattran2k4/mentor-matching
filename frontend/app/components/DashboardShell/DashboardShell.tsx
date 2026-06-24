@@ -1,6 +1,6 @@
 import { LogOut, Menu, X } from 'lucide-react'
 import { useState } from 'react'
-import { Link, NavLink, Outlet, useNavigate } from 'react-router'
+import { Outlet, useLocation, useNavigate } from 'react-router'
 
 import { buttonVariants } from '@/components/ui/button'
 import { path } from '@/config/path'
@@ -24,6 +24,7 @@ export function DashboardShell({
   homeLink = '/'
 }: DashboardShellProps) {
   const navigate = useNavigate()
+  const location = useLocation()
   const logout = useAuthStore((state) => state.logout)
   const [sidebarOpen, setSidebarOpen] = useState(false)
 
@@ -43,7 +44,7 @@ export function DashboardShell({
   const sidebar = (
     <aside className='border-line flex h-full flex-col border-r bg-white'>
       <div className='border-line border-b px-5 py-5'>
-        <Link className='block' to={brandHref} onClick={() => setSidebarOpen(false)}>
+        <a className='block' href={brandHref} onClick={() => setSidebarOpen(false)}>
           <span
             className={cn(
               'inline-block rounded-lg px-2.5 py-1 text-xs font-bold tracking-wide text-white uppercase',
@@ -52,37 +53,40 @@ export function DashboardShell({
           >
             {brandLabel}
           </span>
-        </Link>
+        </a>
       </div>
 
       <nav className='flex-1 space-y-1 px-3 py-4'>
         {navItems.map((item) => (
-          <NavLink
+          <a
             key={item.to}
-            to={item.to}
-            end={item.end}
-            className={linkClass}
+            href={item.to}
+            className={linkClass({
+              isActive: item.end
+                ? location.pathname === item.to
+                : location.pathname.startsWith(item.to)
+            })}
             onClick={() => setSidebarOpen(false)}
           >
             <item.icon size={18} />
             {item.label}
-          </NavLink>
+          </a>
         ))}
       </nav>
 
       <div className='border-line space-y-2 border-t px-4 py-4'>
-        <Link
+        <a
           className='hover:text-primary block text-sm font-medium text-slate-500 transition'
-          to={path.discover}
+          href={path.discover}
         >
           Khám phá mentor
-        </Link>
-        <Link
+        </a>
+        <a
           className='hover:text-primary block text-sm font-medium text-slate-500 transition'
-          to={homeLink}
+          href={homeLink}
         >
           ← Về trang chủ
-        </Link>
+        </a>
       </div>
     </aside>
   )
@@ -122,23 +126,23 @@ export function DashboardShell({
               <Menu size={18} />
             </button>
 
-            <Link
+            <a
               className='text-muted hover:text-primary hidden text-sm font-medium transition md:block'
-              to={path.discover}
+              href={path.discover}
             >
               Khám phá mentor
-            </Link>
+            </a>
 
             <div className='flex items-center gap-2'>
-              <Link
+              <a
                 className={cn(
                   buttonVariants({ size: 'sm', variant: 'outline' }),
                   'hidden sm:inline-flex'
                 )}
-                to={homeLink}
+                href={homeLink}
               >
                 Trang chủ
-              </Link>
+              </a>
               <button
                 className={buttonVariants({ size: 'sm', variant: 'outline' })}
                 type='button'
