@@ -1,5 +1,4 @@
 import type { LucideIcon } from 'lucide-react'
-import { Link } from 'react-router'
 
 import { Card, CardContent } from '@/components/ui/card'
 import { cn } from '@/utils/cn'
@@ -20,7 +19,7 @@ export function WorkspaceActionCard({
   to
 }: WorkspaceActionCardProps) {
   return (
-    <Link className='block h-full' to={to}>
+    <a className='block h-full' href={to}>
       <Card
         className={cn(
           'hover:border-primary/30 hover:bg-primary/5 rounded-3xl transition',
@@ -37,6 +36,6 @@ export function WorkspaceActionCard({
           </div>
         </CardContent>
       </Card>
-    </Link>
+    </a>
   )
 }

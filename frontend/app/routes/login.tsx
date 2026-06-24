@@ -63,6 +63,7 @@ export default function LoginPage() {
   const handleLogin = async (values: LoginFormValues) => {
     try {
       await loginMutation.mutateAsync(values)
+      queryClient.removeQueries({ queryKey: QUERY_KEYS.auth.me })
       const user = await queryClient.fetchQuery({
         queryKey: QUERY_KEYS.auth.me,
         queryFn: authApi.getCurrentUser
