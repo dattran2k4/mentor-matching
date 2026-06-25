@@ -37,7 +37,7 @@ function getReadinessItems(formState: BecomeMentorFormState): BecomeMentorReadin
       label: 'Hồ sơ cá nhân và chuyên môn',
       helper:
         formState.fullName &&
-        formState.currentLocation &&
+        formState.currentDistrictId &&
         formState.headline &&
         formState.introduction
           ? 'Đã có cả thông tin cơ bản lẫn định vị chuyên môn'
@@ -45,7 +45,9 @@ function getReadinessItems(formState: BecomeMentorFormState): BecomeMentorReadin
       done: Boolean(
         formState.avatarUrl &&
         formState.fullName &&
-        formState.currentLocation &&
+        formState.hometownCityId &&
+        formState.currentCityId &&
+        formState.currentDistrictId &&
         formState.headline &&
         formState.introduction &&
         formState.teachingStyle &&
@@ -114,22 +116,48 @@ export default function BecomeMentorPage() {
   const completedCount = readinessItems.filter((item) => item.done).length
   const currentStep = steps[currentStepIndex]
   const profileState: BecomeMentorProfileStepState = {
-    avatarUrl: formState.avatarUrl,
-    currentLocation: formState.currentLocation,
+    currentCityId: formState.currentCityId,
+    currentDistrictId: formState.currentDistrictId,
     currentPosition: formState.currentPosition,
     experienceYears: formState.experienceYears,
     fullName: formState.fullName,
     gender: formState.gender,
     headline: formState.headline,
-    hometown: formState.hometown,
+    hometownCityId: formState.hometownCityId,
     introduction: formState.introduction,
     teachingStyle: formState.teachingStyle,
     workplace: formState.workplace
   }
   const profileStep = useBecomeMentorProfileStep({
     formId: becomeMentorStepFormIds.profile,
-    onSubmit: (values) => {
-      setFormState((current) => ({ ...current, ...values }))
+    onSubmit: (values, savedCurrentMentor) => {
+      setFormState((current) => ({
+        ...current,
+        avatarMediaId: savedCurrentMentor.avatarMediaId,
+        avatarUrl: savedCurrentMentor.avatarUrl ?? current.avatarUrl,
+        currentCityId: savedCurrentMentor.currentLocation.cityId
+          ? String(savedCurrentMentor.currentLocation.cityId)
+          : values.currentCityId,
+        currentDistrictId: savedCurrentMentor.currentLocation.districtId
+          ? String(savedCurrentMentor.currentLocation.districtId)
+          : values.currentDistrictId,
+        currentLocation:
+          savedCurrentMentor.currentLocation.districtName ||
+          savedCurrentMentor.currentLocation.cityName ||
+          values.currentDistrictId,
+        currentPosition: values.currentPosition ?? '',
+        experienceYears: values.experienceYears,
+        fullName: savedCurrentMentor.fullName || values.fullName,
+        gender: savedCurrentMentor.gender ?? values.gender ?? '',
+        headline: values.headline,
+        hometown: savedCurrentMentor.hometown.cityName || values.hometownCityId,
+        hometownCityId: savedCurrentMentor.hometown.cityId
+          ? String(savedCurrentMentor.hometown.cityId)
+          : values.hometownCityId,
+        introduction: values.introduction,
+        teachingStyle: values.teachingStyle,
+        workplace: values.workplace ?? ''
+      }))
       goToStep(currentStepIndex + 1)
     },
     profileState
@@ -241,6 +269,7 @@ export default function BecomeMentorPage() {
           currentStepLabel={currentStep.label}
           isFirstStep={currentStepIndex === 0}
           isLastStep={currentStepIndex === steps.length - 1}
+          isSubmitting={currentStep.id === 'profile' && profileStep.isSubmitting}
           onBack={() => goToStep(currentStepIndex - 1)}
           totalCount={readinessItems.length}
         />

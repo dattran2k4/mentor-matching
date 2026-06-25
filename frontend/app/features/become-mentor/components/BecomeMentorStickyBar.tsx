@@ -10,6 +10,7 @@ type BecomeMentorStickyBarProps = {
   currentStepFormId: string
   isFirstStep: boolean
   isLastStep: boolean
+  isSubmitting?: boolean
   onBack: () => void
   totalCount: number
 }
@@ -21,6 +22,7 @@ export function BecomeMentorStickyBar({
   currentStepFormId,
   isFirstStep,
   isLastStep,
+  isSubmitting = false,
   onBack,
   totalCount
 }: BecomeMentorStickyBarProps) {
@@ -53,7 +55,13 @@ export function BecomeMentorStickyBar({
               Quay lại
             </Button>
           ) : null}
-          <Button className='rounded-2xl' form={currentStepFormId} size='lg' type='submit'>
+          <Button
+            className='rounded-2xl'
+            form={currentStepFormId}
+            isLoading={isSubmitting}
+            size='lg'
+            type='submit'
+          >
             {isLastStep ? 'Gửi duyệt hồ sơ' : 'Tiếp tục'}
             <ArrowRight size={16} />
           </Button>

@@ -1,30 +1,62 @@
 import { ImagePlus } from 'lucide-react'
 import type { ChangeEvent, ReactNode } from 'react'
-import type { FieldErrors, UseFormRegister } from 'react-hook-form'
+import { useState } from 'react'
+import { Controller } from 'react-hook-form'
+import type { Control, FieldErrors, UseFormRegister } from 'react-hook-form'
 
+import { AppSelect } from '@/components/ui/app-select'
+import type { AppSelectOption } from '@/components/ui/app-select'
 import { buttonVariants } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Select } from '@/components/ui/select'
 import type { BecomeMentorProfileFormValues } from '@/features/become-mentor/schemas'
 
 import { BecomeMentorSectionCard } from './BecomeMentorSectionCard'
 
+const genderOptions: AppSelectOption[] = [
+  { label: 'Nam', value: 'MALE' },
+  { label: 'Nữ', value: 'FEMALE' },
+  { label: 'Khác', value: 'OTHER' }
+]
+
 type BecomeMentorPersonalSectionProps = {
-  avatarUrl: string
+  avatarPreviewUrl: string
+  cityOptions: AppSelectOption[]
+  control: Control<BecomeMentorProfileFormValues>
+  currentCityId: string
+  districtOptions: AppSelectOption[]
   eyebrow?: string
   errors: FieldErrors<BecomeMentorProfileFormValues>
+  existingAvatarMediaId?: number | null
+  existingAvatarUrl?: string
+  isCitiesLoading: boolean
+  isDistrictsLoading: boolean
   onAvatarChange: (event: ChangeEvent<HTMLInputElement>) => void
+  onCurrentCityChange: (cityId: string) => void
   register: UseFormRegister<BecomeMentorProfileFormValues>
 }
 
 export function BecomeMentorPersonalSection({
-  avatarUrl,
+  avatarPreviewUrl,
+  cityOptions,
+  control,
+  currentCityId,
+  districtOptions,
   eyebrow = 'Bước 1',
   errors,
+  isCitiesLoading,
+  isDistrictsLoading,
   onAvatarChange,
+  onCurrentCityChange,
   register
 }: BecomeMentorPersonalSectionProps) {
+  const [isAvatarActionOpen, setIsAvatarActionOpen] = useState(false)
+
+  const handleAvatarChange = (event: ChangeEvent<HTMLInputElement>) => {
+    onAvatarChange(event)
+    setIsAvatarActionOpen(false)
+  }
+
   return (
     <BecomeMentorSectionCard
       description='Đặt nền thông tin cơ bản thật rõ ràng để đội ngũ admin và học viên hiểu bạn là ai, đang dạy ở đâu.'
@@ -34,31 +66,51 @@ export function BecomeMentorPersonalSection({
     >
       <div className='grid gap-6'>
         <div className='grid gap-5 lg:grid-cols-[13rem_minmax(0,1fr)]'>
-          <div className='rounded-2xl border border-dashed border-slate-300 bg-slate-50/80 p-4'>
-            <div className='flex h-full flex-col items-center justify-center rounded-[20px] border border-white bg-white px-4 py-6 text-center shadow-sm'>
-              <div className='bg-primary/10 text-primary flex h-20 w-20 items-center justify-center rounded-[28px]'>
-                <ImagePlus size={28} />
-              </div>
+          <div className='rounded-[2rem] border border-dashed border-slate-300 bg-gradient-to-b from-slate-50 to-white p-4'>
+            <div className='flex h-full flex-col items-center justify-center rounded-[1.7rem] border border-white bg-white px-4 py-6 text-center shadow-sm'>
+              <button
+                aria-expanded={isAvatarActionOpen}
+                className='group relative flex size-28 items-center justify-center overflow-hidden rounded-full border border-slate-200 bg-slate-100 shadow-inner transition outline-none hover:border-blue-300 hover:shadow-md focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2'
+                onClick={() => setIsAvatarActionOpen((current) => !current)}
+                type='button'
+              >
+                {avatarPreviewUrl ? (
+                  <img
+                    alt='Ảnh đại diện mentor đã chọn'
+                    className='size-full object-cover'
+                    src={avatarPreviewUrl}
+                  />
+                ) : (
+                  <span className='bg-primary/10 text-primary flex size-14 items-center justify-center rounded-full transition group-hover:scale-105'>
+                    <ImagePlus size={24} />
+                  </span>
+                )}
+                <span className='absolute inset-0 bg-slate-950/0 transition group-hover:bg-slate-950/10' />
+              </button>
               <p className='mt-4 text-sm font-semibold text-slate-900'>Ảnh đại diện mentor</p>
               <Input
                 accept='image/png,image/jpeg,image/jpg'
                 className='sr-only'
                 id='mentor-avatar-file'
-                onChange={onAvatarChange}
+                onChange={handleAvatarChange}
                 type='file'
               />
-              <label
-                className={buttonVariants({
-                  className: 'mt-5 w-full max-w-48 cursor-pointer rounded-2xl',
-                  variant: 'outline'
-                })}
-                htmlFor='mentor-avatar-file'
-              >
-                Chọn ảnh đại diện
-              </label>
-              <p className='mt-3 min-h-6 text-sm leading-6 text-slate-500'>
-                {avatarUrl ? `Đã chọn: ${avatarUrl}` : 'Chưa có tệp nào được chọn.'}
-              </p>
+              {isAvatarActionOpen ? (
+                <div className='mt-5 w-full rounded-2xl border border-slate-200 bg-slate-50 p-3 shadow-sm'>
+                  <label
+                    className={buttonVariants({
+                      className: 'w-full cursor-pointer rounded-2xl',
+                      variant: 'default'
+                    })}
+                    htmlFor='mentor-avatar-file'
+                  >
+                    Tải ảnh lên
+                  </label>
+                </div>
+              ) : (
+                <p className='mt-5 text-xs font-medium text-slate-500'>Nhấn vào ảnh để cập nhật</p>
+              )}
+              <FieldError message={errors.avatarFile?.message} />
             </div>
           </div>
 
@@ -75,34 +127,91 @@ export function BecomeMentorPersonalSection({
 
             <div className='grid gap-4 md:grid-cols-2'>
               <Field>
-                <Label htmlFor='mentor-gender'>Giới tính</Label>
-                <Select id='mentor-gender' {...register('gender')}>
-                  <option value=''>Chọn giới tính</option>
-                  <option value='MALE'>Nam</option>
-                  <option value='FEMALE'>Nữ</option>
-                  <option value='OTHER'>Khác</option>
-                </Select>
+                <Label>Giới tính</Label>
+                <Controller
+                  control={control}
+                  name='gender'
+                  render={({ field }) => (
+                    <AppSelect
+                      ariaLabel='Chọn giới tính'
+                      onValueChange={field.onChange}
+                      options={genderOptions}
+                      placeholder='Chọn giới tính'
+                      value={field.value ?? ''}
+                    />
+                  )}
+                />
               </Field>
 
               <Field>
-                <Label htmlFor='mentor-hometown'>Quê quán</Label>
-                <Input
-                  {...register('hometown')}
-                  id='mentor-hometown'
-                  placeholder='Tỉnh / thành phố'
+                <Label>Quê quán</Label>
+                <Controller
+                  control={control}
+                  name='hometownCityId'
+                  render={({ field }) => (
+                    <AppSelect
+                      ariaLabel='Chọn quê quán'
+                      disabled={isCitiesLoading}
+                      onValueChange={field.onChange}
+                      options={cityOptions}
+                      placeholder={
+                        isCitiesLoading ? 'Đang tải thành phố...' : 'Chọn tỉnh/thành phố'
+                      }
+                      value={field.value}
+                    />
+                  )}
                 />
+                <FieldError message={errors.hometownCityId?.message} />
               </Field>
             </div>
 
-            <Field>
-              <Label htmlFor='mentor-current-location'>Khu vực hiện tại</Label>
-              <Input
-                {...register('currentLocation')}
-                id='mentor-current-location'
-                placeholder='Quận / huyện, tỉnh / thành phố nơi bạn có thể gặp trực tiếp'
-              />
-              <FieldError message={errors.currentLocation?.message} />
-            </Field>
+            <div className='grid gap-4 md:grid-cols-2'>
+              <Field>
+                <Label>Khu vực hiện tại</Label>
+                <Controller
+                  control={control}
+                  name='currentCityId'
+                  render={({ field }) => (
+                    <AppSelect
+                      ariaLabel='Chọn tỉnh hoặc thành phố hiện tại'
+                      disabled={isCitiesLoading}
+                      onValueChange={onCurrentCityChange}
+                      options={cityOptions}
+                      placeholder={
+                        isCitiesLoading ? 'Đang tải thành phố...' : 'Chọn tỉnh/thành phố'
+                      }
+                      value={field.value}
+                    />
+                  )}
+                />
+                <FieldError message={errors.currentCityId?.message} />
+              </Field>
+
+              <Field>
+                <Label>Quận/Huyện</Label>
+                <Controller
+                  control={control}
+                  name='currentDistrictId'
+                  render={({ field }) => (
+                    <AppSelect
+                      ariaLabel='Chọn quận hoặc huyện hiện tại'
+                      disabled={!currentCityId || isDistrictsLoading}
+                      onValueChange={field.onChange}
+                      options={districtOptions}
+                      placeholder={
+                        !currentCityId
+                          ? 'Chọn tỉnh/thành phố trước'
+                          : isDistrictsLoading
+                            ? 'Đang tải quận/huyện...'
+                            : 'Chọn quận/huyện'
+                      }
+                      value={field.value}
+                    />
+                  )}
+                />
+                <FieldError message={errors.currentDistrictId?.message} />
+              </Field>
+            </div>
           </div>
         </div>
       </div>

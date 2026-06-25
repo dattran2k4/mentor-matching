@@ -25,9 +25,13 @@ export type BecomeMentorAvailabilityWindow = {
 
 export type BecomeMentorFormState = {
   avatarUrl: string
+  avatarMediaId: number | null
   fullName: string
   gender: string
+  hometownCityId: string
   hometown: string
+  currentCityId: string
+  currentDistrictId: string
   currentLocation: string
   headline: string
   introduction: string

@@ -67,7 +67,7 @@ class MentorProfileServiceTest {
         CurrentMentorDetails actual = mentorProfileService.updateCurrentMentor(command);
 
         assertEquals(expected, actual);
-        assertEquals("https://new.example.com/avatar.jpg", mentorProfile.getAvatarUrl());
+        assertEquals("https://old.example.com/avatar.jpg", mentorProfile.getAvatarUrl());
         assertEquals(Gender.MALE, mentorProfile.getGender());
         assertEquals(11L, mentorProfile.getHometownCityId());
         assertEquals(22L, mentorProfile.getCurrentDistrictId());

@@ -69,7 +69,6 @@ export type CurrentMentorApiResponse = {
 }
 
 export type UpdateCurrentMentorRequest = {
-  avatarUrl: string
   gender?: MentorGenderApiResponse | null
   hometownCityId?: number | null
   currentDistrictId?: number | null

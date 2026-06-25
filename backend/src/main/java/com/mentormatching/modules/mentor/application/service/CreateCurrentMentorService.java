@@ -37,7 +37,7 @@ public class CreateCurrentMentorService implements CreateCurrentMentorUseCase {
 
         validateLocationReferences(command);
 
-        MentorProfile mentorProfile = MentorProfile.create(command.userId(), command.avatarUrl(), command.gender(),
+        MentorProfile mentorProfile = MentorProfile.create(command.userId(), command.gender(),
                 command.hometownCityId(), command.currentDistrictId(), command.headline(), command.introduction(),
                 command.teachingStyle(), command.experienceYears(), command.currentPosition(), command.workplace(),
                 command.education(), command.major(), command.meetingType());

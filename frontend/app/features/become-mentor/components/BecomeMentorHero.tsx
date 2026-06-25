@@ -1,7 +1,6 @@
 import { ArrowRight, BadgeCheck, Clock3, ShieldCheck } from 'lucide-react'
 
 import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
 
 type BecomeMentorHeroProps = {
   completedCount: number
@@ -65,10 +64,6 @@ export function BecomeMentorHero({ completedCount, totalCount }: BecomeMentorHer
               description='Chúng tôi kiểm tra độ tin cậy trước khi bật hoạt động mentor.'
             />
           </div>
-          <Button className='mt-6 h-11 w-full rounded-2xl' size='lg'>
-            Bắt đầu với hồ sơ nháp
-            <ArrowRight size={16} />
-          </Button>
         </div>
       </div>
     </section>

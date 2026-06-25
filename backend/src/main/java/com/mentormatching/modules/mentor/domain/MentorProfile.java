@@ -54,12 +54,12 @@ public class MentorProfile {
         this.updatedAt = data.updatedAt();
     }
 
-    public static MentorProfile create(Long userId, String avatarUrl, Gender gender, Long hometownCityId,
-                                       Long currentDistrictId, String headline, String introduction,
-                                       String teachingStyle, Integer experienceYears, String currentPosition,
-                                       String workplace, String education, String major, MeetingType meetingType) {
+    public static MentorProfile create(Long userId, Gender gender, Long hometownCityId, Long currentDistrictId,
+                                       String headline, String introduction, String teachingStyle,
+                                       Integer experienceYears, String currentPosition, String workplace,
+                                       String education, String major, MeetingType meetingType) {
         LocalDateTime now = LocalDateTime.now();
-        MentorProfile mentorProfile = new MentorProfile(new MentorProfileRestoreData(null, userId, avatarUrl, null, gender,
+        MentorProfile mentorProfile = new MentorProfile(new MentorProfileRestoreData(null, userId, "", null, gender,
                 hometownCityId, currentDistrictId, headline, introduction, teachingStyle, experienceYears,
                 currentPosition, workplace, education, major, meetingType, MentorApprovalStatus.DRAFT, null, null,
                 null, now, now));
@@ -67,16 +67,23 @@ public class MentorProfile {
         return mentorProfile;
     }
 
+    public static MentorProfile create(Long userId, String ignoredAvatarUrl, Gender gender, Long hometownCityId,
+                                       Long currentDistrictId, String headline, String introduction,
+                                       String teachingStyle, Integer experienceYears, String currentPosition,
+                                       String workplace, String education, String major, MeetingType meetingType) {
+        return create(userId, gender, hometownCityId, currentDistrictId, headline, introduction, teachingStyle,
+                experienceYears, currentPosition, workplace, education, major, meetingType);
+    }
+
     public static MentorProfile restore(MentorProfileRestoreData data) {
         return new MentorProfile(data);
     }
 
-    public void updateProfile(String avatarUrl, Gender gender, Long hometownCityId, Long currentDistrictId,
-                              String headline, String introduction, String teachingStyle,
-                              Integer experienceYears, String currentPosition, String workplace,
-                              String education, String major, MeetingType meetingType) {
+    public void updateProfile(Gender gender, Long hometownCityId, Long currentDistrictId, String headline,
+                              String introduction, String teachingStyle, Integer experienceYears,
+                              String currentPosition, String workplace, String education, String major,
+                              MeetingType meetingType) {
         validateExperienceYears(experienceYears);
-        this.avatarUrl = avatarUrl;
         this.gender = gender;
         this.hometownCityId = hometownCityId;
         this.currentDistrictId = currentDistrictId;
@@ -89,6 +96,14 @@ public class MentorProfile {
         this.education = education;
         this.major = major;
         this.meetingType = meetingType;
+    }
+
+    public void updateProfile(String ignoredAvatarUrl, Gender gender, Long hometownCityId, Long currentDistrictId,
+                              String headline, String introduction, String teachingStyle,
+                              Integer experienceYears, String currentPosition, String workplace,
+                              String education, String major, MeetingType meetingType) {
+        updateProfile(gender, hometownCityId, currentDistrictId, headline, introduction, teachingStyle,
+                experienceYears, currentPosition, workplace, education, major, meetingType);
     }
 
     public void updateAvatar(Long avatarMediaId, String avatarUrl) {

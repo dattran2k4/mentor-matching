@@ -2,9 +2,13 @@ import type { BecomeMentorDocumentKey, BecomeMentorFormState } from './become-me
 
 export const initialBecomeMentorFormState: BecomeMentorFormState = {
   avatarUrl: '',
+  avatarMediaId: null,
   fullName: '',
   gender: '',
+  hometownCityId: '',
   hometown: '',
+  currentCityId: '',
+  currentDistrictId: '',
   currentLocation: '',
   headline: '',
   introduction: '',
