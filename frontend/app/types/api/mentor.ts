@@ -250,6 +250,18 @@ export type MentorAvailabilityDetailApiResponse = {
   endTime: string
 }
 
+export type SaveCurrentMentorAvailabilityRequest = {
+  availabilityType: MentorAvailabilityTypeApiResponse
+  dayOfWeek?: number | null
+  availableDate?: string | null
+  startTime: string
+  endTime: string
+}
+
+export type CreateCurrentMentorAvailabilityApiResponse = {
+  availabilityId: number
+}
+
 export type AdminMentorListItemApiResponse = {
   id: number
   userId: number

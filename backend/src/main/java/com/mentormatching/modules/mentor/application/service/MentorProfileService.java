@@ -41,7 +41,7 @@ public class MentorProfileService implements UpdateCurrentMentorUseCase {
                 command.meetingType());
         MentorProfile savedMentorProfile = mentorProfileRepositoryPort.save(mentorProfile);
 
-        return mentorReadRepositoryPort.findCurrentMentorByUserId(savedMentorProfile.getUserId())
+        return mentorReadRepositoryPort.findCurrentMentorByMentorId(savedMentorProfile.getId())
                 .orElseThrow(() -> new ResourceNotFoundException("Mentor profile not found"));
     }
 

@@ -1,9 +1,17 @@
 import type { Dispatch, SetStateAction } from 'react'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 
 import type { MentorAvailabilityDraftValue } from '@/components/MentorAvailabilityForm/MentorAvailabilityForm'
+import { useDeleteCurrentMentorAvailabilityMutation } from '@/hooks/queries/mentor/useDeleteCurrentMentorAvailabilityMutation'
+import { useCurrentMentorOnboardingStatusQuery } from '@/hooks/queries/mentor/useCurrentMentorOnboardingStatusQuery'
+import { useCurrentMentorScheduleQuery } from '@/hooks/queries/mentor/useCurrentMentorScheduleQuery'
+import { useUpsertCurrentMentorAvailabilityMutation } from '@/hooks/queries/mentor/useUpsertCurrentMentorAvailabilityMutation'
 
 import type { BecomeMentorAvailabilityWindow, BecomeMentorFormState } from '../become-mentor.types'
+import {
+  mapAvailabilityDraftToRequests,
+  mapMentorAvailabilityToBecomeMentorAvailabilityWindow
+} from '../mappers/availability.mapper'
 import { becomeMentorAvailabilitySchema } from '../schemas/availability.schema'
 
 const initialAvailabilityDraft: MentorAvailabilityDraftValue = {
@@ -28,20 +36,54 @@ export function useBecomeMentorAvailabilityStep({
   const [availabilityDraft, setAvailabilityDraft] =
     useState<MentorAvailabilityDraftValue>(initialAvailabilityDraft)
   const [editingAvailabilityId, setEditingAvailabilityId] = useState<string | null>(null)
+  const onboardingStatusQuery = useCurrentMentorOnboardingStatusQuery()
+  const shouldFetchCurrentSchedule = Boolean(onboardingStatusQuery.data?.mentorProfileCreated)
+  const currentScheduleQuery = useCurrentMentorScheduleQuery(shouldFetchCurrentSchedule, {
+    suppressNotFound: true
+  })
+  const upsertCurrentMentorAvailabilityMutation = useUpsertCurrentMentorAvailabilityMutation()
+  const deleteCurrentMentorAvailabilityMutation = useDeleteCurrentMentorAvailabilityMutation()
   const stepValidation = becomeMentorAvailabilitySchema.safeParse({ availabilities })
   const stepError = stepValidation.success
     ? undefined
     : stepValidation.error.flatten().fieldErrors.availabilities?.[0]
+  const editingAvailability =
+    availabilities.find((item) => item.id === editingAvailabilityId) ?? null
+
+  useEffect(() => {
+    if (!currentScheduleQuery.data) return
+
+    setFormState((current) => ({
+      ...current,
+      availabilities: currentScheduleQuery.data.availabilities.map(
+        mapMentorAvailabilityToBecomeMentorAvailabilityWindow
+      )
+    }))
+  }, [currentScheduleQuery.data, setFormState])
 
   const resetAvailabilityDraft = () => {
     setAvailabilityDraft(initialAvailabilityDraft)
     setEditingAvailabilityId(null)
   }
 
-  const saveAvailability = () => {
+  const syncAvailabilitiesFromServer = async () => {
+    const nextResult = await currentScheduleQuery.refetch()
+
+    if (!nextResult.data) return
+
+    setFormState((current) => ({
+      ...current,
+      availabilities: nextResult.data.availabilities.map(
+        mapMentorAvailabilityToBecomeMentorAvailabilityWindow
+      )
+    }))
+  }
+
+  const saveAvailability = async () => {
     const draft = {
       endTime: availabilityDraft.endTime,
       id: editingAvailabilityId ?? `availability-${Date.now()}`,
+      mentorAvailabilityId: editingAvailability?.mentorAvailabilityId ?? null,
       mode: availabilityDraft.mode,
       selectedDays:
         availabilityDraft.mode === 'RECURRING' ? availabilityDraft.selectedDays.slice() : [],
@@ -54,12 +96,16 @@ export function useBecomeMentorAvailabilityStep({
     if (draft.mode === 'RECURRING' && draft.selectedDays.length === 0) return
     if (draft.mode === 'SPECIFIC_DATE' && !draft.specificDate) return
 
-    setFormState((current) => ({
-      ...current,
-      availabilities: editingAvailabilityId
-        ? current.availabilities.map((item) => (item.id === editingAvailabilityId ? draft : item))
-        : [...current.availabilities, draft]
-    }))
+    const saveRequests = mapAvailabilityDraftToRequests(
+      availabilityDraft,
+      editingAvailability?.mentorAvailabilityId ?? null
+    )
+
+    for (const request of saveRequests) {
+      await upsertCurrentMentorAvailabilityMutation.mutateAsync(request)
+    }
+
+    await syncAvailabilitiesFromServer()
     resetAvailabilityDraft()
   }
 
@@ -74,11 +120,18 @@ export function useBecomeMentorAvailabilityStep({
     })
   }
 
-  const removeAvailability = (availabilityId: string) => {
-    setFormState((current) => ({
-      ...current,
-      availabilities: current.availabilities.filter((item) => item.id !== availabilityId)
-    }))
+  const removeAvailability = async (availabilityId: string) => {
+    const availability = availabilities.find((item) => item.id === availabilityId)
+
+    if (availability?.mentorAvailabilityId) {
+      await deleteCurrentMentorAvailabilityMutation.mutateAsync(availability.mentorAvailabilityId)
+      await syncAvailabilitiesFromServer()
+    } else {
+      setFormState((current) => ({
+        ...current,
+        availabilities: current.availabilities.filter((item) => item.id !== availabilityId)
+      }))
+    }
 
     if (editingAvailabilityId === availabilityId) {
       resetAvailabilityDraft()
@@ -94,10 +147,23 @@ export function useBecomeMentorAvailabilityStep({
   return {
     availabilityDraft,
     isEditing: Boolean(editingAvailabilityId),
+    isError:
+      onboardingStatusQuery.isError || (shouldFetchCurrentSchedule && currentScheduleQuery.isError),
+    isDeleting: deleteCurrentMentorAvailabilityMutation.isPending,
+    isLoading:
+      onboardingStatusQuery.isLoading ||
+      (shouldFetchCurrentSchedule && currentScheduleQuery.isLoading),
+    isSaving: upsertCurrentMentorAvailabilityMutation.isPending,
     onDraftChange: setAvailabilityDraft,
     onEditAvailability: editAvailability,
     onRemoveAvailability: removeAvailability,
     onResetDraft: resetAvailabilityDraft,
+    onRetry: () => {
+      void onboardingStatusQuery.refetch()
+      if (shouldFetchCurrentSchedule) {
+        void currentScheduleQuery.refetch()
+      }
+    },
     onSaveAvailability: saveAvailability,
     onSubmitStep: submitAvailabilityStep,
     stepError

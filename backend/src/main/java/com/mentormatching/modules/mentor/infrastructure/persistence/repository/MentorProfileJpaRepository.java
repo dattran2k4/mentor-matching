@@ -151,9 +151,9 @@ public interface MentorProfileJpaRepository extends JpaRepository<MentorProfileJ
             left join DistrictJpaEntity currentDistrict on currentDistrict.id = mentor.currentDistrictId
             left join CityJpaEntity currentCity on currentCity.id = currentDistrict.cityId
             left join MentorVerificationJpaEntity verification on verification.mentorId = mentor.id
-            where mentor.userId = :userId
+            where mentor.id = :mentorId
             """)
-    Optional<CurrentMentorDetailsProjection> findCurrentMentorDetailByUserId(@Param("userId") Long userId);
+    Optional<CurrentMentorDetailsProjection> findCurrentMentorDetailByMentorId(@Param("mentorId") Long mentorId);
 
     @Query("""
             select mentor.id as id,

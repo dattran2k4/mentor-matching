@@ -25,6 +25,8 @@ import type {
   ReviewMentorApprovalRequest,
   ReviewMentorVerificationRequest,
   SaveCurrentMentorAchievementRequest,
+  SaveCurrentMentorAvailabilityRequest,
+  CreateCurrentMentorAvailabilityApiResponse,
   UpdateCurrentMentorAvatarRequest,
   UpdateCurrentMentorRequest,
   UpdateCurrentMentorTraitsRequest,
@@ -50,6 +52,9 @@ const MENTOR_ENDPOINTS = {
   myAchievementDetail: (achievementId: number) => `mentors/me/achievements/${achievementId}`,
   mentorAchievements: (mentorId: number) => `mentors/${mentorId}/achievements`,
   myVerification: 'mentors/me/verification',
+  myAvailabilities: 'scheduling/me/availabilities',
+  myAvailabilityDetail: (availabilityId: number) =>
+    `scheduling/me/availabilities/${availabilityId}`,
   mentorAvailabilities: (mentorId: number) => `mentors/${mentorId}/availabilities`,
   mentorCalendarBooking: (mentorId: number) => `mentors/${mentorId}/calendar-booking`,
   adminMentors: 'admin/mentors',
@@ -238,6 +243,40 @@ const defaultMentorApi = {
         MENTOR_ENDPOINTS.mentorAvailabilities(mentorId)
       )
     ).data,
+
+  getCurrentMentorAvailabilities: async (): Promise<
+    ApiResponse<MentorAvailabilityDetailApiResponse[]>
+  > =>
+    (
+      await http.get<ApiResponse<MentorAvailabilityDetailApiResponse[]>>(
+        MENTOR_ENDPOINTS.myAvailabilities
+      )
+    ).data,
+
+  createCurrentMentorAvailability: async (
+    payload: SaveCurrentMentorAvailabilityRequest
+  ): Promise<ApiResponse<CreateCurrentMentorAvailabilityApiResponse>> =>
+    (
+      await http.post<ApiResponse<CreateCurrentMentorAvailabilityApiResponse>>(
+        MENTOR_ENDPOINTS.myAvailabilities,
+        payload
+      )
+    ).data,
+
+  updateCurrentMentorAvailability: async (
+    availabilityId: number,
+    payload: SaveCurrentMentorAvailabilityRequest
+  ): Promise<ApiResponse<null>> =>
+    (
+      await http.put<ApiResponse<null>>(
+        MENTOR_ENDPOINTS.myAvailabilityDetail(availabilityId),
+        payload
+      )
+    ).data,
+
+  deleteCurrentMentorAvailability: async (availabilityId: number): Promise<ApiResponse<null>> =>
+    (await http.delete<ApiResponse<null>>(MENTOR_ENDPOINTS.myAvailabilityDetail(availabilityId)))
+      .data,
 
   getMentorCalendarBooking: async (
     mentorId: number,

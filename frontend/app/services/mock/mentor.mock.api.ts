@@ -24,6 +24,7 @@ import type {
   ReviewMentorApprovalRequest,
   ReviewMentorVerificationRequest,
   SaveCurrentMentorAchievementRequest,
+  SaveCurrentMentorAvailabilityRequest,
   UpdateCurrentMentorAvatarRequest,
   UpdateCurrentMentorRequest,
   UpdateCurrentMentorTraitsRequest,
@@ -432,6 +433,20 @@ function buildMentorCalendar(
   }
 }
 
+function normalizeAvailabilityPayload(
+  payload: SaveCurrentMentorAvailabilityRequest
+): MentorAvailabilityDetailApiResponse {
+  return {
+    id: 0,
+    availabilityType: payload.availabilityType,
+    dayOfWeek: payload.availabilityType === 'RECURRING' ? (payload.dayOfWeek ?? null) : null,
+    availableDate:
+      payload.availabilityType === 'SPECIFIC_DATE' ? (payload.availableDate ?? null) : null,
+    startTime: payload.startTime,
+    endTime: payload.endTime
+  }
+}
+
 function filterByMeetingType<T extends { meetingType: MentorMeetingTypeApiResponse | null }>(
   items: T[],
   meetingType?: MentorMeetingTypeApiResponse
@@ -823,6 +838,74 @@ export const mockMentorApi = {
       mentorAvailabilitiesByMentorId[mentorId] ?? [],
       'Get mentor availabilities successfully'
     )
+  },
+
+  async getCurrentMentorAvailabilities(): Promise<
+    ApiResponse<MentorAvailabilityDetailApiResponse[]>
+  > {
+    await delay()
+    requireMockSession()
+
+    return buildSuccessResponse(
+      mentorAvailabilitiesByMentorId[currentMentorState.id] ?? [],
+      'Get current mentor availabilities successfully'
+    )
+  },
+
+  async createCurrentMentorAvailability(
+    payload: SaveCurrentMentorAvailabilityRequest
+  ): Promise<ApiResponse<{ availabilityId: number }>> {
+    await delay()
+    requireMockSession()
+
+    const currentAvailabilities = mentorAvailabilitiesByMentorId[currentMentorState.id] ?? []
+    const nextAvailabilityId =
+      currentAvailabilities.reduce((maxId, item) => Math.max(maxId, item.id), 0) + 1
+
+    mentorAvailabilitiesByMentorId[currentMentorState.id] = [
+      ...currentAvailabilities,
+      {
+        ...normalizeAvailabilityPayload(payload),
+        id: nextAvailabilityId
+      }
+    ]
+
+    return buildCreatedResponse(
+      { availabilityId: nextAvailabilityId },
+      'Create current mentor availability successfully'
+    )
+  },
+
+  async updateCurrentMentorAvailability(
+    availabilityId: number,
+    payload: SaveCurrentMentorAvailabilityRequest
+  ): Promise<ApiResponse<null>> {
+    await delay()
+    requireMockSession()
+
+    mentorAvailabilitiesByMentorId[currentMentorState.id] = (
+      mentorAvailabilitiesByMentorId[currentMentorState.id] ?? []
+    ).map((item) =>
+      item.id === availabilityId
+        ? {
+            ...normalizeAvailabilityPayload(payload),
+            id: availabilityId
+          }
+        : item
+    )
+
+    return buildSuccessResponse(null, 'Update current mentor availability successfully')
+  },
+
+  async deleteCurrentMentorAvailability(availabilityId: number): Promise<ApiResponse<null>> {
+    await delay()
+    requireMockSession()
+
+    mentorAvailabilitiesByMentorId[currentMentorState.id] = (
+      mentorAvailabilitiesByMentorId[currentMentorState.id] ?? []
+    ).filter((item) => item.id !== availabilityId)
+
+    return buildSuccessResponse(null, 'Delete current mentor availability successfully')
   },
 
   async getMentorCalendarBooking(

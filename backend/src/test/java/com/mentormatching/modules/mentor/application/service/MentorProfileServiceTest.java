@@ -62,7 +62,7 @@ class MentorProfileServiceTest {
 
         when(mentorProfileRepositoryPort.findByUserId(20L)).thenReturn(Optional.of(mentorProfile));
         when(mentorProfileRepositoryPort.save(mentorProfile)).thenReturn(mentorProfile);
-        when(mentorReadRepositoryPort.findCurrentMentorByUserId(20L)).thenReturn(Optional.of(expected));
+        when(mentorReadRepositoryPort.findCurrentMentorByMentorId(10L)).thenReturn(Optional.of(expected));
 
         CurrentMentorDetails actual = mentorProfileService.updateCurrentMentor(command);
 

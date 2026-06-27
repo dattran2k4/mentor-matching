@@ -1,6 +1,7 @@
 import { CalendarDays, Clock3, Pencil, Plus, Trash2 } from 'lucide-react'
 import type { ComponentProps } from 'react'
 
+import { ScreenErrorState } from '@/components/ScreenErrorState'
 import {
   isMentorAvailabilityDraftValid,
   MentorAvailabilityForm,
@@ -8,6 +9,7 @@ import {
   type MentorAvailabilityDraftValue
 } from '@/components/MentorAvailabilityForm/MentorAvailabilityForm'
 import { Button } from '@/components/ui/button'
+import { Spinner } from '@/components/ui/spinner'
 import type { BecomeMentorAvailabilityWindow } from '@/features/become-mentor/become-mentor.types'
 import { formatTimeRange } from '@/utils/format'
 
@@ -17,12 +19,17 @@ type BecomeMentorAvailabilitySectionProps = {
   availabilities: BecomeMentorAvailabilityWindow[]
   availabilityDraft: MentorAvailabilityDraftValue
   formId: string
+  isDeleting: boolean
   isEditing: boolean
+  isError: boolean
+  isLoading: boolean
+  isSaving: boolean
   onDraftChange: (value: MentorAvailabilityDraftValue) => void
   onEditAvailability: (availability: BecomeMentorAvailabilityWindow) => void
-  onRemoveAvailability: (availabilityId: string) => void
+  onRemoveAvailability: (availabilityId: string) => void | Promise<void>
   onResetDraft: () => void
-  onSaveAvailability: () => void
+  onRetry: () => void
+  onSaveAvailability: () => void | Promise<void>
   onSubmitStep: () => void
   stepError?: string
 }
@@ -31,15 +38,38 @@ export function BecomeMentorAvailabilitySection({
   availabilities,
   availabilityDraft,
   formId,
+  isDeleting,
   isEditing,
+  isError,
+  isLoading,
+  isSaving,
   onDraftChange,
   onEditAvailability,
   onRemoveAvailability,
   onResetDraft,
+  onRetry,
   onSaveAvailability,
   onSubmitStep,
   stepError
 }: BecomeMentorAvailabilitySectionProps) {
+  if (isLoading) {
+    return (
+      <div className='flex min-h-72 items-center justify-center rounded-[28px] border border-slate-200 bg-white'>
+        <Spinner label='Đang tải lịch rảnh đã lưu...' size='lg' />
+      </div>
+    )
+  }
+
+  if (isError) {
+    return (
+      <ScreenErrorState
+        description='Không thể tải lịch rảnh hiện tại. Hãy thử lại trước khi tiếp tục.'
+        onRetry={onRetry}
+        title='Không tải được lịch rảnh'
+      />
+    )
+  }
+
   return (
     <BecomeMentorSectionCard
       description='Dùng lại đúng cách chọn khung giờ của khu mentor để hồ sơ ứng tuyển và workspace sau này giữ cùng một logic.'
@@ -52,6 +82,7 @@ export function BecomeMentorAvailabilitySection({
         id={formId}
         onSubmit={(event) => {
           event.preventDefault()
+          if (isSaving || isDeleting) return
           onSubmitStep()
         }}
       >
@@ -91,6 +122,7 @@ export function BecomeMentorAvailabilitySection({
                   <div className='flex shrink-0 items-center gap-2'>
                     <IconButton
                       aria-label='Sửa khung giờ'
+                      disabled={isSaving || isDeleting}
                       onClick={() => onEditAvailability(availability)}
                       variant='outline'
                     >
@@ -98,6 +130,7 @@ export function BecomeMentorAvailabilitySection({
                     </IconButton>
                     <IconButton
                       aria-label='Xóa khung giờ'
+                      disabled={isSaving || isDeleting}
                       onClick={() => onRemoveAvailability(availability.id)}
                       variant='destructive'
                     >
@@ -142,13 +175,19 @@ export function BecomeMentorAvailabilitySection({
               ) : null}
               <Button
                 className='w-full rounded-2xl sm:flex-1'
-                disabled={!isMentorAvailabilityDraftValid(availabilityDraft)}
+                disabled={
+                  !isMentorAvailabilityDraftValid(availabilityDraft) || isSaving || isDeleting
+                }
                 onClick={onSaveAvailability}
                 size='lg'
                 type='button'
               >
                 <Plus size={18} />
-                {isEditing ? 'Cập nhật khung giờ' : 'Thêm khung giờ'}
+                {isSaving
+                  ? 'Đang lưu khung giờ...'
+                  : isEditing
+                    ? 'Cập nhật khung giờ'
+                    : 'Thêm khung giờ'}
               </Button>
             </div>
           </div>
@@ -158,9 +197,9 @@ export function BecomeMentorAvailabilitySection({
   )
 }
 
-function IconButton({ children, ...props }: ComponentProps<typeof Button>) {
+function IconButton({ children, type = 'button', ...props }: ComponentProps<typeof Button>) {
   return (
-    <Button className='h-10 w-10 rounded-xl p-0' size='icon' {...props}>
+    <Button className='h-10 w-10 rounded-xl p-0' size='icon' type={type} {...props}>
       {children}
     </Button>
   )

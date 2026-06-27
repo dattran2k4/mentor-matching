@@ -41,9 +41,9 @@ public class CreateCurrentMentorService implements CreateCurrentMentorUseCase {
                 command.hometownCityId(), command.currentDistrictId(), command.headline(), command.introduction(),
                 command.teachingStyle(), command.experienceYears(), command.currentPosition(), command.workplace(),
                 command.education(), command.major(), command.meetingType());
-        mentorProfileRepositoryPort.save(mentorProfile);
+        MentorProfile savedMentorProfile = mentorProfileRepositoryPort.save(mentorProfile);
 
-        return mentorReadRepositoryPort.findCurrentMentorByUserId(command.userId())
+        return mentorReadRepositoryPort.findCurrentMentorByMentorId(savedMentorProfile.getId())
                 .orElseThrow(() -> new ResourceNotFoundException("Mentor profile not found"));
     }
 

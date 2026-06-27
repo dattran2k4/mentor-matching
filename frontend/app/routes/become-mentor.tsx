@@ -212,11 +212,16 @@ export default function BecomeMentorPage() {
             availabilities={formState.availabilities}
             availabilityDraft={availabilityStep.availabilityDraft}
             formId={becomeMentorStepFormIds.availability}
+            isDeleting={availabilityStep.isDeleting}
             isEditing={availabilityStep.isEditing}
+            isError={availabilityStep.isError}
+            isLoading={availabilityStep.isLoading}
+            isSaving={availabilityStep.isSaving}
             onDraftChange={availabilityStep.onDraftChange}
             onEditAvailability={availabilityStep.onEditAvailability}
             onRemoveAvailability={availabilityStep.onRemoveAvailability}
             onResetDraft={availabilityStep.onResetDraft}
+            onRetry={availabilityStep.onRetry}
             onSaveAvailability={availabilityStep.onSaveAvailability}
             onSubmitStep={availabilityStep.onSubmitStep}
             stepError={availabilityStep.stepError}

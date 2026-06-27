@@ -20,6 +20,7 @@ export type BecomeMentorOffering = {
 
 export type BecomeMentorAvailabilityWindow = {
   id: string
+  mentorAvailabilityId: number | null
   mode: BecomeMentorAvailabilityMode
   selectedDays: string[]
   specificDate: string

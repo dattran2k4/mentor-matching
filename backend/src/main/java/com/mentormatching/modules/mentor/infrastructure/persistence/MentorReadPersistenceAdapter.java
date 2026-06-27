@@ -133,8 +133,8 @@ public class MentorReadPersistenceAdapter implements MentorReadRepositoryPort {
     }
 
     @Override
-    public Optional<CurrentMentorDetails> findCurrentMentorByUserId(Long userId) {
-        return mentorProfileJpaRepository.findCurrentMentorDetailByUserId(userId)
+    public Optional<CurrentMentorDetails> findCurrentMentorByMentorId(Long mentorId) {
+        return mentorProfileJpaRepository.findCurrentMentorDetailByMentorId(mentorId)
                 .map(this::toCurrentMentorDetails);
     }
 

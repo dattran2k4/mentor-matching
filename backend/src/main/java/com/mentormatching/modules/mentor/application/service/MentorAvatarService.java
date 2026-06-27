@@ -47,7 +47,7 @@ public class MentorAvatarService implements UpdateCurrentMentorAvatarUseCase {
         mentorProfile.updateAvatar(mediaAsset.id(), mediaAsset.deliveryUrl());
         MentorProfile savedMentorProfile = mentorProfileRepositoryPort.save(mentorProfile);
 
-        return mentorReadRepositoryPort.findCurrentMentorByUserId(savedMentorProfile.getUserId())
+        return mentorReadRepositoryPort.findCurrentMentorByMentorId(savedMentorProfile.getId())
                 .orElseThrow(() -> new ResourceNotFoundException("Mentor profile not found"));
     }
 

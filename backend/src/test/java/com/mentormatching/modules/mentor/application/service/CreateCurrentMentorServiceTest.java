@@ -21,6 +21,8 @@ import com.mentormatching.modules.mentor.application.port.out.MentorReadReposito
 import com.mentormatching.modules.mentor.domain.Gender;
 import com.mentormatching.modules.mentor.domain.MeetingType;
 import com.mentormatching.modules.mentor.domain.MentorApprovalStatus;
+import com.mentormatching.modules.mentor.domain.MentorProfile;
+import com.mentormatching.modules.mentor.domain.MentorProfileRestoreData;
 import com.mentormatching.modules.mentor.domain.MentorVerificationStatus;
 import com.mentormatching.shared.exception.InvalidDataException;
 
@@ -54,7 +56,13 @@ class CreateCurrentMentorServiceTest {
                 LocalDateTime.parse("2026-06-01T10:15:30"));
 
         when(mentorProfileRepositoryPort.existsByUserId(20L)).thenReturn(false);
-        when(mentorReadRepositoryPort.findCurrentMentorByUserId(20L)).thenReturn(Optional.of(expected));
+        MentorProfile savedMentorProfile = MentorProfile.restore(new MentorProfileRestoreData(10L, 20L, "", null,
+                Gender.MALE, 11L, 22L, "New headline", "New intro", "New style", 7, "New position",
+                "New workplace", "New education", "New major", MeetingType.HYBRID, MentorApprovalStatus.DRAFT, null,
+                null, null, LocalDateTime.parse("2026-06-01T10:15:30"),
+                LocalDateTime.parse("2026-06-01T10:15:30")));
+        when(mentorProfileRepositoryPort.save(any())).thenReturn(savedMentorProfile);
+        when(mentorReadRepositoryPort.findCurrentMentorByMentorId(10L)).thenReturn(Optional.of(expected));
 
         CurrentMentorDetails actual = createCurrentMentorService.createCurrentMentor(command);
 
