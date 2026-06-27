@@ -11,7 +11,15 @@ import {
 type UseBecomeMentorOfferingsFormParams = {
   editingOffering: BecomeMentorOffering | null
   onResetDraft: () => void
-  onSaveOffering: (values: BecomeMentorOfferingFormValues) => void
+  onSaveOffering: (values: BecomeMentorOfferingFormValues) => Promise<void>
+}
+
+const emptyOfferingFormValues: BecomeMentorOfferingFormValues = {
+  gradeId: '',
+  pricePerHour: '',
+  subjectGradeId: '',
+  subjectId: '',
+  teachingNote: ''
 }
 
 export function useBecomeMentorOfferingsForm({
@@ -21,31 +29,30 @@ export function useBecomeMentorOfferingsForm({
 }: UseBecomeMentorOfferingsFormParams) {
   const form = useForm<BecomeMentorOfferingFormValues>({
     resolver: zodResolver(becomeMentorOfferingSchema),
-    defaultValues: getOfferingFormDefaults()
+    defaultValues: emptyOfferingFormValues
   })
-  const draft = useWatch({ control: form.control }) ?? getOfferingFormDefaults()
+  const draft = useWatch({ control: form.control }) ?? emptyOfferingFormValues
 
   const canSaveOffering = Boolean(
-    (draft.primarySubject ?? '').trim() &&
-    (draft.gradeLevel ?? '').trim() &&
+    (draft.subjectGradeId ?? '').trim() &&
+    (draft.subjectId ?? '').trim() &&
+    (draft.gradeId ?? '').trim() &&
     (draft.pricePerHour ?? '').trim() &&
     (draft.teachingNote ?? '').trim()
   )
 
   useEffect(() => {
-    form.reset(
-      editingOffering ? getOfferingFormDefaults(editingOffering) : getOfferingFormDefaults()
-    )
+    form.reset(editingOffering ? getOfferingFormDefaults(editingOffering) : emptyOfferingFormValues)
   }, [editingOffering, form])
 
-  const saveOffering = form.handleSubmit((values) => {
-    onSaveOffering(values)
-    form.reset(getOfferingFormDefaults())
+  const saveOffering = form.handleSubmit(async (values) => {
+    await onSaveOffering(values)
+    form.reset(emptyOfferingFormValues)
   })
 
   const cancelEditing = () => {
     onResetDraft()
-    form.reset(getOfferingFormDefaults())
+    form.reset(emptyOfferingFormValues)
   }
 
   return {
@@ -54,7 +61,9 @@ export function useBecomeMentorOfferingsForm({
     control: form.control,
     errors: form.formState.errors,
     register: form.register,
-    saveOffering
+    saveOffering,
+    setValue: form.setValue,
+    watch: form.watch
   }
 }
 
@@ -62,9 +71,10 @@ function getOfferingFormDefaults(
   offering?: BecomeMentorOffering | null
 ): BecomeMentorOfferingFormValues {
   return {
-    gradeLevel: offering?.gradeLevel ?? '',
+    gradeId: offering?.gradeId ?? '',
     pricePerHour: offering?.pricePerHour ?? '',
-    primarySubject: offering?.subject ?? '',
+    subjectGradeId: offering?.subjectGradeId ?? '',
+    subjectId: offering?.subjectId ?? '',
     teachingNote: offering?.teachingNote ?? ''
   }
 }

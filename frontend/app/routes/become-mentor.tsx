@@ -192,10 +192,15 @@ export default function BecomeMentorPage() {
           <BecomeMentorOfferingsSection
             editingOffering={offeringsStep.editingOffering}
             formId={becomeMentorStepFormIds.offerings}
+            isDeleting={offeringsStep.isDeleting}
             isEditing={offeringsStep.isEditing}
+            isError={offeringsStep.isError}
+            isLoading={offeringsStep.isLoading}
+            isSaving={offeringsStep.isSaving}
             onEditOffering={offeringsStep.onEditOffering}
             onRemoveOffering={offeringsStep.onRemoveOffering}
             onResetDraft={offeringsStep.onResetDraft}
+            onRetry={offeringsStep.onRetry}
             onSaveOffering={offeringsStep.onSaveOffering}
             onSubmitStep={() => goToStep(currentStepIndex + 1)}
             offerings={formState.offerings}

@@ -8,9 +8,13 @@ export type BecomeMentorDocumentKey = 'idFront' | 'idBack' | 'selfieWithId'
 
 export type BecomeMentorOffering = {
   id: string
-  subject: string
   gradeLevel: string
+  gradeId: string
+  mentorSubjectId: number | null
   pricePerHour: string
+  subject: string
+  subjectGradeId: string
+  subjectId: string
   teachingNote: string
 }
 

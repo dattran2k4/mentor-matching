@@ -2,45 +2,55 @@ import type { ComponentProps, ReactNode } from 'react'
 import { Pencil, Plus, Trash2 } from 'lucide-react'
 import { Controller } from 'react-hook-form'
 
+import { ScreenErrorState } from '@/components/ScreenErrorState'
 import { AppSelect } from '@/components/ui/app-select'
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
 import { NumericInput } from '@/components/ui/numeric-input'
+import { Spinner } from '@/components/ui/spinner'
 import { Textarea } from '@/components/ui/textarea'
 import { useBecomeMentorOfferingsForm } from '@/features/become-mentor/hooks'
 import type { BecomeMentorOfferingFormValues } from '@/features/become-mentor/schemas'
-import {
-  useCatalogGradesQuery,
-  useCatalogSubjectsQuery
-} from '@/hooks/queries/catalog/useCatalogOptionsQuery'
+import { useCatalogOptionsQuery } from '@/hooks/queries/catalog/useCatalogOptionsQuery'
 import { formatPrice } from '@/utils/format'
 
 import type { BecomeMentorOffering } from '../become-mentor.types'
+import { formatGradeLabel } from '../mappers/offering.mapper'
 
 import { BecomeMentorSectionCard } from './BecomeMentorSectionCard'
 
 type BecomeMentorOfferingsSectionProps = {
   editingOffering: BecomeMentorOffering | null
   formId: string
+  isDeleting: boolean
   isEditing: boolean
+  isError: boolean
+  isLoading: boolean
+  isSaving: boolean
   offerings: BecomeMentorOffering[]
   onEditOffering: (offering: BecomeMentorOffering) => void
-  onRemoveOffering: (offeringId: string) => void
+  onRemoveOffering: (offeringId: string) => Promise<void>
   onResetDraft: () => void
-  onSaveOffering: (values: BecomeMentorOfferingFormValues) => void
+  onRetry: () => void
+  onSaveOffering: (values: BecomeMentorOfferingFormValues) => Promise<void>
   onSubmitStep: () => void
 }
 
 export function BecomeMentorOfferingsSection({
   editingOffering,
   formId,
+  isDeleting,
   isEditing,
+  isError,
+  isLoading,
+  isSaving,
+  offerings,
   onEditOffering,
   onRemoveOffering,
   onResetDraft,
+  onRetry,
   onSaveOffering,
-  onSubmitStep,
-  offerings
+  onSubmitStep
 }: BecomeMentorOfferingsSectionProps) {
   const offeringsForm = useBecomeMentorOfferingsForm({
     editingOffering,
@@ -48,33 +58,65 @@ export function BecomeMentorOfferingsSection({
     onSaveOffering
   })
   const {
-    data: subjects,
-    isLoading: isSubjectsLoading,
-    isError: isSubjectsError
-  } = useCatalogSubjectsQuery()
-  const {
-    data: grades,
-    isLoading: isGradesLoading,
-    isError: isGradesError
-  } = useCatalogGradesQuery()
-  const subjectOptions = (subjects ?? []).map((subject) => ({
+    data: catalogOptions,
+    isError: isCatalogError,
+    isLoading: isCatalogLoading
+  } = useCatalogOptionsQuery()
+  const selectedSubjectId = offeringsForm.watch('subjectId')
+  const selectedGradeId = offeringsForm.watch('gradeId')
+  const selectedSubjectGradeId =
+    catalogOptions?.subjectGrades.find(
+      (item) =>
+        String(item.subjectId) === selectedSubjectId && String(item.gradeId) === selectedGradeId
+    )?.id ?? null
+  const subjectOptions = (catalogOptions?.subjects ?? []).map((subject) => ({
     label: subject.name,
-    value: subject.name
+    value: String(subject.id)
   }))
-  const gradeOptions = (grades ?? []).map((grade) => ({
+  const gradeOptions = (catalogOptions?.grades ?? []).map((grade) => ({
     label: formatGradeLabel(grade.name),
-    value: formatGradeLabel(grade.name)
+    value: String(grade.id)
   }))
-  const subjectPlaceholder = isSubjectsLoading
+  const subjectPlaceholder = isCatalogLoading
     ? 'Đang tải môn học...'
-    : isSubjectsError
+    : isCatalogError
       ? 'Không tải được môn học'
       : 'Chọn môn'
-  const gradePlaceholder = isGradesLoading
+  const gradePlaceholder = isCatalogLoading
     ? 'Đang tải cấp lớp...'
-    : isGradesError
+    : isCatalogError
       ? 'Không tải được cấp lớp'
       : 'Chọn cấp lớp'
+
+  if (isLoading) {
+    return (
+      <div className='flex min-h-72 items-center justify-center rounded-[28px] border border-slate-200 bg-white'>
+        <Spinner label='Đang tải danh sách môn dạy...' size='lg' />
+      </div>
+    )
+  }
+
+  if (isError) {
+    return (
+      <ScreenErrorState
+        description='Không thể tải danh sách môn dạy hiện tại. Hãy thử lại trước khi tiếp tục.'
+        onRetry={onRetry}
+        title='Không tải được môn dạy'
+      />
+    )
+  }
+
+  const syncSubjectGradeId = (subjectId: string, gradeId: string) => {
+    const nextSubjectGradeId =
+      catalogOptions?.subjectGrades.find(
+        (item) => String(item.subjectId) === subjectId && String(item.gradeId) === gradeId
+      )?.id ?? ''
+
+    offeringsForm.setValue('subjectGradeId', String(nextSubjectGradeId), {
+      shouldDirty: true,
+      shouldValidate: true
+    })
+  }
 
   return (
     <BecomeMentorSectionCard
@@ -122,7 +164,10 @@ export function BecomeMentorOfferingsSection({
                     </IconButton>
                     <IconButton
                       aria-label={`Xóa ${offering.subject}`}
-                      onClick={() => onRemoveOffering(offering.id)}
+                      disabled={isDeleting}
+                      onClick={() => {
+                        void onRemoveOffering(offering.id)
+                      }}
                       variant='destructive'
                     >
                       <Trash2 size={16} />
@@ -150,40 +195,53 @@ export function BecomeMentorOfferingsSection({
               <Label>Chọn môn học</Label>
               <Controller
                 control={offeringsForm.control}
-                name='primarySubject'
+                name='subjectId'
                 render={({ field }) => (
                   <AppSelect
                     ariaLabel='Chọn môn học'
                     className='[&_button]:h-11 [&_button]:rounded-xl [&_button]:text-sm [&_span]:text-slate-900'
-                    disabled={isSubjectsLoading || isSubjectsError || subjectOptions.length === 0}
-                    onValueChange={field.onChange}
+                    disabled={isCatalogLoading || isCatalogError || subjectOptions.length === 0}
+                    onValueChange={(value) => {
+                      field.onChange(value)
+                      syncSubjectGradeId(value, selectedGradeId)
+                    }}
                     options={subjectOptions}
                     placeholder={subjectPlaceholder}
                     value={field.value}
                   />
                 )}
               />
-              <FieldError message={offeringsForm.errors.primarySubject?.message} />
+              <FieldError message={offeringsForm.errors.subjectId?.message} />
             </Field>
 
             <Field>
               <Label>Cấp lớp</Label>
               <Controller
                 control={offeringsForm.control}
-                name='gradeLevel'
+                name='gradeId'
                 render={({ field }) => (
                   <AppSelect
                     ariaLabel='Chọn cấp lớp'
                     className='[&_button]:h-11 [&_button]:rounded-xl [&_button]:text-sm [&_span]:text-slate-900'
-                    disabled={isGradesLoading || isGradesError || gradeOptions.length === 0}
-                    onValueChange={field.onChange}
+                    disabled={isCatalogLoading || isCatalogError || gradeOptions.length === 0}
+                    onValueChange={(value) => {
+                      field.onChange(value)
+                      syncSubjectGradeId(selectedSubjectId, value)
+                    }}
                     options={gradeOptions}
                     placeholder={gradePlaceholder}
                     value={field.value}
                   />
                 )}
               />
-              <FieldError message={offeringsForm.errors.gradeLevel?.message} />
+              <FieldError
+                message={
+                  offeringsForm.errors.gradeId?.message ||
+                  (!selectedSubjectGradeId && selectedSubjectId && selectedGradeId
+                    ? 'Tổ hợp môn học và cấp lớp này chưa được hỗ trợ.'
+                    : offeringsForm.errors.subjectGradeId?.message)
+                }
+              />
             </Field>
 
             <Field>
@@ -235,7 +293,8 @@ export function BecomeMentorOfferingsSection({
               ) : null}
               <Button
                 className='w-full rounded-2xl sm:flex-1'
-                disabled={!offeringsForm.canSaveOffering}
+                disabled={!offeringsForm.canSaveOffering || isSaving}
+                isLoading={isSaving}
                 onClick={offeringsForm.saveOffering}
                 size='lg'
                 type='button'
@@ -261,16 +320,12 @@ function FieldError({ message }: { message?: string }) {
   return <p className='text-sm font-medium text-red-500'>{message}</p>
 }
 
-function IconButton({ children, ...props }: ComponentProps<typeof Button>) {
+function IconButton({ children, type = 'button', ...props }: ComponentProps<typeof Button>) {
   return (
-    <Button className='h-10 w-10 rounded-xl p-0' size='icon' {...props}>
+    <Button className='h-10 w-10 rounded-xl p-0' size='icon' type={type} {...props}>
       {children}
     </Button>
   )
-}
-
-function formatGradeLabel(value: string) {
-  return value.replace(/^Lop\s+/i, 'Lớp ')
 }
 
 function formatOfferingPrice(value: string) {
@@ -280,11 +335,5 @@ function formatOfferingPrice(value: string) {
     return 'Chưa đặt học phí'
   }
 
-  const numericValue = Number(digits)
-
-  if (Number.isNaN(numericValue)) {
-    return 'Chưa đặt học phí'
-  }
-
-  return `${formatPrice(numericValue)}/giờ`
+  return `${formatPrice(Number(digits))}/giờ`
 }
